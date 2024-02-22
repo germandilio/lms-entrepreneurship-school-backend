@@ -11,14 +11,15 @@ import ru.hse.lmsteam.backend.app.app.LmsBackendApplication;
 @TestConfiguration(proxyBeanMethods = false)
 public class TestLmsBackendApplication {
 
-    @Bean
-    @ServiceConnection
-    PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
-    }
+  @Bean
+  @ServiceConnection
+  PostgreSQLContainer<?> postgresContainer() {
+    return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+  }
 
-    public static void main(String[] args) {
-        SpringApplication.from(LmsBackendApplication::main).with(TestLmsBackendApplication.class).run(args);
-    }
-
+  public static void main(String[] args) {
+    SpringApplication.from(LmsBackendApplication::main)
+        .with(TestLmsBackendApplication.class)
+        .run(args);
+  }
 }

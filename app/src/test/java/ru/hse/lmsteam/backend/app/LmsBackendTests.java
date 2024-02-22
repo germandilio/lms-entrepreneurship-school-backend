@@ -8,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class LmsBackendTests {
 
-    @Test
-    void contextLoads() {
-    }
-
+  @Test
+  void contextLoads() {}
 }
