@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package demo;
+
+option java_multiple_files = true;
+option java_package = "ru.hse.lmsteam.demo";
+
+message DemoMessage {
+  string info = 1;
+}
