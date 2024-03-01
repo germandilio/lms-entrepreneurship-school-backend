@@ -1,8 +1,9 @@
 plugins {
 	id 'buildlogic.java-application-conventions'
-	id 'org.springframework.boot' version '3.2.2'
-	id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.springframework.boot' version '3.2.3'
 }
+
+apply plugin: 'io.spring.dependency-management'
 
 group = 'ru.hse.lmsteam'
 version = '0.0.1-SNAPSHOT'
@@ -16,8 +17,11 @@ configurations {
 dependencies {
 	implementation project(':schema-registry')
 
+	implementation("com.google.guava:guava:33.0.0-jre")
 	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-configuration-processor'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
