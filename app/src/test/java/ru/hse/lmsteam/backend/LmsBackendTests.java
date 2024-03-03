@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.app;
+package ru.hse.lmsteam.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringBootConfiguration;

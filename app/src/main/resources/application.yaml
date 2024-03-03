@@ -1,1 +1,30 @@
+spring:
+  application:
+    name: lms-entrepreneurship-school-backend-app
+  database:
+    master:
+      url: r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@localhost:5433/lms_db
+    slave:
+      url: r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@localhost:5434/lms_db
 
+  docker:
+    compose:
+      enabled: false
+
+logging:
+  level:
+    org.springframework.r2dbc: TRACE
+    ru.hse.lmsteam: DEBUG
+
+server:
+  port: 3000
+  compression:
+    enabled: true
+
+app:
+  proto:
+    schema:
+      path: ru.hse.lmsteam.schema
+
+springdoc:
+  show-actuator: true

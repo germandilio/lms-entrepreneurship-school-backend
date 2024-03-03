@@ -4,7 +4,9 @@ plugins {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
+    google()
 }
 
 dependencies {
@@ -34,6 +36,7 @@ spotless {
         cleanthat()
         googleJavaFormat()
         formatAnnotations()
+        targetExclude("")
     }
 }
 

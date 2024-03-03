@@ -1,3 +1,11 @@
 plugins {
     id 'buildlogic.java-common-conventions'
+    id 'idea'
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }

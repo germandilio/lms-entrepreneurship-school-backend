@@ -6,7 +6,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
-import ru.hse.lmsteam.backend.app.app.LmsBackendApplication;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class TestLmsBackendApplication {

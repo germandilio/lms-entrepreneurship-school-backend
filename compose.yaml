@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  pg-0:
+    image: docker.io/bitnami/postgresql-repmgr:16.2.0
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_0_data:/bitnami/postgresql
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=lms_admin_db_password
+      - POSTGRESQL_USERNAME=lms_dev_backend
+      - POSTGRESQL_PASSWORD=lms_backend_dev_password
+      - POSTGRESQL_DATABASE=lms_db
+      - REPMGR_PASSWORD=repmgr_password
+      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-0:5432,pg-1:5432
+      - REPMGR_NODE_NAME=pg-0
+      - REPMGR_NODE_NETWORK_NAME=pg-0
+      - REPMGR_PORT_NUMBER=5432
+  pg-1:
+    image: docker.io/bitnami/postgresql-repmgr:16.2.0
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_1_data:/bitnami/postgresql
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=lms_admin_db_password
+      - POSTGRESQL_USERNAME=lms_dev_backend
+      - POSTGRESQL_PASSWORD=lms_backend_dev_password
+      - POSTGRESQL_DATABASE=lms_db
+      - REPMGR_PASSWORD=repmgr_password
+      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-0:5432,pg-1:5432
+      - REPMGR_NODE_NAME=pg-1
+      - REPMGR_NODE_NETWORK_NAME=pg-1
+      - REPMGR_PORT_NUMBER=5432
+volumes:
+  pg_0_data:
+    driver: local
+  pg_1_data:
+    driver: local
