@@ -11,5 +11,20 @@ spring:
     compose:
       enabled: false
 
+logging:
+  level:
+    org.springframework.r2dbc: TRACE
+    ru.hse.lmsteam: DEBUG
+
 server:
   port: 3000
+  compression:
+    enabled: true
+
+app:
+  proto:
+    schema:
+      path: ru.hse.lmsteam.schema
+
+springdoc:
+  show-actuator: true

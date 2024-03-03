@@ -36,6 +36,7 @@ spotless {
         cleanthat()
         googleJavaFormat()
         formatAnnotations()
+        targetExclude("")
     }
 }
 

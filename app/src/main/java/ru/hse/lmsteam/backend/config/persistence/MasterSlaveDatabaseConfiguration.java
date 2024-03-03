@@ -1,11 +1,11 @@
-package ru.hse.lmsteam.backend.config;
+package ru.hse.lmsteam.backend.config.persistence;
 
+import com.google.common.collect.ImmutableList;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import java.util.Collection;
-import java.util.List;
 import java.util.ServiceLoader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,32 +29,39 @@ public class MasterSlaveDatabaseConfiguration {
   @Value("${spring.database.slave.url}")
   private String slaveDbURL;
 
-  @Bean(name = "slaveConnectionFactory")
-  @Primary
-  public ConnectionFactory slaveConnectionFactory() {
-    return getConnectionPool(slaveDbURL);
-  }
-
-  @Bean(name = "masterConnectionFactory")
-  public ConnectionFactory masterConnectionFactory() {
-    return getConnectionPool(masterDbURL);
+  @Bean
+  public MasterSlaveDbOperations masterSlaveDbActions(
+      @Qualifier(value = "masterR2dbcEntityTemplate") final R2dbcEntityTemplate masterEntityTemplate,
+      @Qualifier(value = "slaveR2dbcEntityTemplate") final R2dbcEntityTemplate slaveEntityTemplate) {
+    return new MasterSlaveDbOperations(masterEntityTemplate, slaveEntityTemplate);
   }
 
   @Bean(name = "slaveR2dbcEntityTemplate")
   @Primary
   public R2dbcEntityTemplate slaveR2dbcEntityTemplate(
-      @Qualifier(value = "slaveConnectionFactory") ConnectionFactory connectionFactory) {
+      @Qualifier(value = "slaveConnectionFactory") final ConnectionFactory connectionFactory) {
     return templateWithCustomConverters(connectionFactory, getCustomConverters());
   }
 
   @Bean(name = "masterR2dbcEntityTemplate")
   public R2dbcEntityTemplate masterR2dbcEntityTemplate(
-      @Qualifier(value = "masterConnectionFactory") ConnectionFactory connectionFactory) {
+      @Qualifier(value = "masterConnectionFactory") final ConnectionFactory connectionFactory) {
     return templateWithCustomConverters(connectionFactory, getCustomConverters());
   }
 
+  @Bean(name = "slaveConnectionFactory")
+  public ConnectionFactory slaveConnectionFactory() {
+    return getConnectionPool(slaveDbURL);
+  }
+
+  @Primary
+  @Bean(name = "masterConnectionFactory")
+  public ConnectionFactory masterConnectionFactory() {
+    return getConnectionPool(masterDbURL);
+  }
+
   private R2dbcEntityTemplate templateWithCustomConverters(
-      ConnectionFactory connectionFactory, Collection<?> converters) {
+      final ConnectionFactory connectionFactory, final Collection<?> converters) {
 
     Assert.notNull(connectionFactory, "ConnectionFactory must not be null");
     var dialect = DialectResolver.getDialect(connectionFactory);
@@ -68,13 +75,13 @@ public class MasterSlaveDatabaseConfiguration {
         databaseClient, new DefaultReactiveDataAccessStrategy(dialect, converters));
   }
 
-  private List<ServiceLoader.Provider<Converter>> getCustomConverters() {
+  private ImmutableList<ServiceLoader.Provider<Converter>> getCustomConverters() {
     return ServiceLoader.load(Converter.class).stream()
         .filter(converter -> converter.getClass().isAnnotationPresent(CustomConverter.class))
-        .toList();
+        .collect(ImmutableList.toImmutableList());
   }
 
-  private ConnectionPool getConnectionPool(String url) {
+  private ConnectionPool getConnectionPool(final String url) {
     var connectionFactory = ConnectionFactories.get(url);
     var configuration = ConnectionPoolConfiguration.builder(connectionFactory).build();
     return new ConnectionPool(configuration);
