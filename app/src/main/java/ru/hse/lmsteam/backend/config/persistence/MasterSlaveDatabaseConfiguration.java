@@ -21,7 +21,7 @@ import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.util.Assert;
 
 @Configuration
-@EnableR2dbcRepositories(basePackages = "ru.hse.lmsteam.backend.dao")
+@EnableR2dbcRepositories(basePackages = "ru.hse.lmsteam.backend.repository")
 public class MasterSlaveDatabaseConfiguration {
   @Value("${spring.database.master.url}")
   private String masterDbURL;

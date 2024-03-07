@@ -1,6 +1,7 @@
-package ru.hse.lmsteam.backend.model;
+package ru.hse.lmsteam.backend.domain.user;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
@@ -8,13 +9,13 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @Table("users")
 public record User(
-    @Id String id,
+    @Id UUID id,
     String name,
     String surname,
-    String patronymicOpt,
+    String patronymic,
     String messengerContact,
     Sex sex,
     String email,
     String phoneNumber,
     BigDecimal balance,
-    Float finalGradeBonus) {}
+    Boolean isDeleted) {}
