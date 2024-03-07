@@ -4,6 +4,7 @@ import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;
 
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class UsersApiProtoConverterImpl implements UsersApiProtoConverter {
   }
 
   @Override
-  public User retrieveUser(UpdateOrCreateUser.Request request) {
-    return userProtoConverter.map(request.getUser());
+  public UserUpsertModel retrieveUserUpsertModel(UpdateOrCreateUser.Request request) {
+    return userProtoConverter.map(request);
   }
 }

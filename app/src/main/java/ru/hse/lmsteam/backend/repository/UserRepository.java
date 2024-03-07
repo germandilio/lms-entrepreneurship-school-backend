@@ -10,6 +10,13 @@ import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 public interface UserRepository {
   Mono<User> findById(UUID id);
 
+  /**
+   * Locks entity with provided id in database.
+   * @param id user uuid
+   * @return retrieved entity
+   */
+  Mono<User> findByIdForUpdate(UUID id);
+
   Mono<User> saveOne(User user);
 
   Mono<Long> deleteById(UUID id);

@@ -21,7 +21,16 @@ message GetUser {
 
 message UpdateOrCreateUser {
   message Request {
-    User user = 1;
+    // provide id to update existing entity, if leaved empty will be created new entity
+    google.protobuf.StringValue id = 1;
+    string name = 2;
+    string surname = 3;
+    google.protobuf.StringValue patronymic = 4;
+
+    google.protobuf.StringValue messenger_contact = 5;
+    Sex sex = 6;
+    string email = 7;
+    google.protobuf.StringValue phone_number = 8;
   }
 
   message Response {
@@ -63,9 +72,9 @@ message User {
   google.protobuf.StringValue phone_number = 8;
 
   // notation used: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html#toString()
-  google.protobuf.StringValue balance = 9;
+  string balance = 9;
 
-  google.protobuf.BoolValue is_deleted = 10;
+  bool is_deleted = 10;
 }
 
 enum Sex {

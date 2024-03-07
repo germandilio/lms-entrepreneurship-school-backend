@@ -14,7 +14,9 @@ public interface UsersControllerDocSchema {
 
   Mono<GetUser.Response> getUser(UUID id);
 
-  Mono<UpdateOrCreateUser.Response> updateOrCreateUser(UpdateOrCreateUser.Request request);
+  Mono<UpdateOrCreateUser.Response> createUser(UpdateOrCreateUser.Request request);
+
+  Mono<UpdateOrCreateUser.Response> updateUser(UpdateOrCreateUser.Request request);
 
   Mono<DeleteUser.Response> deleteUser(UUID id);
 

@@ -15,7 +15,9 @@ import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 import ru.hse.lmsteam.schema.api.users.*;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping(
+    value = "/api/v1/users",
+    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
 @RequiredArgsConstructor
 public class UsersController implements UsersControllerDocSchema {
   private final UserManagerImpl usersManager;
@@ -27,15 +29,27 @@ public class UsersController implements UsersControllerDocSchema {
     return usersManager.getUser(id).map(usersApiProtoConverter::buildGetUserResponse);
   }
 
-  @PostMapping(
-      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE},
-      produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+  @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
-  public Mono<UpdateOrCreateUser.Response> updateOrCreateUser(
+  public Mono<UpdateOrCreateUser.Response> createUser(
       @RequestBody UpdateOrCreateUser.Request request) {
-    var user = usersApiProtoConverter.retrieveUser(request);
+    var userUpsertModel = usersApiProtoConverter.retrieveUserUpsertModel(request);
     return usersManager
-        .updateOrCreateUser(user)
+        .createUser(userUpsertModel)
+        .map(usersApiProtoConverter::buildUpdateUserResponse);
+  }
+
+  /**
+   * If user entity provided without ID, or if there is no entity with provided ID method will fall
+   * back to createUser logic.
+   */
+  @PatchMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+  @Override
+  public Mono<UpdateOrCreateUser.Response> updateUser(
+      @RequestBody UpdateOrCreateUser.Request request) {
+    var userUpsertModel = usersApiProtoConverter.retrieveUserUpsertModel(request);
+    return usersManager
+        .createUser(userUpsertModel)
         .map(usersApiProtoConverter::buildUpdateUserResponse);
   }
 

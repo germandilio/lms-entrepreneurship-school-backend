@@ -6,6 +6,8 @@ import static org.springframework.data.relational.core.query.Query.query;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.relational.core.sql.LockMode;
+import org.springframework.data.relational.repository.Lock;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,6 +30,15 @@ public class UserRepositoryImpl implements UserRepository {
       throw new IllegalArgumentException("Id is null!");
     }
     return db.slave.selectOne(query(where("id").is(id)), User.class);
+  }
+
+  @Override
+  public Mono<User> findByIdForUpdate(UUID id) {
+    return db.master
+        .getDatabaseClient()
+        .sql("SELECT * FROM users FOR UPDATE")
+        .mapProperties(User.class)
+        .one();
   }
 
   @Override

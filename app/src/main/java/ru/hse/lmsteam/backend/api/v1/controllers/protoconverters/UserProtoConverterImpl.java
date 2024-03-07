@@ -1,12 +1,13 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
-import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.user.Sex;
 import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
+import ru.hse.lmsteam.schema.api.users.UpdateOrCreateUser;
 
 @Component
 public class UserProtoConverterImpl implements UserProtoConverter {
@@ -39,10 +40,10 @@ public class UserProtoConverterImpl implements UserProtoConverter {
       userBuilder.setPhoneNumber(StringValue.of(user.phoneNumber()));
     }
     if (user.balance() != null) {
-      userBuilder.setBalance(StringValue.of(user.balance().toString()));
+      userBuilder.setBalance(user.balance().toString());
     }
     if (user.isDeleted() != null) {
-      userBuilder.setIsDeleted(BoolValue.of(user.isDeleted()));
+      userBuilder.setIsDeleted(user.isDeleted());
     }
 
     return userBuilder.build();
@@ -67,14 +68,38 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     if (user.hasPhoneNumber()) {
       userBuilder.phoneNumber(user.getPhoneNumber().getValue());
     }
-    if (user.hasBalance()) {
-      userBuilder.balance(new BigDecimal(user.getBalance().getValue()));
+    if (!user.getBalance().isEmpty()) {
+      userBuilder.balance(new BigDecimal(user.getBalance()));
     }
-    if (user.hasIsDeleted()) {
-      userBuilder.isDeleted(user.getIsDeleted().getValue());
-    }
+    userBuilder.isDeleted(user.getIsDeleted());
 
     return userBuilder.build();
+  }
+
+  @Override
+  public UserUpsertModel map(UpdateOrCreateUser.Request request) {
+    var userModelBuilder = UserUpsertModel.builder();
+    if (request.hasId()) {
+      userModelBuilder.id(UUID.fromString(request.getId().getValue()));
+    }
+    userModelBuilder.name(request.getName());
+    userModelBuilder.surname(request.getSurname());
+    if (request.hasPatronymic()) {
+      userModelBuilder.patronymic(request.getPatronymic().getValue());
+    }
+    if (request.hasMessengerContact()) {
+      userModelBuilder.messengerContact(request.getMessengerContact().getValue());
+    }
+    if (convertSex(request.getSex()) != null) {
+      userModelBuilder.sex(convertSex(request.getSex()));
+    }
+
+    userModelBuilder.email(request.getEmail());
+    if (request.hasPhoneNumber()) {
+      userModelBuilder.phoneNumber(request.getPhoneNumber().getValue());
+    }
+
+    return userModelBuilder.build();
   }
 
   private ru.hse.lmsteam.schema.api.users.Sex convertSex(Sex sex) {

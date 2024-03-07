@@ -6,18 +6,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.user.User;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 
 public interface UserManager {
   Mono<User> getUser(UUID id);
 
-  /**
-   * Updates or creates user. If user has id, then it will be updated, otherwise it will be created.
-   * It is recommended to pass null as id, if you want to create new user.
-   *
-   * @param user user entity to update or create
-   * @return updated or created user entity
-   */
-  Mono<User> updateOrCreateUser(User user);
+  Mono<User> updateUser(UserUpsertModel user);
+
+  Mono<User> createUser(UserUpsertModel user);
 
   Mono<Long> deleteUser(UUID id);
 

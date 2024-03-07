@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.domain.user;
 
+import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.Builder;
@@ -12,10 +13,10 @@ public record User(
     @Id UUID id,
     String name,
     String surname,
-    String patronymic,
-    String messengerContact,
+    @Nullable String patronymic,
+    @Nullable String messengerContact,
     Sex sex,
     String email,
-    String phoneNumber,
+    @Nullable String phoneNumber,
     BigDecimal balance,
     Boolean isDeleted) {}
