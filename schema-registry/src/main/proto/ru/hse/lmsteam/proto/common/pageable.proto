@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package ru.hse.lmsteam.proto.common;
+
+option java_multiple_files = true;
+option java_package = "ru.hse.lmsteam.schema.api.common";
+
+import "google/protobuf/wrappers.proto";
+
+message Pageable {
+  google.protobuf.Int32Value page = 1;
+  google.protobuf.Int32Value size = 2;
+  SortOrder sort_order = 3;
+  repeated string properties = 4;
+}
+
+enum SortOrder {
+  NOT_INITIALIZED = 0;
+  ASC = 1;
+  DESC = 2;
+}
