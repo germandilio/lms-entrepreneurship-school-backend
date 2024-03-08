@@ -12,6 +12,7 @@ public interface UserRepository {
 
   /**
    * Locks entity with provided id in database.
+   *
    * @param id user uuid
    * @return retrieved entity
    */

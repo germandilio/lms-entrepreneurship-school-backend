@@ -6,8 +6,6 @@ import static org.springframework.data.relational.core.query.Query.query;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.relational.core.sql.LockMode;
-import org.springframework.data.relational.repository.Lock;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
