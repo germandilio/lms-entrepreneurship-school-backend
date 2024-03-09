@@ -11,14 +11,15 @@ public interface UserRepository {
   Mono<User> findById(UUID id);
 
   /**
-   * Locks entity with provided id in database.
+   * Retrieves entity operating on master db. If forUpdate = true, locks entity in db using sql'FOR
+   * UPDATE'
    *
    * @param id user uuid
    * @return retrieved entity
    */
-  Mono<User> findByIdForUpdate(UUID id);
+  Mono<User> findById(UUID id, boolean forUpdate);
 
-  Mono<User> saveOne(User user);
+  Mono<UUID> saveOne(User user);
 
   Mono<Long> deleteById(UUID id);
 

@@ -14,12 +14,20 @@ public class UsersApiProtoConverterImpl implements UsersApiProtoConverter {
 
   @Override
   public GetUser.Response buildGetUserResponse(User user) {
-    return GetUser.Response.newBuilder().setUser(userProtoConverter.map(user)).build();
+    var builder = GetUser.Response.newBuilder();
+    if (user != null) {
+      builder.setUser(userProtoConverter.map(user));
+    }
+    return builder.build();
   }
 
   @Override
   public UpdateOrCreateUser.Response buildUpdateUserResponse(User user) {
-    return UpdateOrCreateUser.Response.newBuilder().setUser(userProtoConverter.map(user)).build();
+    var builder = UpdateOrCreateUser.Response.newBuilder();
+    if (user != null) {
+      builder.setUser(userProtoConverter.map(user));
+    }
+    return builder.build();
   }
 
   @Override

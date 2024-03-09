@@ -5,6 +5,7 @@ import static org.springframework.data.relational.core.query.Query.query;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,7 @@ import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.UserFilterOptionsQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
@@ -31,24 +33,25 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public Mono<User> findByIdForUpdate(UUID id) {
-    return db.master
-        .getDatabaseClient()
-        .sql("SELECT * FROM users FOR UPDATE")
-        .mapProperties(User.class)
-        .one();
+  public Mono<User> findById(UUID id, boolean forUpdate) {
+    if (id == null) {
+      throw new IllegalArgumentException("Id is null!");
+    }
+
+    var sql = "SELECT * FROM users WHERE id = :id" + (forUpdate ? " FOR UPDATE" : "");
+    return db.master.getDatabaseClient().sql(sql).bind("id", id).mapProperties(User.class).one();
   }
 
   @Override
-  public Mono<User> saveOne(User user) {
+  public Mono<UUID> saveOne(User user) {
     if (user == null) {
       throw new IllegalArgumentException("User is null!");
     }
 
     if (user.id() == null) {
-      return db.master.insert(user);
+      return db.master.insert(user).map(User::id);
     } else {
-      return db.master.update(user);
+      return db.master.update(user).map(User::id);
     }
   }
 
