@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+import reactor.core.publisher.Mono;
 
 @Builder
 @Table("users")
@@ -18,5 +19,16 @@ public record User(
     Sex sex,
     String email,
     @Nullable String phoneNumber,
+    @Nullable Integer groupId,
+    String role,
     BigDecimal balance,
-    Boolean isDeleted) {}
+    Boolean isDeleted) {
+
+  public Group getGroup() {
+    return null;
+  }
+
+  public Mono<Group> lazyGetGroup() {
+    return Mono.empty();
+  }
+}

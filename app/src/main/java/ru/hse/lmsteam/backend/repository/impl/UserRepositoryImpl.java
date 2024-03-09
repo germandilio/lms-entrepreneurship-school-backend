@@ -4,8 +4,8 @@ import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -13,16 +13,20 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.user.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
-import ru.hse.lmsteam.backend.repository.query.translators.UserFilterOptionsQueryTranslator;
+import ru.hse.lmsteam.backend.repository.query.translators.QueryTranslator;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 
 @Slf4j
 @Repository
-@RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
   private final MasterSlaveDbOperations db;
+  private final QueryTranslator<UserFilterOptions> userFiltersQTranslator;
 
-  private final UserFilterOptionsQueryTranslator userFiltersQTranslator;
+  public UserRepositoryImpl(
+      MasterSlaveDbOperations db, @Qualifier("userFilterOptionsQT") QueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+    this.db = db;
+    this.userFiltersQTranslator = userFiltersQTranslator;
+  }
 
   @Override
   public Mono<User> findById(UUID id) {
@@ -43,7 +47,7 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public Mono<UUID> saveOne(User user) {
+  public Mono<UUID> upsert(User user) {
     if (user == null) {
       throw new IllegalArgumentException("User is null!");
     }
@@ -56,11 +60,16 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public Mono<Long> deleteById(UUID id) {
+  public Mono<Long> delete(UUID id) {
     if (id == null) {
       throw new IllegalArgumentException("Id is null!");
     }
-    return db.master.delete(query(where("id").is(id)), User.class);
+    return db.master
+        .getDatabaseClient()
+        .sql("UPDATE users SET is_deleted = true WHERE id = :id")
+        .bind("id", id)
+        .fetch()
+        .rowsUpdated();
   }
 
   @Override

@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 
-@Component
+@Component("userFilterOptionsQT")
 public class UserFilterOptionsQueryTranslator implements QueryTranslator<UserFilterOptions> {
 
   @Override

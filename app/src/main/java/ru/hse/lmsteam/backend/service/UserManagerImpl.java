@@ -35,7 +35,7 @@ public class UserManagerImpl implements UserManager {
   public Mono<User> createUser(final UserUpsertModel userUpsertModel) {
     var userToSave = userUpsertModel.mergeWith(User.builder().build(), true);
     userValidator.validateForSave(userToSave);
-    return userRepository.saveOne(userToSave).flatMap(id -> userRepository.findById(id, false));
+    return userRepository.upsert(userToSave).flatMap(id -> userRepository.findById(id, false));
   }
 
   @Transactional
@@ -48,7 +48,7 @@ public class UserManagerImpl implements UserManager {
         .map(userOpt -> userOpt.orElse(User.builder().build()))
         .map(userUpsertModel::mergeWith)
         .doOnNext(userValidator::validateForSave)
-        .flatMap(userRepository::saveOne)
+        .flatMap(userRepository::upsert)
         .flatMap(id -> userRepository.findById(id, false));
   }
 
@@ -58,7 +58,7 @@ public class UserManagerImpl implements UserManager {
     if (id == null) {
       return Mono.empty();
     }
-    return userRepository.deleteById(id);
+    return userRepository.delete(id);
   }
 
   @Transactional(readOnly = true)

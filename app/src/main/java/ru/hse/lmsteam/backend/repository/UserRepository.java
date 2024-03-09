@@ -19,9 +19,9 @@ public interface UserRepository {
    */
   Mono<User> findById(UUID id, boolean forUpdate);
 
-  Mono<UUID> saveOne(User user);
+  Mono<UUID> upsert(User user);
 
-  Mono<Long> deleteById(UUID id);
+  Mono<Long> delete(UUID id);
 
   Flux<User> findAll(UserFilterOptions filterOptions, Pageable pageable);
 
