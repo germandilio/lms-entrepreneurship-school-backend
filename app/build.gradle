@@ -20,11 +20,14 @@ dependencies {
 	implementation 'com.google.guava:guava:33.0.0-jre'
 	implementation 'com.google.protobuf:protobuf-java-util:3.25.3'
 
+	// TODO remove if not used in future
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
-	// If you are using mapstruct in test code
+	implementation 'io.netty:netty-resolver-dns-native-macos'
+
+	// mapstruct in test code
 	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 //    to enable json / protobuf conversion

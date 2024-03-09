@@ -35,20 +35,21 @@ public class UserManagerImpl implements UserManager {
   public Mono<User> createUser(final UserUpsertModel userUpsertModel) {
     var userToSave = userUpsertModel.mergeWith(User.builder().build(), true);
     userValidator.validateForSave(userToSave);
-    return userRepository.saveOne(userToSave);
+    return userRepository.saveOne(userToSave).flatMap(id -> userRepository.findById(id, false));
   }
 
   @Transactional
   @Override
   public Mono<User> updateUser(final UserUpsertModel userUpsertModel) {
     return userRepository
-        .findByIdForUpdate(userUpsertModel.id())
+        .findById(userUpsertModel.id(), true)
         .singleOptional()
         // stub User for saving new entity with empty id
         .map(userOpt -> userOpt.orElse(User.builder().build()))
         .map(userUpsertModel::mergeWith)
         .doOnNext(userValidator::validateForSave)
-        .flatMap(userRepository::saveOne);
+        .flatMap(userRepository::saveOne)
+        .flatMap(id -> userRepository.findById(id, false));
   }
 
   @Transactional

@@ -49,7 +49,7 @@ public class UsersController implements UsersControllerDocSchema {
       @RequestBody UpdateOrCreateUser.Request request) {
     var userUpsertModel = usersApiProtoConverter.retrieveUserUpsertModel(request);
     return usersManager
-        .createUser(userUpsertModel)
+        .updateUser(userUpsertModel)
         .map(usersApiProtoConverter::buildUpdateUserResponse);
   }
 
