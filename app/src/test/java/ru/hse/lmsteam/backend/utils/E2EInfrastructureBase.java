@@ -1,14 +1,8 @@
 package ru.hse.lmsteam.backend.utils;
 
-import io.r2dbc.spi.ConnectionFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.r2dbc.connection.init.CompositeDatabasePopulator;
-import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
-import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -23,7 +17,10 @@ public abstract class E2EInfrastructureBase {
   @Bean
   @ServiceConnection
   static PostgreSQLContainer<?> postgresContainer() {
-    var container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.2-alpine"));
+    var container =
+        new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.2-alpine"))
+            .withInitScript("schema.sql")
+            .withNetworkMode("HOST");
     r2dbcUrl = container.getJdbcUrl().replace("jdbc", "r2dbc");
     return container;
   }
@@ -33,18 +30,5 @@ public abstract class E2EInfrastructureBase {
     registry.add("spring.data.url", () -> r2dbcUrl);
     registry.add("spring.database.master.url", () -> r2dbcUrl);
     registry.add("spring.database.slave.url", () -> r2dbcUrl);
-  }
-
-  @Bean
-  public ConnectionFactoryInitializer initializer(
-      @Qualifier("masterConnectionFactory") ConnectionFactory connectionFactory) {
-    ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
-    initializer.setConnectionFactory(connectionFactory);
-
-    CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
-    populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("schema.sql")));
-    initializer.setDatabasePopulator(populator);
-
-    return initializer;
   }
 }
