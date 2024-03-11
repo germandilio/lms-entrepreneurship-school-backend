@@ -21,8 +21,7 @@ public class GroupRepositoryImpl implements GroupRepository {
 
   public GroupRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("groupFilterOptionsQT")
-          QueryTranslator<GroupsFilterOptions> groupsFilterOptionsQTranslator) {
+      @Qualifier("groupFilterOptionsQT") QueryTranslator<GroupsFilterOptions> groupsFilterOptionsQTranslator) {
     this.db = db;
     this.groupsFilterOptionsQTranslator = groupsFilterOptionsQTranslator;
   }

@@ -9,12 +9,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import ru.hse.lmsteam.backend.app.TestLmsBackendApplication;
 import ru.hse.lmsteam.backend.domain.user.Sex;
 import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.user.UserRole;
 import ru.hse.lmsteam.backend.service.UserManager;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.backend.utils.E2EInfrastructureBase;
-import ru.hse.lmsteam.schema.api.users.DeleteUser;
-import ru.hse.lmsteam.schema.api.users.GetUser;
-import ru.hse.lmsteam.schema.api.users.UpdateOrCreateUser;
+import ru.hse.lmsteam.schema.api.users.*;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -32,6 +31,7 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
           .patronymic("e2ePatronymic")
           .messengerContact("telegram")
           .sex(Sex.MALE)
+          .role(UserRole.STUDENT)
           .email("email@gmail.com")
           .phoneNumber("+77777777777")
           .build();
@@ -47,6 +47,7 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
               .patronymic(demoUser.patronymic())
               .messengerContact(demoUser.messengerContact())
               .sex(demoUser.sex())
+              .role(demoUser.role())
               .email(demoUser.email())
               .phoneNumber(demoUser.phoneNumber())
               .build();
@@ -82,6 +83,8 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
               Assertions.assertEquals(
                   demoUser.messengerContact(), returnedUser.getMessengerContact().getValue());
               Assertions.assertEquals(demoUser.sex().toString(), returnedUser.getSex().toString());
+              Assertions.assertEquals(
+                  demoUser.role().toString(), returnedUser.getRole().toString());
               Assertions.assertEquals(demoUser.email(), returnedUser.getEmail());
               Assertions.assertEquals(
                   demoUser.phoneNumber(), returnedUser.getPhoneNumber().getValue());
@@ -97,7 +100,8 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
         UpdateOrCreateUser.Request.newBuilder()
             .setName("fkmd")
             .setSurname("chick")
-            .setSex(ru.hse.lmsteam.schema.api.users.Sex.FEMALE)
+            .setSex(UserSexNamespace.Sex.FEMALE)
+            .setRole(UserRoleNamespace.Role.STUDENT)
             .setEmail("email@gmail.com")
             .build();
     webTestClient
@@ -122,6 +126,8 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
               Assertions.assertFalse(returnedUser.hasMessengerContact());
               Assertions.assertEquals(
                   requestBody.getSex().toString(), returnedUser.getSex().toString());
+              Assertions.assertEquals(
+                  requestBody.getRole().toString(), returnedUser.getRole().toString());
               Assertions.assertEquals(requestBody.getEmail(), returnedUser.getEmail());
               Assertions.assertFalse(returnedUser.hasPhoneNumber());
               Assertions.assertEquals("0.0000", returnedUser.getBalance());
@@ -138,7 +144,8 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
             .setId(StringValue.of(demoUser.id().toString()))
             .setName("fkmd")
             .setSurname("chick")
-            .setSex(ru.hse.lmsteam.schema.api.users.Sex.FEMALE)
+            .setSex(UserSexNamespace.Sex.FEMALE)
+            .setRole(UserRoleNamespace.Role.TRACKER)
             .setEmail("email@gmail.com")
             .build();
     webTestClient
@@ -165,6 +172,8 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
                   demoUser.messengerContact(), returnedUser.getMessengerContact().getValue());
               Assertions.assertEquals(
                   requestBody.getSex().toString(), returnedUser.getSex().toString());
+              Assertions.assertEquals(
+                  requestBody.getRole().toString(), returnedUser.getRole().toString());
               Assertions.assertEquals(requestBody.getEmail(), returnedUser.getEmail());
               Assertions.assertEquals(
                   demoUser.phoneNumber(), returnedUser.getPhoneNumber().getValue());
@@ -207,10 +216,9 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
                   .expectBody(GetUser.Response.class)
                   .consumeWith(
                       r2 -> {
-                        Assertions.assertNull(
-                            r2.getResponseBody(),
-                            "Response body is not null after deleting user with id="
-                                + demoUser.id());
+                        var response2 = r2.getResponseBody();
+                        Assertions.assertNotNull(response2, "Response body is null!");
+                        Assertions.assertTrue(response2.getUser().getIsDeleted());
                       });
             });
 

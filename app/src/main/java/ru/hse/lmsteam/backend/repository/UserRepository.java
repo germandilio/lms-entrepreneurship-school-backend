@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.repository;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
@@ -19,6 +20,8 @@ public interface UserRepository {
    */
   Mono<User> findById(UUID id, boolean forUpdate);
 
+  Flux<User> findAllById(ImmutableSet<UUID> ids);
+
   Mono<UUID> upsert(User user);
 
   Mono<Long> delete(UUID id);
@@ -26,4 +29,6 @@ public interface UserRepository {
   Flux<User> findAll(UserFilterOptions filterOptions, Pageable pageable);
 
   Flux<String> allUserNames();
+
+  Flux<UUID> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds);
 }

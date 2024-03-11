@@ -6,8 +6,6 @@ option java_multiple_files = true;
 option java_package = "ru.hse.lmsteam.schema.api.users";
 
 import "google/protobuf/wrappers.proto";
-import "ru/hse/lmsteam/proto/common/pageable.proto";
-import "ru/hse/lmsteam/proto/common/money.proto";
 
 message GetUser {
   message Request {
@@ -28,9 +26,10 @@ message UpdateOrCreateUser {
     google.protobuf.StringValue patronymic = 4;
 
     google.protobuf.StringValue messenger_contact = 5;
-    Sex sex = 6;
+    UserSexNamespace.Sex sex = 6;
     string email = 7;
     google.protobuf.StringValue phone_number = 8;
+    UserRoleNamespace.Role role = 9;
   }
 
   message Response {
@@ -67,18 +66,32 @@ message User {
   google.protobuf.StringValue patronymic = 4;
 
   google.protobuf.StringValue messenger_contact = 5;
-  Sex sex = 6;
+  UserSexNamespace.Sex sex = 6;
   string email = 7;
   google.protobuf.StringValue phone_number = 8;
 
   // notation used: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html#toString()
   string balance = 9;
+  UserRoleNamespace.Role role = 10;
 
-  bool is_deleted = 10;
+  bool is_deleted = 11;
 }
 
-enum Sex {
-  NOT_INITIALISED = 0;
-  MALE = 1;
-  FEMALE = 2;
+message UserSexNamespace {
+  enum Sex {
+    NOT_INITIALISED = 0;
+    MALE = 1;
+    FEMALE = 2;
+  }
 }
+
+
+message UserRoleNamespace {
+  enum Role {
+    NOT_INITIALISED = 0;
+    STUDENT = 1;
+    TRACKER = 2;
+    ADMIN = 3;
+  }
+}
+

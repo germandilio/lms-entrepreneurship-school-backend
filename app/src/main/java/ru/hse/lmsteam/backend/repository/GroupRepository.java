@@ -10,8 +10,8 @@ public interface GroupRepository {
   Mono<Group> findById(Integer id);
 
   /**
-   * Find group by id. If forUpdate = true - locks the entity in database.
-   * Operates on master
+   * Find group by id. If forUpdate = true - locks the entity in database. Operates on master
+   *
    * @param id group id
    * @param forUpdate whether to acquire row lock in database.
    * @return group entity

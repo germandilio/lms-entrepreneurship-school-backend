@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.Builder;
 import ru.hse.lmsteam.backend.domain.user.Sex;
 import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.user.UserRole;
 
 @Builder
 public record UserUpsertModel(
@@ -16,7 +17,8 @@ public record UserUpsertModel(
     @Nullable String messengerContact,
     Sex sex,
     String email,
-    @Nullable String phoneNumber) {
+    @Nullable String phoneNumber,
+    UserRole role) {
 
   /**
    * Applies upsert model onto user domain model. It means, that all values provided in upsert model
@@ -49,6 +51,7 @@ public record UserUpsertModel(
         .email(email != null ? email : user.email())
         .phoneNumber(phoneNumber != null ? phoneNumber : user.phoneNumber())
         .balance(user.balance())
+        .role(role != null ? role : user.role())
         .isDeleted(user.isDeleted())
         .build();
   }

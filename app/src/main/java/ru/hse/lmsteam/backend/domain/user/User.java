@@ -20,7 +20,7 @@ public record User(
     String email,
     @Nullable String phoneNumber,
     @Nullable Integer groupId,
-    String role,
+    UserRole role,
     BigDecimal balance,
     Boolean isDeleted) {
 

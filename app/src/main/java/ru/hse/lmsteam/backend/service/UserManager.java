@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.service;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
@@ -32,4 +33,13 @@ public interface UserManager {
    * @return list of usernames
    */
   Flux<String> getUserNamesList();
+
+  /**
+   * Set user group memberships.
+   *
+   * @param groupId group which user will be added to
+   * @param userIds list of users to be added to the group
+   * @return list of updated user entities (members ofr the group)
+   */
+  Flux<User> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds);
 }

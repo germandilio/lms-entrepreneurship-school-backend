@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.service;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,7 @@ public class UserManagerImpl implements UserManager {
   @Override
   public Mono<Long> deleteUser(final UUID id) {
     if (id == null) {
-      return Mono.empty();
+      return Mono.just(0L);
     }
     return userRepository.delete(id);
   }
@@ -76,5 +77,18 @@ public class UserManagerImpl implements UserManager {
   @Override
   public Flux<String> getUserNamesList() {
     return userRepository.allUserNames();
+  }
+
+  @Transactional
+  @Override
+  public Flux<User> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds) {
+    if (groupId == null || userIds == null) {
+      throw new IllegalArgumentException(
+          "GroupId and user ids to format the group cannot be null!");
+    }
+    return userRepository
+        .setUserGroupMemberships(groupId, userIds)
+        .collectList()
+        .thenMany(userRepository.findAllById(userIds));
   }
 }

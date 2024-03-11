@@ -3,6 +3,7 @@ package ru.hse.lmsteam.backend.repository.impl;
 import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,7 +24,8 @@ public class UserRepositoryImpl implements UserRepository {
   private final QueryTranslator<UserFilterOptions> userFiltersQTranslator;
 
   public UserRepositoryImpl(
-      MasterSlaveDbOperations db, @Qualifier("userFilterOptionsQT") QueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+      MasterSlaveDbOperations db,
+      @Qualifier("userFilterOptionsQT") QueryTranslator<UserFilterOptions> userFiltersQTranslator) {
     this.db = db;
     this.userFiltersQTranslator = userFiltersQTranslator;
   }
@@ -44,6 +46,14 @@ public class UserRepositoryImpl implements UserRepository {
 
     var sql = "SELECT * FROM users WHERE id = :id" + (forUpdate ? " FOR UPDATE" : "");
     return db.master.getDatabaseClient().sql(sql).bind("id", id).mapProperties(User.class).one();
+  }
+
+  @Override
+  public Flux<User> findAllById(ImmutableSet<UUID> ids) {
+    if (ids == null) {
+      throw new IllegalArgumentException("Ids is null!");
+    }
+    return db.slave.select(query(where("id").in(ids)), User.class);
   }
 
   @Override
@@ -91,5 +101,24 @@ public class UserRepositoryImpl implements UserRepository {
         .sql("SELECT name FROM users")
         .map(row -> row.get("name", String.class))
         .all();
+  }
+
+  @Override
+  public Flux<UUID> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds) {
+    if (groupId == null) {
+      throw new IllegalArgumentException("Group id is null!");
+    }
+    if (userIds == null) {
+      throw new IllegalArgumentException("User ids is null!");
+    }
+
+    return db.master
+        .getDatabaseClient()
+        .sql("UPDATE users SET group_id = :groupId WHERE id IN (:userIds)")
+        .bind("groupId", groupId)
+        .bind("userIds", userIds)
+        .fetch()
+        .rowsUpdated()
+        .thenMany(Flux.fromIterable(userIds));
   }
 }
