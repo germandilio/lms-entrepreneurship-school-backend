@@ -5,7 +5,7 @@ import ru.hse.lmsteam.backend.domain.user.User;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;
 
-public interface UsersApiProtoConverter {
+public interface UsersApiProtoBuilder {
   GetUser.Response buildGetUserResponse(User user);
 
   UpdateOrCreateUser.Response buildUpdateUserResponse(User user);

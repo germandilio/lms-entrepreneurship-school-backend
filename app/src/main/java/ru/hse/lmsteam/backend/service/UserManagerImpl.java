@@ -24,7 +24,7 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<User> getUser(final UUID id) {
+  public Mono<User> findById(final UUID id) {
     if (id == null) {
       return Mono.empty();
     }
@@ -33,7 +33,7 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional
   @Override
-  public Mono<User> createUser(final UserUpsertModel userUpsertModel) {
+  public Mono<User> create(final UserUpsertModel userUpsertModel) {
     var userToSave = userUpsertModel.mergeWith(User.builder().build(), true);
     userValidator.validateForSave(userToSave);
     return userRepository.upsert(userToSave).flatMap(id -> userRepository.findById(id, false));
@@ -41,7 +41,7 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional
   @Override
-  public Mono<User> updateUser(final UserUpsertModel userUpsertModel) {
+  public Mono<User> update(final UserUpsertModel userUpsertModel) {
     return userRepository
         .findById(userUpsertModel.id(), true)
         .singleOptional()
@@ -55,7 +55,7 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional
   @Override
-  public Mono<Long> deleteUser(final UUID id) {
+  public Mono<Long> delete(final UUID id) {
     if (id == null) {
       return Mono.just(0L);
     }
@@ -64,7 +64,7 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Flux<User> findUsers(final UserFilterOptions filterOptions, final Pageable pageable) {
+  public Flux<User> findAll(final UserFilterOptions filterOptions, final Pageable pageable) {
     if (pageable == null) {
       throw new IllegalArgumentException(
           "Page parameters are mandatory. Please provide Pageable object with specified page params.");
@@ -84,7 +84,7 @@ public class UserManagerImpl implements UserManager {
   public Flux<User> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds) {
     if (groupId == null || userIds == null) {
       throw new IllegalArgumentException(
-          "GroupId and user ids to format the group cannot be null!");
+          "GroupId and user ids cannot be null to update/create membership!");
     }
     return userRepository
         .setUserGroupMemberships(groupId, userIds)

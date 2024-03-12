@@ -13,10 +13,12 @@ import ru.hse.lmsteam.backend.domain.user.User;
 import ru.hse.lmsteam.backend.repository.GroupRepository;
 import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.validation.GroupValidator;
 
 @RequiredArgsConstructor
 @Service
 public class GroupManagerImpl implements GroupManager {
+  private final GroupValidator groupValidator;
   private final GroupRepository groupRepository;
   private final UserManager userManager;
 
@@ -33,8 +35,10 @@ public class GroupManagerImpl implements GroupManager {
   @Override
   public Mono<Group> upsert(final Group group) {
     if (group == null) {
-      return Mono.empty();
+      throw new IllegalArgumentException(
+          "Group object is mandatory for update / create operations.");
     }
+    groupValidator.validateForSave(group);
     return groupRepository.upsert(group).flatMap(id -> groupRepository.findById(id, false));
   }
 
@@ -52,7 +56,7 @@ public class GroupManagerImpl implements GroupManager {
   public Flux<User> getGroupMembers(final Integer groupId) {
     var filterOptions = new UserFilterOptions(null, null, ImmutableSet.of(groupId), null, null);
     var pageable = Pageable.unpaged();
-    return userManager.findUsers(filterOptions, pageable);
+    return userManager.findAll(filterOptions, pageable);
   }
 
   @Transactional

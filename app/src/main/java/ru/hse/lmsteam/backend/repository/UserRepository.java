@@ -12,7 +12,7 @@ public interface UserRepository {
   Mono<User> findById(UUID id);
 
   /**
-   * Retrieves entity operating on master db. If forUpdate = true, locks entity in db using sql'FOR
+   * Retrieves entity operating on master db. If forUpdate = true, locks entity in db using sql 'FOR
    * UPDATE'
    *
    * @param id user uuid

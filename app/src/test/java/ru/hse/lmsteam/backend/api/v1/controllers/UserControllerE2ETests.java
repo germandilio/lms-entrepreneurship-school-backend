@@ -51,7 +51,7 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
               .email(demoUser.email())
               .phoneNumber(demoUser.phoneNumber())
               .build();
-      demoUser = userManager.createUser(userRequest).block();
+      demoUser = userManager.create(userRequest).block();
     }
 
     Assertions.assertNotNull(demoUser);

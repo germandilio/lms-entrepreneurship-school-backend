@@ -9,7 +9,7 @@ import ru.hse.lmsteam.schema.api.users.*;
 
 @RequiredArgsConstructor
 @Component
-public class UsersApiProtoConverterImpl implements UsersApiProtoConverter {
+public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
   private final UserProtoConverterImpl userProtoConverter;
 
   @Override

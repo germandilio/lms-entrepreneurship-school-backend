@@ -10,13 +10,13 @@ import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 
 public interface UserManager {
-  Mono<User> getUser(UUID id);
+  Mono<User> findById(UUID id);
 
-  Mono<User> updateUser(UserUpsertModel user);
+  Mono<User> update(UserUpsertModel user);
 
-  Mono<User> createUser(UserUpsertModel user);
+  Mono<User> create(UserUpsertModel user);
 
-  Mono<Long> deleteUser(UUID id);
+  Mono<Long> delete(UUID id);
 
   /**
    * Finds users by filter options and page properties.
@@ -25,7 +25,7 @@ public interface UserManager {
    * @param pageable page properties such as page number, page size, sort order, etc.
    * @return users collection
    */
-  Flux<User> findUsers(UserFilterOptions filterOptions, Pageable pageable);
+  Flux<User> findAll(UserFilterOptions filterOptions, Pageable pageable);
 
   /**
    * Return list of usernames in the most efficient way.

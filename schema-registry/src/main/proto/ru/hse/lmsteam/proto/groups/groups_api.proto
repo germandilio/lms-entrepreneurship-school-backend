@@ -9,7 +9,7 @@ import "google/protobuf/wrappers.proto";
 import "ru/hse/lmsteam/proto/users/users_api.proto";
 
 message GetGroup {
-  message Request {
+  message Response {
     Group group = 1;
   }
 }
@@ -43,8 +43,7 @@ message GetGroupMembers {
 
 message UpdateGroupMembers {
   message Request {
-    int32 groupId = 1;
-    repeated int32 userIds = 2;
+    repeated string userIds = 1;
   }
 
   message Response {
