@@ -2,8 +2,11 @@ package ru.hse.lmsteam.backend.api.v1.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -55,21 +58,25 @@ public class UsersController implements UsersControllerDocSchema {
     return usersManager.delete(id).map(usersApiProtoBuilder::buildDeleteUserResponse);
   }
 
+  // TODO protection over inconsistent properties and sql injections
+  // also test groups module
+
   @GetMapping
   @Override
+  @PageableAsQueryParam
   public Mono<GetUsers.Response> getUsers(
       @RequestParam(required = false) String namePattern,
       @RequestParam(required = false) String emailPattern,
-      @RequestParam(required = false) ImmutableSet<Integer> groupNumbers,
-      @RequestParam(required = false) ImmutableSet<String> roles,
+      @RequestParam(required = false) List<Integer> groupNumbers,
+      @RequestParam(required = false) List<String> roles,
       @RequestParam(required = false) Boolean isDeleted,
       Pageable pageable) {
     var filterOptions =
         UserFilterOptions.builder()
             .namePattern(namePattern)
             .emailPattern(emailPattern)
-            .groupNumbers(groupNumbers)
-            .roles(roles)
+            .groupNumbers(ImmutableSet.copyOf(Optional.ofNullable(groupNumbers).orElse(List.of())))
+            .roles(ImmutableSet.copyOf(Optional.ofNullable(roles).orElse(List.of())))
             .isDeleted(isDeleted)
             .build();
     return usersManager

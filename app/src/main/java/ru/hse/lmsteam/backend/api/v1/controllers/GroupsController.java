@@ -3,6 +3,7 @@ package ru.hse.lmsteam.backend.api.v1.controllers;
 import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +53,9 @@ public class GroupsController implements GroupsControllerDocSchema {
 
   @GetMapping
   @Override
+  @PageableAsQueryParam
   public Mono<GetGroups.Response> getGroups(
-      @RequestParam(required = false) Integer groupNumber, @RequestParam Pageable pageable) {
+      @RequestParam(required = false) Integer groupNumber, Pageable pageable) {
     var groupOptions = new GroupsFilterOptions(groupNumber);
     return groupManager
         .findAll(groupOptions, pageable)

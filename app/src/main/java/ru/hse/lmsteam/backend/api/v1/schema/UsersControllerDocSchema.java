@@ -1,6 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.schema;
 
-import com.google.common.collect.ImmutableSet;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Mono;
@@ -23,8 +23,8 @@ public interface UsersControllerDocSchema {
   Mono<GetUsers.Response> getUsers(
       String namePattern,
       String emailPattern,
-      ImmutableSet<Integer> groupNumbers,
-      ImmutableSet<String> roles,
+      List<Integer> groupNumbers,
+      List<String> roles,
       Boolean isDeleted,
       Pageable pageable);
 

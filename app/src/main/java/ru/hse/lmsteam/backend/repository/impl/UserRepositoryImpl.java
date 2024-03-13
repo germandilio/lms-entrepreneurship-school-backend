@@ -14,18 +14,18 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.user.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
-import ru.hse.lmsteam.backend.repository.query.translators.QueryTranslator;
+import ru.hse.lmsteam.backend.repository.query.translators.SimpleQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 
 @Slf4j
 @Repository
 public class UserRepositoryImpl implements UserRepository {
   private final MasterSlaveDbOperations db;
-  private final QueryTranslator<UserFilterOptions> userFiltersQTranslator;
+  private final SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator;
 
   public UserRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("userFilterOptionsQT") QueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+      @Qualifier("userFilterOptionsQT") SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
     this.db = db;
     this.userFiltersQTranslator = userFiltersQTranslator;
   }
@@ -90,8 +90,11 @@ public class UserRepositoryImpl implements UserRepository {
     if (pageable == null) {
       throw new IllegalArgumentException("Pageable is null!");
     }
-    return db.slave.select(
-        userFiltersQTranslator.translate(filterOptions).with(pageable), User.class);
+    return db.slave
+        .getDatabaseClient()
+        .sql(userFiltersQTranslator.translateToSql(filterOptions, pageable))
+        .mapProperties(User.class)
+        .all();
   }
 
   @Override
