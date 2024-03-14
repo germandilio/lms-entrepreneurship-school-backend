@@ -81,7 +81,6 @@ public class UsersController implements UsersControllerDocSchema {
             .build();
     return usersManager
         .findAll(filterOptions, pageable)
-        .collect(ImmutableList.toImmutableList())
         .map(usersApiProtoBuilder::buildGetUsersResponse);
   }
 

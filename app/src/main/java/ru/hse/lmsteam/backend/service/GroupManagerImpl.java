@@ -3,6 +3,7 @@ package ru.hse.lmsteam.backend.service;
 import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +54,7 @@ public class GroupManagerImpl implements GroupManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Flux<User> getGroupMembers(final Integer groupId) {
+  public Mono<Page<User>> getGroupMembers(final Integer groupId) {
     var filterOptions = new UserFilterOptions(null, null, ImmutableSet.of(groupId), null, null);
     var pageable = Pageable.unpaged();
     return userManager.findAll(filterOptions, pageable);
@@ -67,7 +68,8 @@ public class GroupManagerImpl implements GroupManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Flux<Group> findAll(final GroupsFilterOptions filterOptions, final Pageable pageable) {
+  public Mono<Page<Group>> findAll(
+      final GroupsFilterOptions filterOptions, final Pageable pageable) {
     if (pageable == null) {
       throw new IllegalArgumentException(
           "Page parameters are mandatory. Please provide Pageable object with specified page params.");

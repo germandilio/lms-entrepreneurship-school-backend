@@ -59,7 +59,6 @@ public class GroupsController implements GroupsControllerDocSchema {
     var groupOptions = new GroupsFilterOptions(groupNumber);
     return groupManager
         .findAll(groupOptions, pageable)
-        .collectList()
         .map(groupsApiProtoBuilder::buildGetGroupsResponse);
   }
 
@@ -68,7 +67,6 @@ public class GroupsController implements GroupsControllerDocSchema {
   public Mono<GetGroupMembers.Response> getGroupMembers(@PathVariable Integer id) {
     return groupManager
         .getGroupMembers(id)
-        .collectList()
         .map(groupsApiProtoBuilder::buildGetGroupMembersResponse);
   }
 

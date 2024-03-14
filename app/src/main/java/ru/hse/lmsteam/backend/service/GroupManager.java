@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.service;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,9 +17,9 @@ public interface GroupManager {
 
   Mono<Long> delete(Integer groupId);
 
-  Flux<User> getGroupMembers(Integer groupId);
+  Mono<Page<User>> getGroupMembers(Integer groupId);
 
   Flux<User> updateGroupMembers(Integer groupId, ImmutableSet<UUID> userIds);
 
-  Flux<Group> findAll(GroupsFilterOptions filterOptions, Pageable pageable);
+  Mono<Page<Group>> findAll(GroupsFilterOptions filterOptions, Pageable pageable);
 }

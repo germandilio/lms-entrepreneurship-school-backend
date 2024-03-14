@@ -7,6 +7,7 @@ option java_package = "ru.hse.lmsteam.schema.api.groups";
 
 import "google/protobuf/wrappers.proto";
 import "ru/hse/lmsteam/proto/users/users_api.proto";
+import "ru/hse/lmsteam/proto/common/pageable.proto";
 
 message GetGroup {
   message Response {
@@ -31,13 +32,15 @@ message DeleteGroup {
 
 message GetGroups {
   message Response {
-    repeated Group groups = 1;
+    ru.hse.lmsteam.proto.common.Page page = 1;
+    repeated Group groups = 2;
   }
 }
 
 message GetGroupMembers {
   message Response {
-    repeated ru.hse.lmsteam.proto.users.User users = 1;
+    ru.hse.lmsteam.proto.common.Page page = 1;
+    repeated ru.hse.lmsteam.proto.users.User users = 2;
   }
 }
 

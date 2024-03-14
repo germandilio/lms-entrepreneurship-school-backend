@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -83,18 +85,23 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public Flux<User> findAll(UserFilterOptions filterOptions, Pageable pageable) {
+  public Mono<Page<User>> findAll(UserFilterOptions filterOptions, Pageable pageable) {
     if (filterOptions == null) {
       throw new IllegalArgumentException("Filter options is null!");
     }
     if (pageable == null) {
       throw new IllegalArgumentException("Pageable is null!");
     }
+    var preparedSQLSelect = userFiltersQTranslator.translateToSql(filterOptions, pageable);
+    var preparedSQLCount = preparedSQLSelect.replace("SELECT users.*", "SELECT COUNT(*)");
     return db.slave
         .getDatabaseClient()
-        .sql(userFiltersQTranslator.translateToSql(filterOptions, pageable))
+        .sql(preparedSQLSelect)
         .mapProperties(User.class)
-        .all();
+        .all()
+        .collectList()
+        .zipWith(db.slave.getDatabaseClient().sql(preparedSQLCount).mapValue(Long.class).one())
+        .map(p -> new PageImpl<>(p.getT1(), pageable, p.getT2()));
   }
 
   @Override

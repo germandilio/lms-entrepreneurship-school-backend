@@ -1,7 +1,7 @@
 package ru.hse.lmsteam.backend.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.user.Group;
 import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
@@ -18,7 +18,7 @@ public interface GroupRepository {
    */
   Mono<Group> findById(Integer id, boolean forUpdate);
 
-  Flux<Group> findAll(GroupsFilterOptions filterOptions, Pageable pageable);
+  Mono<Page<Group>> findAll(GroupsFilterOptions filterOptions, Pageable pageable);
 
   Mono<Integer> upsert(Group group);
 

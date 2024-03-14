@@ -4,9 +4,10 @@ import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.user.Group;
@@ -45,7 +46,7 @@ public class GroupRepositoryImpl implements GroupRepository {
   }
 
   @Override
-  public Flux<Group> findAll(GroupsFilterOptions filterOptions, Pageable pageable) {
+  public Mono<Page<Group>> findAll(GroupsFilterOptions filterOptions, Pageable pageable) {
     if (filterOptions == null) {
       throw new IllegalArgumentException("FilterOptions is null!");
     }
@@ -53,8 +54,12 @@ public class GroupRepositoryImpl implements GroupRepository {
       throw new IllegalArgumentException("Pageable is null!");
     }
 
-    return db.slave.select(
-        groupsFilterOptionsQTranslator.translate(filterOptions).with(pageable), Group.class);
+    var preparedSQLSelect = groupsFilterOptionsQTranslator.translate(filterOptions);
+    return db.slave
+        .select(preparedSQLSelect, Group.class)
+        .collectList()
+        .zipWith(db.slave.count(preparedSQLSelect, Group.class))
+        .map(p -> new PageImpl<>(p.getT1(), pageable, p.getT2()));
   }
 
   @Override

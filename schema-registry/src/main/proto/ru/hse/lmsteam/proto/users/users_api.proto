@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_package = "ru.hse.lmsteam.schema.api.users";
 
 import "google/protobuf/wrappers.proto";
+import "ru/hse/lmsteam/proto/common/pageable.proto";
 
 message GetUser {
   message Request {
@@ -49,7 +50,8 @@ message DeleteUser {
 
 message GetUsers {
   message Response {
-    repeated User users = 1;
+    ru.hse.lmsteam.proto.common.Page page = 1;
+    repeated User users = 2;
   }
 }
 

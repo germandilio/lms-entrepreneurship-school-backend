@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.service;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,7 +26,7 @@ public interface UserManager {
    * @param pageable page properties such as page number, page size, sort order, etc.
    * @return users collection
    */
-  Flux<User> findAll(UserFilterOptions filterOptions, Pageable pageable);
+  Mono<Page<User>> findAll(UserFilterOptions filterOptions, Pageable pageable);
 
   /**
    * Return list of usernames in the most efficient way.
