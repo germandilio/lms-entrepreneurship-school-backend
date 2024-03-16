@@ -4,10 +4,12 @@ import com.google.protobuf.StringValue;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.domain.user.Sex;
-import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.Sex;
+import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.UpdateOrCreateUser;
+import ru.hse.lmsteam.schema.api.users.UserRoleNamespace;
 
 @Component
 public class UserProtoConverterImpl implements UserProtoConverter {
@@ -42,6 +44,9 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     if (user.balance() != null) {
       userBuilder.setBalance(user.balance().toString());
     }
+    if (convertUserRole(user.role()) != null) {
+      userBuilder.setRole(convertUserRole(user.role()));
+    }
     if (user.isDeleted() != null) {
       userBuilder.setIsDeleted(user.isDeleted());
     }
@@ -71,6 +76,8 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     if (!user.getBalance().isEmpty()) {
       userBuilder.balance(new BigDecimal(user.getBalance()));
     }
+    userBuilder.role(convertUserRole(user.getRole()));
+
     userBuilder.isDeleted(user.getIsDeleted());
 
     return userBuilder.build();
@@ -98,22 +105,44 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     if (request.hasPhoneNumber()) {
       userModelBuilder.phoneNumber(request.getPhoneNumber().getValue());
     }
+    if (convertUserRole(request.getRole()) != null) {
+      userModelBuilder.role(convertUserRole(request.getRole()));
+    }
 
     return userModelBuilder.build();
   }
 
-  private ru.hse.lmsteam.schema.api.users.Sex convertSex(Sex sex) {
+  private ru.hse.lmsteam.schema.api.users.UserSexNamespace.Sex convertSex(Sex sex) {
     if (sex == null) return null;
     return switch (sex) {
-      case FEMALE -> ru.hse.lmsteam.schema.api.users.Sex.FEMALE;
-      case MALE -> ru.hse.lmsteam.schema.api.users.Sex.MALE;
+      case FEMALE -> ru.hse.lmsteam.schema.api.users.UserSexNamespace.Sex.FEMALE;
+      case MALE -> ru.hse.lmsteam.schema.api.users.UserSexNamespace.Sex.MALE;
     };
   }
 
-  private Sex convertSex(ru.hse.lmsteam.schema.api.users.Sex sex) {
+  private Sex convertSex(ru.hse.lmsteam.schema.api.users.UserSexNamespace.Sex sex) {
     return switch (sex) {
-      case ru.hse.lmsteam.schema.api.users.Sex.FEMALE -> Sex.FEMALE;
-      case ru.hse.lmsteam.schema.api.users.Sex.MALE -> Sex.MALE;
+      case ru.hse.lmsteam.schema.api.users.UserSexNamespace.Sex.FEMALE -> Sex.FEMALE;
+      case ru.hse.lmsteam.schema.api.users.UserSexNamespace.Sex.MALE -> Sex.MALE;
+      case NOT_INITIALISED -> null;
+      case UNRECOGNIZED -> null;
+    };
+  }
+
+  private UserRoleNamespace.Role convertUserRole(UserRole role) {
+    if (role == null) return null;
+    return switch (role) {
+      case ADMIN -> UserRoleNamespace.Role.ADMIN;
+      case STUDENT -> UserRoleNamespace.Role.STUDENT;
+      case TRACKER -> UserRoleNamespace.Role.TRACKER;
+    };
+  }
+
+  private UserRole convertUserRole(UserRoleNamespace.Role role) {
+    return switch (role) {
+      case UserRoleNamespace.Role.ADMIN -> UserRole.ADMIN;
+      case UserRoleNamespace.Role.STUDENT -> UserRole.STUDENT;
+      case UserRoleNamespace.Role.TRACKER -> UserRole.TRACKER;
       case NOT_INITIALISED -> null;
       case UNRECOGNIZED -> null;
     };

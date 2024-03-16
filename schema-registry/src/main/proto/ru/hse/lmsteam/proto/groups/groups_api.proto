@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package ru.hse.lmsteam.proto.groups;
+
+option java_multiple_files = true;
+option java_package = "ru.hse.lmsteam.schema.api.groups";
+
+import "google/protobuf/wrappers.proto";
+import "ru/hse/lmsteam/proto/users/users_api.proto";
+import "ru/hse/lmsteam/proto/common/pageable.proto";
+
+message GetGroup {
+  message Response {
+    Group group = 1;
+  }
+}
+
+message CreateOrUpdateGroup {
+  message Request {
+    google.protobuf.Int32Value id = 1;
+    google.protobuf.Int32Value number = 2;
+    google.protobuf.StringValue title = 3;
+    google.protobuf.StringValue description = 4;
+    google.protobuf.BoolValue is_deleted = 5;
+  }
+  message Response {
+    Group group = 1;
+  }
+}
+
+message DeleteGroup {
+  message Response {
+    int64 entities_deleted = 1;
+  }
+}
+
+message GetGroups {
+  message Response {
+    ru.hse.lmsteam.proto.common.Page page = 1;
+    repeated Group groups = 2;
+  }
+}
+
+message GetGroupMembers {
+  message Response {
+    ru.hse.lmsteam.proto.common.Page page = 1;
+    repeated ru.hse.lmsteam.proto.users.User users = 2;
+  }
+}
+
+message UpdateGroupMembers {
+  message Request {
+    repeated string user_ids = 1;
+  }
+
+  message Response {
+    repeated ru.hse.lmsteam.proto.users.User users = 1;
+  }
+}
+
+message Group {
+  int32 id = 1;
+  int32 number = 2;
+  string title = 3;
+  string description = 4;
+  bool is_deleted = 5;
+}

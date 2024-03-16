@@ -7,15 +7,7 @@ option java_package = "ru.hse.lmsteam.schema.api.common";
 
 import "google/protobuf/wrappers.proto";
 
-message Pageable {
-  google.protobuf.Int32Value page = 1;
-  google.protobuf.Int32Value size = 2;
-  SortOrder sort_order = 3;
-  repeated string properties = 4;
-}
-
-enum SortOrder {
-  NOT_INITIALIZED = 0;
-  ASC = 1;
-  DESC = 2;
+message Page {
+  int32 total_pages = 1;
+  int64 total_elements = 2;
 }

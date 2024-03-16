@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.domain.user;
+package ru.hse.lmsteam.backend.domain;
 
 import java.util.UUID;
 import lombok.Builder;
