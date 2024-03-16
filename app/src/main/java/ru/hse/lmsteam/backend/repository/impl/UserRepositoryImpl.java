@@ -27,8 +27,7 @@ public class UserRepositoryImpl implements UserRepository {
 
   public UserRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("userFilterOptionsQT")
-          SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+      @Qualifier("userFilterOptionsQT") SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
     this.db = db;
     this.userFiltersQTranslator = userFiltersQTranslator;
   }

@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
