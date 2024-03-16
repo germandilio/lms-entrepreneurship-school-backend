@@ -15,7 +15,7 @@ public interface GroupsControllerDocSchema {
 
   Mono<GetGroups.Response> getGroups(Integer groupNumber, Pageable pageable);
 
-  Mono<GetGroupMembers.Response> getGroupMembers(Integer id);
+  Mono<GetGroupMembers.Response> getGroupMembers(Integer id, Pageable pageable);
 
   Mono<UpdateGroupMembers.Response> updateGroupMembers(
       Integer groupId, UpdateGroupMembers.Request request);

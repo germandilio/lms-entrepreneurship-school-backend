@@ -2,11 +2,13 @@ package ru.hse.lmsteam.backend.api.v1.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import jakarta.validation.ValidationException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +51,9 @@ public class UsersController implements UsersControllerDocSchema {
   public Mono<UpdateOrCreateUser.Response> updateUser(
       @RequestBody UpdateOrCreateUser.Request request) {
     var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(request);
+    if (userUpsertModel.id() == null) {
+      throw new ValidationException("Id is null! Use POST /users to create entity.");
+    }
     return usersManager.update(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
 

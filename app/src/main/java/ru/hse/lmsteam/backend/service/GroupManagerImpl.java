@@ -1,16 +1,18 @@
 package ru.hse.lmsteam.backend.service;
 
 import com.google.common.collect.ImmutableSet;
+import jakarta.validation.ValidationException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.user.Group;
-import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.Group;
+import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.GroupRepository;
 import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
@@ -34,13 +36,50 @@ public class GroupManagerImpl implements GroupManager {
 
   @Transactional
   @Override
-  public Mono<Group> upsert(final Group group) {
+  public Mono<Group> update(final Group group) {
     if (group == null) {
       throw new IllegalArgumentException(
           "Group object is mandatory for update / create operations.");
     }
     groupValidator.validateForSave(group);
-    return groupRepository.upsert(group).flatMap(id -> groupRepository.findById(id, false));
+    return groupRepository
+        .findById(group.id(), true)
+        .map(dbGroup -> group.mergeWith(dbGroup, false))
+        .flatMap(groupRepository::upsert)
+        .flatMap(id -> groupRepository.findById(id, false))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new ValidationException(
+                        "Group with number " + group.number() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
+  }
+
+  @Transactional
+  @Override
+  public Mono<Group> create(final Group group) {
+    if (group == null) {
+      throw new IllegalArgumentException(
+          "Group object is mandatory for update / create operations.");
+    }
+    groupValidator.validateForSave(group);
+    return groupRepository
+        .upsert(group)
+        .flatMap(id -> groupRepository.findById(id, false))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new ValidationException(
+                        "Group with number " + group.number() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional
@@ -54,9 +93,8 @@ public class GroupManagerImpl implements GroupManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<Page<User>> getGroupMembers(final Integer groupId) {
+  public Mono<Page<User>> getGroupMembers(final Integer groupId, Pageable pageable) {
     var filterOptions = new UserFilterOptions(null, null, ImmutableSet.of(groupId), null, null);
-    var pageable = Pageable.unpaged();
     return userManager.findAll(filterOptions, pageable);
   }
 

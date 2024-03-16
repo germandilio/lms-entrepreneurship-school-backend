@@ -4,8 +4,8 @@ import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.domain.user.Group;
-import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.Group;
+import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.schema.api.groups.*;
 
 @Component
@@ -82,9 +82,6 @@ public class GroupsApiProtoBuilderImpl implements GroupsApiProtoBuilder {
 
   @Override
   public Group retrieveGroupModel(CreateOrUpdateGroup.Request request) {
-    if (request.hasGroup()) {
-      return groupProtoConverter.map(request.getGroup());
-    }
-    return null;
+    return groupProtoConverter.retrieveUpdateModel(request);
   }
 }

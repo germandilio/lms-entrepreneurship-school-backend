@@ -17,7 +17,11 @@ message GetGroup {
 
 message CreateOrUpdateGroup {
   message Request {
-    Group group = 1;
+    google.protobuf.Int32Value id = 1;
+    google.protobuf.Int32Value number = 2;
+    google.protobuf.StringValue title = 3;
+    google.protobuf.StringValue description = 4;
+    google.protobuf.BoolValue is_deleted = 5;
   }
   message Response {
     Group group = 1;
@@ -46,7 +50,7 @@ message GetGroupMembers {
 
 message UpdateGroupMembers {
   message Request {
-    repeated string userIds = 1;
+    repeated string user_ids = 1;
   }
 
   message Response {

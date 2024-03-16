@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
-import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.SimpleQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
@@ -27,7 +27,8 @@ public class UserRepositoryImpl implements UserRepository {
 
   public UserRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("userFilterOptionsQT") SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+      @Qualifier("userFilterOptionsQT")
+          SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
     this.db = db;
     this.userFiltersQTranslator = userFiltersQTranslator;
   }
@@ -92,15 +93,18 @@ public class UserRepositoryImpl implements UserRepository {
     if (pageable == null) {
       throw new IllegalArgumentException("Pageable is null!");
     }
-    var preparedSQLSelect = userFiltersQTranslator.translateToSql(filterOptions, pageable);
-    var preparedSQLCount = preparedSQLSelect.replace("SELECT users.*", "SELECT COUNT(*)");
     return db.slave
         .getDatabaseClient()
-        .sql(preparedSQLSelect)
+        .sql(userFiltersQTranslator.translateToSql(filterOptions, pageable))
         .mapProperties(User.class)
         .all()
         .collectList()
-        .zipWith(db.slave.getDatabaseClient().sql(preparedSQLCount).mapValue(Long.class).one())
+        .zipWith(
+            db.slave
+                .getDatabaseClient()
+                .sql(userFiltersQTranslator.translateToCountSql(filterOptions))
+                .mapValue(Long.class)
+                .one())
         .map(p -> new PageImpl<>(p.getT1(), pageable, p.getT2()));
   }
 
@@ -124,11 +128,27 @@ public class UserRepositoryImpl implements UserRepository {
 
     return db.master
         .getDatabaseClient()
-        .sql("UPDATE users SET group_id = :groupId WHERE id IN (:userIds)")
+        .sql("UPDATE users SET group_id = null WHERE group_id = :groupId AND id NOT IN (:userIds)")
         .bind("groupId", groupId)
         .bind("userIds", userIds)
         .fetch()
         .rowsUpdated()
+        .flatMap(
+            count -> {
+              log.info("Removed {} users from group {}", count, groupId);
+              return db.master
+                  .getDatabaseClient()
+                  .sql("UPDATE users SET group_id = :groupId WHERE id IN (:userIds)")
+                  .bind("groupId", groupId)
+                  .bind("userIds", userIds)
+                  .fetch()
+                  .rowsUpdated();
+            })
+        .map(
+            count -> {
+              log.info("Change group for {} users to group {}", count, groupId);
+              return count;
+            })
         .thenMany(Flux.fromIterable(userIds));
   }
 }

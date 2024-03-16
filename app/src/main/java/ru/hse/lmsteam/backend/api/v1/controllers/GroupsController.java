@@ -1,6 +1,7 @@
 package ru.hse.lmsteam.backend.api.v1.controllers;
 
 import com.google.common.collect.ImmutableSet;
+import jakarta.validation.ValidationException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -34,7 +35,7 @@ public class GroupsController implements GroupsControllerDocSchema {
   public Mono<CreateOrUpdateGroup.Response> createGroup(
       @RequestBody CreateOrUpdateGroup.Request request) {
     var groupToCreate = groupsApiProtoBuilder.retrieveGroupModel(request);
-    return groupManager.upsert(groupToCreate).map(groupsApiProtoBuilder::buildCreateGroupResponse);
+    return groupManager.create(groupToCreate).map(groupsApiProtoBuilder::buildCreateGroupResponse);
   }
 
   @PutMapping
@@ -42,7 +43,10 @@ public class GroupsController implements GroupsControllerDocSchema {
   public Mono<CreateOrUpdateGroup.Response> updateGroup(
       @RequestBody CreateOrUpdateGroup.Request request) {
     var groupToUpdate = groupsApiProtoBuilder.retrieveGroupModel(request);
-    return groupManager.upsert(groupToUpdate).map(groupsApiProtoBuilder::buildUpdateGroupResponse);
+    if (groupToUpdate.id() == null) {
+      throw new ValidationException("Id is null! Use POST /groups to create entity.");
+    }
+    return groupManager.update(groupToUpdate).map(groupsApiProtoBuilder::buildUpdateGroupResponse);
   }
 
   @DeleteMapping("/{id}")
@@ -63,10 +67,12 @@ public class GroupsController implements GroupsControllerDocSchema {
   }
 
   @GetMapping("/{id}/members")
+  @PageableAsQueryParam
   @Override
-  public Mono<GetGroupMembers.Response> getGroupMembers(@PathVariable Integer id) {
+  public Mono<GetGroupMembers.Response> getGroupMembers(
+      @PathVariable Integer id, Pageable pageable) {
     return groupManager
-        .getGroupMembers(id)
+        .getGroupMembers(id, pageable)
         .map(groupsApiProtoBuilder::buildGetGroupMembersResponse);
   }
 

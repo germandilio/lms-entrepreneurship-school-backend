@@ -2,8 +2,8 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
 import java.util.Collection;
 import org.springframework.data.domain.Page;
-import ru.hse.lmsteam.backend.domain.user.Group;
-import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.Group;
+import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.schema.api.groups.*;
 
 public interface GroupsApiProtoBuilder {

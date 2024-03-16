@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
-import ru.hse.lmsteam.backend.domain.user.Group;
+import ru.hse.lmsteam.backend.domain.Group;
 import ru.hse.lmsteam.backend.repository.GroupRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.QueryTranslator;
 import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
@@ -54,7 +54,7 @@ public class GroupRepositoryImpl implements GroupRepository {
       throw new IllegalArgumentException("Pageable is null!");
     }
 
-    var preparedSQLSelect = groupsFilterOptionsQTranslator.translate(filterOptions);
+    var preparedSQLSelect = groupsFilterOptionsQTranslator.translate(filterOptions).with(pageable);
     return db.slave
         .select(preparedSQLSelect, Group.class)
         .collectList()

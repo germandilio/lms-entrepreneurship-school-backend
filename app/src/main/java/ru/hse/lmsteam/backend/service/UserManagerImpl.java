@@ -1,16 +1,18 @@
 package ru.hse.lmsteam.backend.service;
 
 import com.google.common.collect.ImmutableSet;
+import jakarta.validation.ValidationException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
@@ -37,7 +39,19 @@ public class UserManagerImpl implements UserManager {
   public Mono<User> create(final UserUpsertModel userUpsertModel) {
     var userToSave = userUpsertModel.mergeWith(User.builder().build(), true);
     userValidator.validateForSave(userToSave);
-    return userRepository.upsert(userToSave).flatMap(id -> userRepository.findById(id, false));
+    return userRepository
+        .upsert(userToSave)
+        .flatMap(id -> userRepository.findById(id, false))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new ValidationException(
+                        "User with id" + userUpsertModel.id() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional

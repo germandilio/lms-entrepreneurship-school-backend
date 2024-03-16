@@ -4,9 +4,9 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.Builder;
-import ru.hse.lmsteam.backend.domain.user.Sex;
-import ru.hse.lmsteam.backend.domain.user.User;
-import ru.hse.lmsteam.backend.domain.user.UserRole;
+import ru.hse.lmsteam.backend.domain.Sex;
+import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.UserRole;
 
 @Builder
 public record UserUpsertModel(

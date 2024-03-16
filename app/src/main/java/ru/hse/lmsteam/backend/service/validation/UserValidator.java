@@ -1,7 +1,7 @@
 package ru.hse.lmsteam.backend.service.validation;
 
 import jakarta.validation.ValidationException;
-import ru.hse.lmsteam.backend.domain.user.User;
+import ru.hse.lmsteam.backend.domain.User;
 
 /**
  * Validator for user entity. Each method throws an exception if the validation fails.

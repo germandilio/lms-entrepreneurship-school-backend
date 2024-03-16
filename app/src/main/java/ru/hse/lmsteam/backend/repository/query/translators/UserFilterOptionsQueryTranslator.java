@@ -21,6 +21,33 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
     }
 
     var selectBase = "SELECT users.* FROM users LEFT JOIN groups ON users.group_id = groups.id";
+
+    return selectBase
+        + getWhere(queryObject)
+        + getOrder(pageable.getSort())
+        + getLimitAndOffset(pageable);
+  }
+
+  @Override
+  public String translateToCountSql(UserFilterOptions queryObject) {
+    if (queryObject == null) {
+      throw new IllegalArgumentException("Cannot translate null queryObject to sql!");
+    }
+
+    var selectBase = "SELECT COUNT(*) FROM users LEFT JOIN groups ON users.group_id = groups.id";
+    return selectBase + getWhere(queryObject);
+  }
+
+  private String getWhere(UserFilterOptions queryObject) {
+    var whereClause = buildWhereClause(queryObject);
+    if (whereClause == null || whereClause.isEmpty()) {
+      return "";
+    } else {
+      return " WHERE " + whereClause;
+    }
+  }
+
+  private String buildWhereClause(UserFilterOptions queryObject) {
     var nameCriteria =
         Optional.ofNullable(queryObject.namePattern())
             .map(name -> "users.name LIKE '%" + name + "%'");
@@ -50,23 +77,10 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
         Optional.ofNullable(queryObject.isDeleted())
             .map(isDeleted -> "users.is_deleted = " + isDeleted);
 
-    var whereClause =
-        Stream.of(nameCriteria, emailCriteria, groupNumberCriteria, roleCriteria, isDeletedCriteria)
-            .flatMap(Optional::stream)
-            .collect(Collectors.joining(" AND "));
-
-    return selectBase
-        + getWhere(whereClause)
-        + getOrder(pageable.getSort())
-        + getLimitAndOffset(pageable);
-  }
-
-  private String getWhere(String whereClause) {
-    if (whereClause == null || whereClause.isEmpty()) {
-      return "";
-    } else {
-      return " WHERE " + whereClause;
-    }
+    return Stream.of(
+            nameCriteria, emailCriteria, groupNumberCriteria, roleCriteria, isDeletedCriteria)
+        .flatMap(Optional::stream)
+        .collect(Collectors.joining(" AND "));
   }
 
   private String getOrder(Sort sort) {

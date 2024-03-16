@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.domain.user;
+package ru.hse.lmsteam.backend.domain;
 
 public enum UserRole {
   STUDENT,

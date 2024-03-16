@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.domain.user;
+package ru.hse.lmsteam.backend.domain;
 
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
