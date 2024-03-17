@@ -37,6 +37,7 @@ public class UserManagerImpl implements UserManager {
   @Transactional
   @Override
   public Mono<User> create(final UserUpsertModel userUpsertModel) {
+    log.info("Creating user with id: {}", userUpsertModel.id());
     var userToSave = userUpsertModel.mergeWith(User.builder().build(), true);
     userValidator.validateForSave(userToSave);
     return userRepository
@@ -57,6 +58,7 @@ public class UserManagerImpl implements UserManager {
   @Transactional
   @Override
   public Mono<User> update(final UserUpsertModel userUpsertModel) {
+    log.info("Updating user with id: {}", userUpsertModel.id());
     return userRepository
         .findById(userUpsertModel.id(), true)
         .singleOptional()
