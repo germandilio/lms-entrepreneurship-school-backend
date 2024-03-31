@@ -10,6 +10,7 @@ import ru.hse.lmsteam.backend.app.TestLmsBackendApplication;
 import ru.hse.lmsteam.backend.domain.Sex;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.repository.UserAuthRepository;
 import ru.hse.lmsteam.backend.service.UserManager;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.backend.utils.E2EInfrastructureBase;
@@ -21,6 +22,7 @@ import ru.hse.lmsteam.schema.api.users.*;
 public class UserControllerE2ETests extends E2EInfrastructureBase {
 
   @Autowired private UserManager userManager;
+  @Autowired private UserAuthRepository userAuthRepository;
 
   @Autowired private WebTestClient webTestClient;
 
@@ -41,7 +43,6 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
     if (demoUser.id() == null) {
       var userRequest =
           UserUpsertModel.builder()
-              .id(demoUser.id())
               .name(demoUser.name())
               .surname(demoUser.surname())
               .patronymic(demoUser.patronymic())
@@ -182,6 +183,7 @@ public class UserControllerE2ETests extends E2EInfrastructureBase {
             });
 
     // clear demoUser after mutation, to be reinitialized
+    userAuthRepository.delete(demoUser.id()).block();
     demoUser = null;
   }
 

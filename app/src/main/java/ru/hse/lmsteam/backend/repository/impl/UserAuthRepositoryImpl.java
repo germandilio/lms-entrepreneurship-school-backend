@@ -45,15 +45,24 @@ public class UserAuthRepositoryImpl implements UserAuthRepository {
   }
 
   @Override
-  public Mono<UserAuth> upsert(UserAuth userAuth) {
+  public Mono<UserAuth> insert(UserAuth userAuth) {
     if (userAuth == null) {
       throw new IllegalArgumentException("UserAuth is null!");
     }
-    if (userAuth.userId() == null) {
-      return db.master.insert(userAuth);
-    } else {
-      return db.master.insert(userAuth);
+
+    return db.master.insert(userAuth);
+  }
+
+  @Override
+  public Mono<UserAuth> update(UserAuth userAuth) {
+    if (userAuth == null) {
+      throw new IllegalArgumentException("UserAuth is null!");
     }
+    if (userAuth.id() == null) {
+      throw new IllegalArgumentException("UserAuth id is null!");
+    }
+
+    return db.master.update(userAuth);
   }
 
   @Override

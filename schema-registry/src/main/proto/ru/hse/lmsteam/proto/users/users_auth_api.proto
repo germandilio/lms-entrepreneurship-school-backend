@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package ru.hse.lmsteam.proto.users.auth;
+
+option java_multiple_files = true;
+option java_package = "ru.hse.lmsteam.schema.api.users.auth";
+
+import "google/protobuf/wrappers.proto";
+
+message AuthResponse {
+  oneof result {
+    Success success = 1;
+    Failure failure = 2;
+  }
+}
+
+message Success {
+  string token = 1;
+  string role = 2;
+  string user_id = 3;
+}
+
+message Failure {
+  string message = 4;
+}

@@ -2,16 +2,22 @@ package ru.hse.lmsteam.backend.service;
 
 import jakarta.validation.ValidationException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
+import ru.hse.lmsteam.backend.service.jwt.TokenManager;
 import ru.hse.lmsteam.backend.service.model.AuthResult;
 import ru.hse.lmsteam.backend.service.validation.PasswordValidator;
 
@@ -22,11 +28,9 @@ public class UserAuthManagerImpl implements UserAuthManager {
   private final UserAuthRepository userAuthRepository;
 
   private final PasswordValidator passwordValidator;
+  private final PasswordEncoder passwordEncoder;
 
-  // TODO return real jwt token with tokenManager
-  // private final TokenManager tokenManager;
-  // TODO password hashing with BCryptPasswordEncoder (?? how to use salt ??)
-  // private final PasswordEncoder passwordEncoder;
+  private final TokenManager tokenManager;
 
   @Transactional(readOnly = true)
   @Override
@@ -35,9 +39,8 @@ public class UserAuthManagerImpl implements UserAuthManager {
         .findByLogin(login, false)
         .switchIfEmpty(
             Mono.error(new ValidationException("User with login " + login + " not found")))
-        .map(userAuth -> doAuthenticate(login, password, userAuth))
-        .onErrorResume(
-            ValidationException.class, exc -> Mono.just(AuthResult.failure(exc.getMessage())));
+        .map(auth -> doAuthenticate(auth).apply(login, password))
+        .map(withAuthToken(login));
   }
 
   @Transactional
@@ -49,7 +52,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
             Mono.error(new ValidationException("User with login " + login + " not found")))
         .<UserAuth>handle(
             (userAuth, sink) -> {
-              var authResult = doAuthenticate(login, oldPassword, userAuth);
+              var authResult = doAuthenticate(userAuth).apply(login, oldPassword);
               if (!authResult.success()) {
                 sink.error(new ValidationException(authResult.message()));
                 return;
@@ -57,16 +60,14 @@ public class UserAuthManagerImpl implements UserAuthManager {
               sink.next(userAuth);
             })
         .flatMap(
-            userAuth -> {
-              passwordValidator.validate(newPassword);
-              // TODO hash password with passwordEncoder
-              var updatedPassword = newPassword;
-              return userAuthRepository.upsert(userAuth.withPassword(updatedPassword));
-            })
+            userAuth ->
+                userAuthRepository.update(
+                    userAuth.withPassword(getPasswordForStoring(newPassword))))
         .map(
             userAuth -> {
               log.info("Password changed for user with login {}", login);
-              return AuthResult.success(userAuth.userId(), "", userAuth.role());
+              return withAuthToken(login)
+                  .apply(AuthResult.success(userAuth.userId(), userAuth.role()));
             })
         .onErrorResume(
             ValidationException.class, exc -> Mono.just(AuthResult.failure(exc.getMessage())));
@@ -80,31 +81,35 @@ public class UserAuthManagerImpl implements UserAuthManager {
             Mono.error(new ValidationException("User with login " + login + " not found")))
         .<UserAuth>handle(
             (userAuth, sink) -> {
-              if (userAuth.token() == null || !userAuth.token().equals(token)) {
-                sink.error(new ValidationException("Invalid token"));
+              if (userAuth.passwordResetToken() == null
+                  || !userAuth.passwordResetToken().equals(token)) {
+                sink.error(new ValidationException("Invalid passwordResetToken"));
+                return;
+              }
+              if (userAuth.password() != null) {
+                sink.error(new ValidationException("Password already set for user"));
                 return;
               }
               sink.next(userAuth);
             })
         .flatMap(
             userAuth -> {
-              passwordValidator.validate(newPassword);
-              // TODO hash password with passwordEncoder
-              var updatedPassword = newPassword;
               var updatedUser =
-                  UserAuth.builder()
-                      .userId(userAuth.userId())
-                      .login(userAuth.login())
-                      .role(userAuth.role())
-                      .password(updatedPassword)
-                      .isDeleted(false)
-                      .build();
-              return userAuthRepository.upsert(updatedUser);
+                  new UserAuth(
+                      userAuth.id(),
+                      userAuth.userId(),
+                      userAuth.login(),
+                      getPasswordForStoring(newPassword),
+                      null, // to ensure than passwordResetToken can be used only once
+                      userAuth.role(),
+                      false);
+              return userAuthRepository.update(updatedUser);
             })
         .map(
             userAuth -> {
               log.info("Password set for user with login {}", login);
-              return AuthResult.success(userAuth.userId(), "", userAuth.role());
+              return withAuthToken(login)
+                  .apply(AuthResult.success(userAuth.userId(), userAuth.role()));
             })
         .onErrorResume(
             ValidationException.class, exc -> Mono.just(AuthResult.failure(exc.getMessage())));
@@ -116,22 +121,17 @@ public class UserAuthManagerImpl implements UserAuthManager {
     if (user == null || user.id() == null) {
       throw new IllegalArgumentException("User or user id is null!");
     }
-    // !!! set all fields to avoid double db query here !!!
-    var userAuth =
-        UserAuth.builder()
-            .userId(user.id())
-            .login(user.email())
-            // keep password empty (it will be set by user later by setPassword with special token)
-            .token(UUID.randomUUID())
-            .role(user.role())
-            .isDeleted(false)
-            .build();
 
-    sendEmailWithToken(user.email(), userAuth.token())
-        .subscribe(__ -> log.info("Email with token sent to user {}", user.email()));
+    // keep password empty (it will be set by user later by setPassword with special
+    // passwordResetToken)
+    var userAuth =
+        new UserAuth(null, user.id(), user.email(), null, UUID.randomUUID(), user.role(), false);
+
+    sendEmailWithToken(user.email(), userAuth.passwordResetToken())
+        .subscribe(__ -> log.info("Email with passwordResetToken sent to user {}", user.email()));
 
     return userAuthRepository
-        .upsert(userAuth)
+        .insert(userAuth)
         .map(
             auth -> {
               log.info("User auth created for userId = {}", auth.userId());
@@ -163,6 +163,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
     return userAuthRepository.delete(userId).then();
   }
 
+  @Transactional
   protected Mono<UserAuth> doAuthUpdate(User user, UserAuth dbAuth) {
     var updatedUserAuth =
         UserAuth.builder()
@@ -170,7 +171,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
             .login(user.email())
             .password(dbAuth.password())
             .role(user.role())
-            .token(dbAuth.token())
+            .passwordResetToken(dbAuth.passwordResetToken())
             .isDeleted(user.isDeleted())
             .build();
 
@@ -178,17 +179,19 @@ public class UserAuthManagerImpl implements UserAuthManager {
       return onUserDeleted(user.id()).thenReturn(updatedUserAuth);
     } else {
       return userAuthRepository
-          .upsert(updatedUserAuth)
+          .update(updatedUserAuth)
+          .publishOn(Schedulers.boundedElastic())
           .flatMap(
               auth -> {
                 log.info("User auth updated for userId = {}", auth.userId());
                 if (!Objects.equals(updatedUserAuth.login(), dbAuth.login())
-                    && updatedUserAuth.token() != null) {
-                  sendEmailWithToken(updatedUserAuth.login(), updatedUserAuth.token())
+                    && updatedUserAuth.passwordResetToken() != null) {
+                  sendEmailWithToken(updatedUserAuth.login(), updatedUserAuth.passwordResetToken())
                       .subscribe(
                           __ ->
                               log.info(
-                                  "Email with token sent to user {}", updatedUserAuth.login()));
+                                  "Email with passwordResetToken sent to user {}",
+                                  updatedUserAuth.login()));
                 }
 
                 return Mono.just(auth);
@@ -197,30 +200,52 @@ public class UserAuthManagerImpl implements UserAuthManager {
   }
 
   private Mono<Void> sendEmailWithToken(String email, UUID token) {
-    // TODO send email with token to user (think about possible errors while sending and proper
+    // TODO send email with passwordResetToken to user (think about possible errors while sending
+    // and proper
     // handling)
+
+    log.info("SendingEmail: token = {}, to user {}", token, email);
     return Mono.empty()
         .onErrorResume(
             exc -> {
-              log.error("Error while sending email with token to user {}", email, exc);
-              // TODO retry logic
+              log.error("Error while sending email with passwordResetToken to user {}", email, exc);
               return Mono.empty();
             })
         .then();
   }
 
-  private AuthResult doAuthenticate(String login, String password, UserAuth userAuth) {
-    if (userAuth.isDeleted()) {
-      return AuthResult.failure("User with login " + login + " is deleted");
-    }
-    if (userAuth.password() == null) {
-      return AuthResult.failure("User with login " + login + " has no password");
-    }
+  private BiFunction<String, String, AuthResult> doAuthenticate(UserAuth userAuth) {
+    return (String login, String password) -> {
+      if (userAuth.isDeleted()) {
+        return AuthResult.failure("User with login " + login + " is deleted");
+      }
+      if (userAuth.password() == null) {
+        return AuthResult.failure(
+            "User with login " + login + " needs to set password before authorizing");
+      }
 
-    if (userAuth.password().equals(password) && userAuth.token() == null) {
-      return AuthResult.success(userAuth.userId(), "", userAuth.role());
-    } else {
-      return AuthResult.failure("Invalid password");
-    }
+      if (passwordEncoder.matches(password, userAuth.password())) {
+        return AuthResult.success(userAuth.userId(), userAuth.role());
+      } else {
+        return AuthResult.failure("Invalid password");
+      }
+    };
+  }
+
+  private Function<AuthResult, AuthResult> withAuthToken(String login) {
+    return authResult -> {
+      if (authResult.userId().isPresent() && authResult.role().isPresent()) {
+        return authResult.withAuthToken(
+            Optional.of(tokenManager.createToken(authResult.userId().get())));
+      } else {
+        log.error("Empty userId or role on authResult with login {}", login);
+        return authResult;
+      }
+    };
+  }
+
+  private String getPasswordForStoring(String rawPassword) {
+    passwordValidator.validate(rawPassword);
+    return passwordEncoder.encode(rawPassword);
   }
 }

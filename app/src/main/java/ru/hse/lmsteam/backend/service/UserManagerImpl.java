@@ -25,6 +25,8 @@ public class UserManagerImpl implements UserManager {
   private final UserRepository userRepository;
   private final UserValidator userValidator;
 
+  private final UserAuthManager userAuthManager;
+
   @Transactional(readOnly = true)
   @Override
   public Mono<User> findById(final UUID id) {
@@ -43,12 +45,13 @@ public class UserManagerImpl implements UserManager {
     return userRepository
         .upsert(userToSave)
         .flatMap(id -> userRepository.findById(id, false))
+        .flatMap(user -> userAuthManager.register(user).thenReturn(user))
         .onErrorResume(
             exc -> {
               if (exc instanceof DuplicateKeyException) {
                 return Mono.error(
                     new ValidationException(
-                        "User with id" + userUpsertModel.id() + " already exists"));
+                        "User with id " + userUpsertModel.id() + " already exists"));
               } else {
                 return Mono.error(exc);
               }
@@ -67,7 +70,8 @@ public class UserManagerImpl implements UserManager {
         .map(userUpsertModel::mergeWith)
         .doOnNext(userValidator::validateForSave)
         .flatMap(userRepository::upsert)
-        .flatMap(id -> userRepository.findById(id, false));
+        .flatMap(id -> userRepository.findById(id, false))
+        .flatMap(user -> userAuthManager.onUserChanged(user).thenReturn(user));
   }
 
   @Transactional
@@ -76,7 +80,10 @@ public class UserManagerImpl implements UserManager {
     if (id == null) {
       return Mono.just(0L);
     }
-    return userRepository.delete(id);
+
+    return userRepository
+        .delete(id)
+        .flatMap(entitiesDeleted -> userAuthManager.onUserDeleted(id).thenReturn(entitiesDeleted));
   }
 
   @Transactional(readOnly = true)

@@ -11,7 +11,9 @@ public interface UserAuthRepository {
 
   Mono<UserAuth> findById(UUID userId, boolean operateOnMaster);
 
-  Mono<UserAuth> upsert(UserAuth userAuth);
+  Mono<UserAuth> insert(UserAuth userAuth);
+
+  Mono<UserAuth> update(UserAuth userAuth);
 
   Mono<Long> delete(UUID userId);
 }
