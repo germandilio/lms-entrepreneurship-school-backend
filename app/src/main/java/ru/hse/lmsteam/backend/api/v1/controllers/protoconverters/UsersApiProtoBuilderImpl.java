@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.service.model.UserNameItem;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;
 
@@ -49,8 +50,18 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
   }
 
   @Override
-  public GetUserNameList.Response buildGetUserNameListResponse(Collection<String> names) {
-    return GetUserNameList.Response.newBuilder().addAllUserNames(names).build();
+  public GetUserNameList.Response buildGetUserNameListResponse(Collection<UserNameItem> items) {
+    return GetUserNameList.Response.newBuilder()
+        .addAllItems(
+            items.stream()
+                .map(
+                    item ->
+                        GetUserNameList.UserNameItem.newBuilder()
+                            .setUserName(item.name())
+                            .setId(item.userId().toString())
+                            .build())
+                .toList())
+        .build();
   }
 
   @Override

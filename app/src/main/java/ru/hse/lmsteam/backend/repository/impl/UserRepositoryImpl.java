@@ -18,6 +18,7 @@ import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.SimpleQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.UserNameItem;
 
 @Slf4j
 @Repository
@@ -108,11 +109,11 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public Flux<String> allUserNames() {
+  public Flux<UserNameItem> allUserNames() {
     return db.slave
         .getDatabaseClient()
-        .sql("SELECT name FROM users")
-        .map(row -> row.get("name", String.class))
+        .sql("SELECT id, name FROM users")
+        .map(row -> new UserNameItem(row.get("id", UUID.class), row.get("name", String.class)))
         .all();
   }
 

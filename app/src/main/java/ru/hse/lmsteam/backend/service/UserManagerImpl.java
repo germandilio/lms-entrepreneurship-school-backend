@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.UserNameItem;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.backend.service.validation.UserValidator;
 
@@ -24,6 +25,8 @@ import ru.hse.lmsteam.backend.service.validation.UserValidator;
 public class UserManagerImpl implements UserManager {
   private final UserRepository userRepository;
   private final UserValidator userValidator;
+
+  private final UserAuthManager userAuthManager;
 
   @Transactional(readOnly = true)
   @Override
@@ -37,17 +40,19 @@ public class UserManagerImpl implements UserManager {
   @Transactional
   @Override
   public Mono<User> create(final UserUpsertModel userUpsertModel) {
+    log.info("Creating user with id: {}", userUpsertModel.id());
     var userToSave = userUpsertModel.mergeWith(User.builder().build(), true);
     userValidator.validateForSave(userToSave);
     return userRepository
         .upsert(userToSave)
         .flatMap(id -> userRepository.findById(id, false))
+        .flatMap(user -> userAuthManager.register(user).thenReturn(user))
         .onErrorResume(
             exc -> {
               if (exc instanceof DuplicateKeyException) {
                 return Mono.error(
                     new ValidationException(
-                        "User with id" + userUpsertModel.id() + " already exists"));
+                        "User with id " + userUpsertModel.id() + " already exists"));
               } else {
                 return Mono.error(exc);
               }
@@ -57,6 +62,7 @@ public class UserManagerImpl implements UserManager {
   @Transactional
   @Override
   public Mono<User> update(final UserUpsertModel userUpsertModel) {
+    log.info("Updating user with id: {}", userUpsertModel.id());
     return userRepository
         .findById(userUpsertModel.id(), true)
         .singleOptional()
@@ -65,7 +71,8 @@ public class UserManagerImpl implements UserManager {
         .map(userUpsertModel::mergeWith)
         .doOnNext(userValidator::validateForSave)
         .flatMap(userRepository::upsert)
-        .flatMap(id -> userRepository.findById(id, false));
+        .flatMap(id -> userRepository.findById(id, false))
+        .flatMap(user -> userAuthManager.onUserChanged(user).thenReturn(user));
   }
 
   @Transactional
@@ -74,7 +81,10 @@ public class UserManagerImpl implements UserManager {
     if (id == null) {
       return Mono.just(0L);
     }
-    return userRepository.delete(id);
+
+    return userRepository
+        .delete(id)
+        .flatMap(entitiesDeleted -> userAuthManager.onUserDeleted(id).thenReturn(entitiesDeleted));
   }
 
   @Transactional(readOnly = true)
@@ -90,7 +100,7 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Flux<String> getUserNamesList() {
+  public Flux<UserNameItem> getUserNamesList() {
     return userRepository.allUserNames();
   }
 

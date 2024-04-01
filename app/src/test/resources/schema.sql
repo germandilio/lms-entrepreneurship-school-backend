@@ -34,6 +34,7 @@ create table "users_auth"
     user_id    uuid primary key    not null,
     login      varchar(256) unique not null,
     password   varchar(70),
+    token      uuid                not null,
     role       varchar(16)         not null,
     is_deleted boolean default false
 );

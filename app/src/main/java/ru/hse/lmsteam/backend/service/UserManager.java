@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.UserNameItem;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 
 public interface UserManager {
@@ -33,7 +34,7 @@ public interface UserManager {
    *
    * @return list of usernames
    */
-  Flux<String> getUserNamesList();
+  Flux<UserNameItem> getUserNamesList();
 
   /**
    * Set user group memberships.
