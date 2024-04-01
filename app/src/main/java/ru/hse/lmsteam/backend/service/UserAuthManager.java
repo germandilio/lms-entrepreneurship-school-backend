@@ -6,7 +6,7 @@ import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.service.model.AuthResult;
 
-public interface UserAuthManager {
+public interface UserAuthManager extends AuthorizationManager {
   Mono<AuthResult> authenticate(String login, String password);
 
   Mono<AuthResult> changePassword(String login, String oldPassword, String newPassword);

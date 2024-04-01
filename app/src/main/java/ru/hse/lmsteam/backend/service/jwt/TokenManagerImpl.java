@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,23 @@ public class TokenManagerImpl implements TokenManager {
         .expiration(new Date(System.currentTimeMillis() + jwtExpirationSeconds * 1000))
         .signWith(getSignInKey(), Jwts.SIG.HS512)
         .compact();
+  }
+
+  @Override
+  public Optional<UUID> getUserId(String token) {
+    if (token == null || token.isBlank()) {
+      return Optional.empty();
+    }
+
+    try {
+      var claims = parser.parseSignedClaims(token);
+      return Optional.of(UUID.fromString(claims.getPayload().getSubject()));
+    } catch (IllegalArgumentException e) {
+      log.error("Failed to convert subject to UUID", e);
+      return Optional.empty();
+    } catch (Exception e) {
+      return Optional.empty();
+    }
   }
 
   @Override

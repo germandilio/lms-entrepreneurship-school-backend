@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.UserNameItem;
 import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
 import ru.hse.lmsteam.backend.service.validation.UserValidator;
 
@@ -99,7 +100,7 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Flux<String> getUserNamesList() {
+  public Flux<UserNameItem> getUserNamesList() {
     return userRepository.allUserNames();
   }
 

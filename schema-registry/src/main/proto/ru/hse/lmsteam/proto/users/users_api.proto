@@ -56,8 +56,12 @@ message GetUsers {
 }
 
 message GetUserNameList {
+  message UserNameItem {
+    string id = 1;
+    string user_name = 2;
+  }
   message Response {
-    repeated string user_names = 1;
+    repeated UserNameItem items = 1;
   }
 }
 

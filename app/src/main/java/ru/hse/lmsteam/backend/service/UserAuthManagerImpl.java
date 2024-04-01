@@ -19,6 +19,9 @@ import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
 import ru.hse.lmsteam.backend.service.jwt.TokenManager;
 import ru.hse.lmsteam.backend.service.model.AuthResult;
+import ru.hse.lmsteam.backend.service.model.AuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.FailedAuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.SuccessfulAuthorizationResult;
 import ru.hse.lmsteam.backend.service.validation.PasswordValidator;
 
 @Slf4j
@@ -41,6 +44,24 @@ public class UserAuthManagerImpl implements UserAuthManager {
             Mono.error(new ValidationException("User with login " + login + " not found")))
         .map(auth -> doAuthenticate(auth).apply(login, password))
         .map(withAuthToken(login));
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<? extends AuthorizationResult> authorize(String token) {
+    return tokenManager
+        .getUserId(token)
+        .map(id -> userAuthRepository.findById(id, false))
+        .orElse(Mono.empty())
+        .map(
+            userAuth -> {
+              if (!userAuth.isDeleted()) {
+                return new SuccessfulAuthorizationResult(userAuth.userId(), userAuth.role());
+              } else {
+                return new FailedAuthorizationResult();
+              }
+            })
+        .switchIfEmpty(Mono.just(new FailedAuthorizationResult()));
   }
 
   @Transactional
@@ -81,13 +102,13 @@ public class UserAuthManagerImpl implements UserAuthManager {
             Mono.error(new ValidationException("User with login " + login + " not found")))
         .<UserAuth>handle(
             (userAuth, sink) -> {
-              if (userAuth.passwordResetToken() == null
-                  || !userAuth.passwordResetToken().equals(token)) {
-                sink.error(new ValidationException("Invalid passwordResetToken"));
-                return;
-              }
               if (userAuth.password() != null) {
                 sink.error(new ValidationException("Password already set for user"));
+                return;
+              }
+              if (userAuth.passwordResetToken() == null
+                  || !userAuth.passwordResetToken().equals(token)) {
+                sink.error(new ValidationException("Provided invalid token"));
                 return;
               }
               sink.next(userAuth);
