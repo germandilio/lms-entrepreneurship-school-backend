@@ -11,6 +11,30 @@ spring:
     compose:
       enabled: false
 
+application:
+  auth:
+    route: '/api/v1/auth'
+    enabled: false
+    jwt:
+      #      need to be at least 512 bits long (86+ characters)
+      secret-key: Gj423j1LGJghsldjasjfsdLGJASLFldfiw1x94092swsmchsfasg202sdfsf42ljl2j430sdfsfsdf080d8flj23jl242sdlfj239anv9w8l23slom9rhnhf3sjdiwe80384hihrhh238asdhkfhskfhsk2323fkhskkamnwqvg37217yehdjghf
+      expiration: 86400 # 1 day
+
+mail:
+  sending:
+    enabled: false
+  from: ${SMTP_USERNAME}
+  smtp:
+    auth: true
+    host: smtp.yandex.com
+    port: 465
+    ssl:
+      port: 465
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    debug: false
+
+
 logging:
   level:
     org.springframework.r2dbc: TRACE
@@ -20,18 +44,5 @@ server:
   port: 3000
   compression:
     enabled: true
-
-app:
-  proto:
-    schema:
-      path: ru.hse.lmsteam.schema
-
 springdoc:
   show-actuator: true
-
-application:
-  security:
-    jwt:
-#      need to be at least 512 bits long (86+ characters)
-      secret-key: Gj423j1LGJghsldjasjfsdLGJASLFldfiw1x94092swsmchsfasg202sdfsf42ljl2j430sdfsfsdf080d8flj23jl242sdlfj239anv9w8l23slom9rhnhf3sjdiwe80384hihrhh238asdhkfhskfhsk2323fkhskkamnwqvg37217yehdjghf
-      expiration: 86400 # 1 day

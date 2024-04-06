@@ -17,6 +17,9 @@ configurations {
 dependencies {
 	implementation project(':schema-registry')
 
+	implementation 'io.netty:netty-resolver-dns-native-macos'
+	implementation 'org.eclipse.angus:angus-mail:2.0.3'
+
 	implementation 'com.google.guava:guava:33.0.0-jre'
 	implementation 'com.google.protobuf:protobuf-java-util:3.25.3'
 
@@ -28,22 +31,20 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.12.5'
-
-	implementation 'io.netty:netty-resolver-dns-native-macos'
-
 	// mapstruct in test code
 	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 //    to enable json / protobuf conversion
-	developmentOnly 'org.springframework.boot:spring-boot-starter-web'
 	developmentOnly 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
-
 	implementation 'com.hubspot.jackson:jackson-datatype-protobuf:0.9.14'
+
+//    to enable webflux (doesnt working right now) + extract validation jakarta api
 	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-configuration-processor'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
