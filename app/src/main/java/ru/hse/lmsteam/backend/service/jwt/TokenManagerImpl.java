@@ -22,8 +22,8 @@ public class TokenManagerImpl implements TokenManager {
   private final JwtParser parser;
 
   public TokenManagerImpl(
-      @Value("${application.security.jwt.secret-key}") String secretKey,
-      @Value("${application.security.jwt.expiration}") Long jwtExpirationSeconds) {
+      @Value("${application.auth.jwt.secret-key}") String secretKey,
+      @Value("${application.auth.jwt.expiration}") Long jwtExpirationSeconds) {
     this.secretKey = secretKey;
     this.jwtExpirationSeconds = jwtExpirationSeconds;
     this.parser = Jwts.parser().verifyWith(getSignInKey()).build();

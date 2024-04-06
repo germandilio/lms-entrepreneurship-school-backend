@@ -18,6 +18,7 @@ import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
 import ru.hse.lmsteam.backend.service.jwt.TokenManager;
+import ru.hse.lmsteam.backend.service.mail.SetNewPasswordEmailSender;
 import ru.hse.lmsteam.backend.service.model.AuthResult;
 import ru.hse.lmsteam.backend.service.model.AuthorizationResult;
 import ru.hse.lmsteam.backend.service.model.FailedAuthorizationResult;
@@ -34,6 +35,8 @@ public class UserAuthManagerImpl implements UserAuthManager {
   private final PasswordEncoder passwordEncoder;
 
   private final TokenManager tokenManager;
+
+  private final SetNewPasswordEmailSender setNewPasswordEmailSender;
 
   @Transactional(readOnly = true)
   @Override
@@ -208,11 +211,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
                 if (!Objects.equals(updatedUserAuth.login(), dbAuth.login())
                     && updatedUserAuth.passwordResetToken() != null) {
                   sendEmailWithToken(updatedUserAuth.login(), updatedUserAuth.passwordResetToken())
-                      .subscribe(
-                          __ ->
-                              log.info(
-                                  "Email with passwordResetToken sent to user {}",
-                                  updatedUserAuth.login()));
+                      .subscribe();
                 }
 
                 return Mono.just(auth);
@@ -220,19 +219,8 @@ public class UserAuthManagerImpl implements UserAuthManager {
     }
   }
 
-  private Mono<Void> sendEmailWithToken(String email, UUID token) {
-    // TODO send email with passwordResetToken to user (think about possible errors while sending
-    // and proper
-    // handling)
-
-    log.info("SendingEmail: token = {}, to user {}", token, email);
-    return Mono.empty()
-        .onErrorResume(
-            exc -> {
-              log.error("Error while sending email with passwordResetToken to user {}", email, exc);
-              return Mono.empty();
-            })
-        .then();
+  private Mono<Void> sendEmailWithToken(String userEmail, UUID token) {
+    return Mono.fromFuture(setNewPasswordEmailSender.sendEmail(userEmail, token.toString()));
   }
 
   private BiFunction<String, String, AuthResult> doAuthenticate(UserAuth userAuth) {
