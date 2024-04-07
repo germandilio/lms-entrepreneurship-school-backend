@@ -4,7 +4,7 @@ import java.util.UUID;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
-import ru.hse.lmsteam.backend.service.model.AuthResult;
+import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
 
 public interface UserAuthManager extends AuthorizationManager {
   Mono<AuthResult> authenticate(String login, String password);

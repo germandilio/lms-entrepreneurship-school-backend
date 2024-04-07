@@ -1,0 +1,16 @@
+package ru.hse.lmsteam.backend.repository;
+
+import com.google.common.collect.ImmutableSet;
+import reactor.core.publisher.Flux;
+import ru.hse.lmsteam.backend.domain.Group;
+import ru.hse.lmsteam.backend.domain.User;
+
+import java.util.UUID;
+
+public interface UserGroupRepository {
+  Flux<User> getMembers(Integer groupId);
+
+  Flux<Group> getUserGroups(UUID userId);
+
+  Flux<UUID> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds);
+}

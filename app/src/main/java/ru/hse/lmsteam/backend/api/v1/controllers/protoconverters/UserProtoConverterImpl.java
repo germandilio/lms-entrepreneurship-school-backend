@@ -3,16 +3,20 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 import com.google.protobuf.StringValue;
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.Sex;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
-import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
+import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.UpdateOrCreateUser;
 import ru.hse.lmsteam.schema.api.users.UserRoleNamespace;
 
 @Component
+@RequiredArgsConstructor
 public class UserProtoConverterImpl implements UserProtoConverter {
+  private final GroupProtoConverter groupProtoConverter;
 
   @Override
   public ru.hse.lmsteam.schema.api.users.User map(User user) {
@@ -47,8 +51,10 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     if (convertUserRole(user.role()) != null) {
       userBuilder.setRole(convertUserRole(user.role()));
     }
-    if (user.isDeleted() != null) {
-      userBuilder.setIsDeleted(user.isDeleted());
+
+    if (user.getGroups() != null) {
+      userBuilder.addAllMemberOfGroups(
+          user.getGroups().stream().map(groupProtoConverter::toSnippet).toList());
     }
 
     return userBuilder.build();
@@ -78,17 +84,12 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     }
     userBuilder.role(convertUserRole(user.getRole()));
 
-    userBuilder.isDeleted(user.getIsDeleted());
-
     return userBuilder.build();
   }
 
   @Override
   public UserUpsertModel map(UpdateOrCreateUser.Request request) {
     var userModelBuilder = UserUpsertModel.builder();
-    if (request.hasId()) {
-      userModelBuilder.id(UUID.fromString(request.getId().getValue()));
-    }
     userModelBuilder.name(request.getName());
     userModelBuilder.surname(request.getSurname());
     if (request.hasPatronymic()) {

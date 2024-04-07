@@ -1,8 +1,15 @@
 package ru.hse.lmsteam.backend.service;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import jakarta.validation.ValidationException;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -12,11 +19,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.hse.lmsteam.backend.domain.Group;
 import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.repository.GroupRepository;
 import ru.hse.lmsteam.backend.repository.UserRepository;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.UserNameItem;
-import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
+import ru.hse.lmsteam.backend.service.model.groups.SetUserGroupMembershipResponse;
+import ru.hse.lmsteam.backend.service.model.groups.Success;
+import ru.hse.lmsteam.backend.service.model.groups.ValidationErrors;
 import ru.hse.lmsteam.backend.service.validation.UserValidator;
 
 @Slf4j
@@ -24,6 +37,7 @@ import ru.hse.lmsteam.backend.service.validation.UserValidator;
 @RequiredArgsConstructor
 public class UserManagerImpl implements UserManager {
   private final UserRepository userRepository;
+  private final GroupRepository groupRepository;
   private final UserValidator userValidator;
 
   private final UserAuthManager userAuthManager;
@@ -52,7 +66,7 @@ public class UserManagerImpl implements UserManager {
               if (exc instanceof DuplicateKeyException) {
                 return Mono.error(
                     new ValidationException(
-                        "User with id " + userUpsertModel.id() + " already exists"));
+                        "User with login" + userUpsertModel.email() + " already exists"));
               } else {
                 return Mono.error(exc);
               }
@@ -87,6 +101,12 @@ public class UserManagerImpl implements UserManager {
         .flatMap(entitiesDeleted -> userAuthManager.onUserDeleted(id).thenReturn(entitiesDeleted));
   }
 
+  /**
+   * Finds all users by filters (non-admin users).
+   * @param filterOptions filter options to filter users
+   * @param pageable page properties such as page number, page size, sort order, etc.
+   * @return
+   */
   @Transactional(readOnly = true)
   @Override
   public Mono<Page<User>> findAll(final UserFilterOptions filterOptions, final Pageable pageable) {
@@ -104,16 +124,77 @@ public class UserManagerImpl implements UserManager {
     return userRepository.allUserNames();
   }
 
+  @Override
+  public Mono<BigDecimal> getUserBalance(UUID id) {
+    if (id == null) {
+      throw new IllegalArgumentException("Id cannot be null to get balance!");
+    }
+    return userRepository.getUserBalance(id);
+  }
+
+  // TODO 1: finish transition to multiple user groups. Final polish api + testing
+  // TODO 2: create api for lessons (very simple: indexed fields + protobuf inside database)
+  // approximately 2 evenings of work (done up to wednesday)
+
   @Transactional
   @Override
-  public Flux<User> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds) {
+  public Mono<SetUserGroupMembershipResponse> setUserGroupMemberships(
+      Integer groupId, ImmutableSet<UUID> userIds) {
     if (groupId == null || userIds == null) {
       throw new IllegalArgumentException(
           "GroupId and user ids cannot be null to update/create membership!");
     }
     return userRepository
-        .setUserGroupMemberships(groupId, userIds)
+        .findAllById(userIds)
         .collectList()
-        .thenMany(userRepository.findAllById(userIds));
+        .flatMap(
+            foundUsers -> {
+              var dbUserIds =
+                  foundUsers.stream().map(User::id).collect(ImmutableSet.toImmutableSet());
+              Mono<ValidationErrors> validationErrors =
+                  getValidationErrorsMono(userIds, foundUsers, dbUserIds);
+              if (validationErrors != null) return validationErrors;
+
+              return userRepository
+                  .setUserGroupMemberships(groupId, dbUserIds)
+                  .collectList()
+                  .thenReturn(new Success());
+            });
+  }
+
+  private Mono<ValidationErrors> getValidationErrorsMono(
+      ImmutableSet<UUID> userIds, List<User> foundUsers, ImmutableSet<UUID> dbUserIds) {
+    if (dbUserIds.size() != userIds.size()) {
+      return Mono.just(
+          new ValidationErrors(
+              Optional.of(Sets.difference(userIds, dbUserIds).immutableCopy()), Optional.empty()));
+    }
+
+    var studentsAlreadyInGroups =
+        foundUsers.stream()
+            .filter(user -> UserRole.STUDENT.equals(user.role()))
+            .filter(user -> user.groupId() != null)
+            .collect(ImmutableSet.toImmutableSet());
+    if (!studentsAlreadyInGroups.isEmpty()) {
+      // find batch of groups by user.groupId, collect to map<userId, group>, then return
+      // ValidationErrors
+      return groupRepository
+          .findByIds(
+              studentsAlreadyInGroups.stream()
+                  .map(User::groupId)
+                  .collect(ImmutableSet.toImmutableSet()),
+              false)
+          .collect(ImmutableMap.toImmutableMap(Group::id, Function.identity()))
+          .map(
+              groupsById -> {
+                var errors =
+                    studentsAlreadyInGroups.stream()
+                        .map(user -> Map.entry(user.id(), groupsById.get(user.groupId())))
+                        .collect(
+                            ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+                return new ValidationErrors(Optional.empty(), Optional.of(errors));
+              });
+    }
+    return null;
   }
 }

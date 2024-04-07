@@ -1,7 +1,7 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.service.model.AuthResult;
+import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
 import ru.hse.lmsteam.schema.api.users.auth.AuthResponse;
 import ru.hse.lmsteam.schema.api.users.auth.Failure;
 import ru.hse.lmsteam.schema.api.users.auth.Success;

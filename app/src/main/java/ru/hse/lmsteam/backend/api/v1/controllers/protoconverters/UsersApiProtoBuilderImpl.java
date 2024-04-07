@@ -1,12 +1,14 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
+import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.service.model.UserNameItem;
-import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
+import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;
 
 @RequiredArgsConstructor
@@ -19,6 +21,15 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
     var builder = GetUser.Response.newBuilder();
     if (user != null) {
       builder.setUser(userProtoConverter.map(user));
+    }
+    return builder.build();
+  }
+
+  @Override
+  public GetUserBalance.Response buildGetUserBalanceResponse(BigDecimal balance) {
+    var builder = GetUserBalance.Response.newBuilder();
+    if (balance != null) {
+      builder.setBalance(balance.toString());
     }
     return builder.build();
   }
@@ -56,12 +67,18 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
             items.stream()
                 .map(
                     item ->
-                        GetUserNameList.UserNameItem.newBuilder()
+                        GetUserNameList.UserSnippet.newBuilder()
                             .setUserName(item.name())
                             .setId(item.userId().toString())
                             .build())
                 .toList())
         .build();
+  }
+
+  @Override
+  public UserUpsertModel retrieveUserUpsertModel(UUID userId, UpdateOrCreateUser.Request request) {
+    var model = retrieveUserUpsertModel(request);
+    return model.withId(userId);
   }
 
   @Override

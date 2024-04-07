@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.service.model;
+package ru.hse.lmsteam.backend.service.model.auth;
 
 import java.util.Optional;
 import java.util.UUID;

@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 
 @Component("userFilterOptionsQT")
 public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<UserFilterOptions> {
@@ -23,7 +23,7 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
     var selectBase = "SELECT users.* FROM users LEFT JOIN groups ON users.group_id = groups.id";
 
     return selectBase
-        + getWhere(queryObject)
+        + withAdminNonRetrievable(getWhere(queryObject))
         + getOrder(pageable.getSort())
         + getLimitAndOffset(pageable);
   }
@@ -35,7 +35,7 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
     }
 
     var selectBase = "SELECT COUNT(*) FROM users LEFT JOIN groups ON users.group_id = groups.id";
-    return selectBase + getWhere(queryObject);
+    return selectBase + withAdminNonRetrievable(getWhere(queryObject));
   }
 
   private String getWhere(UserFilterOptions queryObject) {
@@ -47,13 +47,21 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
     }
   }
 
+  private String withAdminNonRetrievable(String whereClause) {
+    if (whereClause == null || whereClause.isEmpty()) {
+      return " WHERE users.role != 'ADMIN'";
+    } else {
+      return whereClause + " AND users.role != 'ADMIN'";
+    }
+  }
+
   private String buildWhereClause(UserFilterOptions queryObject) {
     var nameCriteria =
         Optional.ofNullable(queryObject.namePattern())
-            .map(name -> "users.name LIKE '%" + name + "%'");
+            .map(name -> "users.name ILIKE '%" + name + "%'");
     var emailCriteria =
         Optional.ofNullable(queryObject.emailPattern())
-            .map(email -> "users.email LIKE '%" + email + "%'");
+            .map(email -> "users.email ILIKE '%" + email + "%'");
     var groupNumberCriteria =
         Optional.ofNullable(queryObject.groupNumbers())
             .filter(groupNumbers -> !groupNumbers.isEmpty())

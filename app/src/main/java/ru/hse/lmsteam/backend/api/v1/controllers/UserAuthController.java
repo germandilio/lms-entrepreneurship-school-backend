@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.UserAuthProtoConverter;
 import ru.hse.lmsteam.backend.service.UserAuthManager;
-import ru.hse.lmsteam.backend.service.model.AuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.auth.AuthorizationResult;
 import ru.hse.lmsteam.schema.api.users.auth.ChangePassword;
 import ru.hse.lmsteam.schema.api.users.auth.Login;
 import ru.hse.lmsteam.schema.api.users.auth.SetPassword;

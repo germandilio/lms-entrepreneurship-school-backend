@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.GroupsApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.GroupsControllerDocSchema;
 import ru.hse.lmsteam.backend.service.GroupManager;
-import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
+import ru.hse.lmsteam.backend.service.model.groups.GroupsFilterOptions;
 import ru.hse.lmsteam.schema.api.groups.*;
 
 @RestController
@@ -38,7 +38,7 @@ public class GroupsController implements GroupsControllerDocSchema {
     return groupManager.create(groupToCreate).map(groupsApiProtoBuilder::buildCreateGroupResponse);
   }
 
-  @PutMapping
+  @PatchMapping
   @Override
   public Mono<CreateOrUpdateGroup.Response> updateGroup(
       @RequestBody CreateOrUpdateGroup.Request request) {
@@ -86,7 +86,6 @@ public class GroupsController implements GroupsControllerDocSchema {
             .collect(ImmutableSet.toImmutableSet());
     return groupManager
         .updateGroupMembers(id, userIds)
-        .collectList()
         .map(groupsApiProtoBuilder::buildUpdateGroupMembersResponse);
   }
 }

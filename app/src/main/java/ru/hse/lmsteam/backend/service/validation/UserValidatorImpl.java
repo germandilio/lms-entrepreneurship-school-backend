@@ -25,7 +25,7 @@ public class UserValidatorImpl implements UserValidator {
     if (user.role() == null) {
       throw new ValidationException("Role cannot be null");
     }
-    if (user.role() != null && user.role() == UserRole.ADMIN) {
+    if (user.role() == UserRole.ADMIN) {
       throw new ValidationException("Admin role is not allowed");
     }
     if (user.email() == null || user.email().isEmpty()) {

@@ -9,13 +9,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Group;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.GroupRepository;
-import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.groups.GroupsFilterOptions;
+import ru.hse.lmsteam.backend.service.model.groups.SetUserGroupMembershipResponse;
 import ru.hse.lmsteam.backend.service.validation.GroupValidator;
 
 @RequiredArgsConstructor
@@ -100,7 +100,8 @@ public class GroupManagerImpl implements GroupManager {
 
   @Transactional
   @Override
-  public Flux<User> updateGroupMembers(final Integer groupId, final ImmutableSet<UUID> userIds) {
+  public Mono<SetUserGroupMembershipResponse> updateGroupMembers(
+      final Integer groupId, final ImmutableSet<UUID> userIds) {
     return userManager.setUserGroupMemberships(groupId, userIds);
   }
 

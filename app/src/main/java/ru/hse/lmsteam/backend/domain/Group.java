@@ -1,10 +1,8 @@
 package ru.hse.lmsteam.backend.domain;
 
-import com.google.common.collect.ImmutableList;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-import reactor.core.publisher.Flux;
 
 @Builder
 @Table("groups")
@@ -14,13 +12,6 @@ public record Group(
     String title,
     String description,
     Boolean isDeleted) {
-  public ImmutableList<User> getMembers() {
-    return null;
-  }
-
-  public Flux<User> lazyGetMembers() {
-    return null;
-  }
 
   /**
    * Merges the current group with the given one. Priority is given to the given group.

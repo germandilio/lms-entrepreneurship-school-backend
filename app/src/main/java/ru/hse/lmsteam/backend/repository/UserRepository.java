@@ -1,17 +1,20 @@
 package ru.hse.lmsteam.backend.repository;
 
 import com.google.common.collect.ImmutableSet;
+import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
 
 public interface UserRepository {
   Mono<User> findById(UUID id);
+
+  Mono<BigDecimal> getUserBalance(UUID id);
 
   /**
    * Retrieves entity operating on master db. If forUpdate = true, locks entity in db using sql 'FOR
@@ -31,6 +34,4 @@ public interface UserRepository {
   Mono<Page<User>> findAll(UserFilterOptions filterOptions, Pageable pageable);
 
   Flux<UserNameItem> allUserNames();
-
-  Flux<UUID> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds);
 }

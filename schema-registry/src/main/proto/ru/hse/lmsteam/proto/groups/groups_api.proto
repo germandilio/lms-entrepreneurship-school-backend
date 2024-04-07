@@ -21,7 +21,6 @@ message CreateOrUpdateGroup {
     google.protobuf.Int32Value number = 2;
     google.protobuf.StringValue title = 3;
     google.protobuf.StringValue description = 4;
-    google.protobuf.BoolValue is_deleted = 5;
   }
   message Response {
     Group group = 1;
@@ -43,8 +42,7 @@ message GetGroups {
 
 message GetGroupMembers {
   message Response {
-    ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated ru.hse.lmsteam.proto.users.User users = 2;
+    repeated ru.hse.lmsteam.proto.users.User users = 1;
   }
 }
 
@@ -54,7 +52,19 @@ message UpdateGroupMembers {
   }
 
   message Response {
-    repeated ru.hse.lmsteam.proto.users.User users = 1;
+    oneof data {
+     Success success = 1;
+     ValidationErrors errors = 2;
+    }
+  }
+
+  message Success {
+  }
+
+  message ValidationErrors {
+    repeated string not_found_user_ids = 1;
+    // map<userid, group>
+    map<string, ru.hse.lmsteam.proto.users.GroupSnippet> already_members = 2;
   }
 }
 
@@ -63,5 +73,7 @@ message Group {
   int32 number = 2;
   string title = 3;
   string description = 4;
-  bool is_deleted = 5;
+
+  repeated ru.hse.lmsteam.proto.users.User students = 6;
+  repeated ru.hse.lmsteam.proto.users.User trackers = 7;
 }

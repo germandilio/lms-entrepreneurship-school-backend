@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.service.AuthorizationManager;
-import ru.hse.lmsteam.backend.service.model.FailedAuthorizationResult;
-import ru.hse.lmsteam.backend.service.model.SuccessfulAuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.auth.FailedAuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.auth.SuccessfulAuthorizationResult;
 
 @Component
 @Slf4j

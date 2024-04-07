@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### For security reasons ###
+qodana.yaml
+compose.yaml
