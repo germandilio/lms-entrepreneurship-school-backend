@@ -2,7 +2,6 @@ package ru.hse.lmsteam.backend.api.v1.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import jakarta.validation.ValidationException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,7 +14,7 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.UsersApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.UsersControllerDocSchema;
 import ru.hse.lmsteam.backend.service.UserManagerImpl;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 import ru.hse.lmsteam.schema.api.users.*;
 
 @RestController
@@ -33,6 +32,12 @@ public class UsersController implements UsersControllerDocSchema {
     return usersManager.findById(id).map(usersApiProtoBuilder::buildGetUserResponse);
   }
 
+  @GetMapping("/{id}/balance")
+  @Override
+  public Mono<GetUserBalance.Response> getUserBalance(@PathVariable UUID id) {
+    return usersManager.getUserBalance(id).map(usersApiProtoBuilder::buildGetUserBalanceResponse);
+  }
+
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
   public Mono<UpdateOrCreateUser.Response> createUser(
@@ -45,14 +50,13 @@ public class UsersController implements UsersControllerDocSchema {
    * If user entity provided without ID, or if there is no entity with provided ID method will fall
    * back to createUser logic.
    */
-  @PatchMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+  @PatchMapping(
+      value = "/{userId}",
+      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
   public Mono<UpdateOrCreateUser.Response> updateUser(
-      @RequestBody UpdateOrCreateUser.Request request) {
-    var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(request);
-    if (userUpsertModel.id() == null) {
-      throw new ValidationException("Id is null! Use POST /users to create entity.");
-    }
+      @PathVariable UUID userId, @RequestBody UpdateOrCreateUser.Request request) {
+    var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(userId, request);
     return usersManager.update(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
 
@@ -65,7 +69,7 @@ public class UsersController implements UsersControllerDocSchema {
   // TODO protection over inconsistent properties and sql injections
   // also test groups module
 
-  @GetMapping
+  @GetMapping("/list")
   @Override
   @PageableAsQueryParam
   public Mono<GetUsers.Response> getUsers(
@@ -80,7 +84,11 @@ public class UsersController implements UsersControllerDocSchema {
             .namePattern(namePattern)
             .emailPattern(emailPattern)
             .groupNumbers(ImmutableSet.copyOf(Optional.ofNullable(groupNumbers).orElse(List.of())))
-            .roles(ImmutableSet.copyOf(Optional.ofNullable(roles).orElse(List.of())))
+            .roles(
+                Optional.ofNullable(roles).orElse(List.of()).stream()
+                    .map(String::toUpperCase)
+                    .filter(s -> !s.isBlank() && !"ADMIN".equals(s))
+                    .collect(ImmutableSet.toImmutableSet()))
             .isDeleted(isDeleted)
             .build();
     return usersManager
@@ -92,7 +100,7 @@ public class UsersController implements UsersControllerDocSchema {
   @Override
   public Mono<GetUserNameList.Response> getUserNameList() {
     return usersManager
-        .getUserNamesList()
+        .getUserSnippets()
         .collect(ImmutableList.toImmutableList())
         .map(usersApiProtoBuilder::buildGetUserNameListResponse);
   }

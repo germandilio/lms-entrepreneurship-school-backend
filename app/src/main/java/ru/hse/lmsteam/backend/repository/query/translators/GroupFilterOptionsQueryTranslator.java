@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
+import ru.hse.lmsteam.backend.service.model.groups.GroupsFilterOptions;
 
 @Component("groupFilterOptionsQT")
 public class GroupFilterOptionsQueryTranslator implements QueryTranslator<GroupsFilterOptions> {
@@ -15,6 +15,6 @@ public class GroupFilterOptionsQueryTranslator implements QueryTranslator<Groups
     var numberCriteria =
         Optional.ofNullable(queryObject.number()).map(where("number")::is).orElse(Criteria.empty());
 
-    return Query.query(numberCriteria);
+    return Query.query(numberCriteria.and(Criteria.where("is_deleted").isFalse()));
   }
 }

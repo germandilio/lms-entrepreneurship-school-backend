@@ -1,18 +1,22 @@
 package ru.hse.lmsteam.backend.service;
 
 import com.google.common.collect.ImmutableSet;
+import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.UserNameItem;
-import ru.hse.lmsteam.backend.service.model.UserUpsertModel;
+import ru.hse.lmsteam.backend.service.model.groups.SetUserGroupMembershipResponse;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
+import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 
 public interface UserManager {
   Mono<User> findById(UUID id);
+
+  Flux<User> findGroupMembers(Integer groupId);
 
   Mono<User> update(UserUpsertModel user);
 
@@ -34,14 +38,17 @@ public interface UserManager {
    *
    * @return list of usernames
    */
-  Flux<UserNameItem> getUserNamesList();
+  Flux<UserSnippet> getUserSnippets();
+
+  Mono<BigDecimal> getUserBalance(UUID id);
 
   /**
    * Set user group memberships.
    *
    * @param groupId group which user will be added to
    * @param userIds list of users to be added to the group
-   * @return list of updated user entities (members ofr the group)
+   * @return @see SetUserGroupMembershipResponse
    */
-  Flux<User> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds);
+  Mono<SetUserGroupMembershipResponse> setUserGroupMemberships(
+      Integer groupId, ImmutableSet<UUID> userIds);
 }

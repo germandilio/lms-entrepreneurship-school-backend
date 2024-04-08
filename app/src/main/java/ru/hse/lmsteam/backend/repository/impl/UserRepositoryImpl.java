@@ -4,6 +4,8 @@ import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
 import com.google.common.collect.ImmutableSet;
+import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,8 +19,8 @@ import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.SimpleQueryTranslator;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 
 @Slf4j
 @Repository
@@ -38,7 +40,21 @@ public class UserRepositoryImpl implements UserRepository {
     if (id == null) {
       throw new IllegalArgumentException("Id is null!");
     }
-    return db.slave.selectOne(query(where("id").is(id)), User.class);
+    return db.slave.selectOne(
+        query(where("id").is(id).and(where("is_deleted").isFalse())), User.class);
+  }
+
+  @Override
+  public Mono<BigDecimal> getUserBalance(UUID id) {
+    if (id == null) {
+      throw new IllegalArgumentException("Id is null!");
+    }
+    return db.slave
+        .getDatabaseClient()
+        .sql("SELECT balance FROM users WHERE id = :id AND is_deleted = false")
+        .bind("id", id)
+        .mapValue(BigDecimal.class)
+        .one();
   }
 
   @Override
@@ -109,46 +125,17 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public Flux<UserNameItem> allUserNames() {
+  public Flux<UserSnippet> allUserSnippets() {
     return db.slave
         .getDatabaseClient()
-        .sql("SELECT id, name FROM users")
-        .map(row -> new UserNameItem(row.get("id", UUID.class), row.get("name", String.class)))
-        .all();
-  }
-
-  @Override
-  public Flux<UUID> setUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds) {
-    if (groupId == null) {
-      throw new IllegalArgumentException("Group id is null!");
-    }
-    if (userIds == null) {
-      throw new IllegalArgumentException("User ids is null!");
-    }
-
-    return db.master
-        .getDatabaseClient()
-        .sql("UPDATE users SET group_id = null WHERE group_id = :groupId AND id NOT IN (:userIds)")
-        .bind("groupId", groupId)
-        .bind("userIds", userIds)
-        .fetch()
-        .rowsUpdated()
-        .flatMap(
-            count -> {
-              log.info("Removed {} users from group {}", count, groupId);
-              return db.master
-                  .getDatabaseClient()
-                  .sql("UPDATE users SET group_id = :groupId WHERE id IN (:userIds)")
-                  .bind("groupId", groupId)
-                  .bind("userIds", userIds)
-                  .fetch()
-                  .rowsUpdated();
-            })
+        .sql("SELECT id, name, surname, patronymic FROM users WHERE is_deleted = false")
         .map(
-            count -> {
-              log.info("Change group for {} users to group {}", count, groupId);
-              return count;
-            })
-        .thenMany(Flux.fromIterable(userIds));
+            row ->
+                new UserSnippet(
+                    row.get("id", UUID.class),
+                    row.get("name", String.class),
+                    row.get("surname", String.class),
+                    Optional.ofNullable(row.get("patronymic", String.class))))
+        .all();
   }
 }

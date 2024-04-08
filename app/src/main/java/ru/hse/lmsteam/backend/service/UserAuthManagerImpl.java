@@ -19,10 +19,10 @@ import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
 import ru.hse.lmsteam.backend.service.jwt.TokenManager;
 import ru.hse.lmsteam.backend.service.mail.SetNewPasswordEmailSender;
-import ru.hse.lmsteam.backend.service.model.AuthResult;
-import ru.hse.lmsteam.backend.service.model.AuthorizationResult;
-import ru.hse.lmsteam.backend.service.model.FailedAuthorizationResult;
-import ru.hse.lmsteam.backend.service.model.SuccessfulAuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
+import ru.hse.lmsteam.backend.service.model.auth.AuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.auth.FailedAuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.auth.SuccessfulAuthorizationResult;
 import ru.hse.lmsteam.backend.service.validation.PasswordValidator;
 
 @Slf4j
@@ -151,8 +151,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
     var userAuth =
         new UserAuth(null, user.id(), user.email(), null, UUID.randomUUID(), user.role(), false);
 
-    sendEmailWithToken(user.email(), userAuth.passwordResetToken())
-        .subscribe(__ -> log.info("Email with passwordResetToken sent to user {}", user.email()));
+    sendEmailWithToken(user.email(), userAuth.passwordResetToken()).subscribe();
 
     return userAuthRepository
         .insert(userAuth)

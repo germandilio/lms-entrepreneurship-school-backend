@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 
 @Component("userFilterOptionsQT")
 public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<UserFilterOptions> {
@@ -20,10 +20,10 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
       throw new IllegalArgumentException("Cannot translate queryObject to sql with null pageable!");
     }
 
-    var selectBase = "SELECT users.* FROM users LEFT JOIN groups ON users.group_id = groups.id";
+    var selectBase = "SELECT users.* FROM users";
 
     return selectBase
-        + getWhere(queryObject)
+        + withNonDeleted(withAdminNonRetrievable(getWhere(queryObject)))
         + getOrder(pageable.getSort())
         + getLimitAndOffset(pageable);
   }
@@ -34,8 +34,8 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
       throw new IllegalArgumentException("Cannot translate null queryObject to sql!");
     }
 
-    var selectBase = "SELECT COUNT(*) FROM users LEFT JOIN groups ON users.group_id = groups.id";
-    return selectBase + getWhere(queryObject);
+    var selectBase = "SELECT COUNT(*) FROM users";
+    return selectBase + withNonDeleted(withAdminNonRetrievable(getWhere(queryObject)));
   }
 
   private String getWhere(UserFilterOptions queryObject) {
@@ -47,22 +47,39 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
     }
   }
 
+  private String withAdminNonRetrievable(String whereClause) {
+    if (whereClause == null || whereClause.isEmpty()) {
+      return " WHERE users.role != 'ADMIN'";
+    } else {
+      return whereClause + " AND users.role != 'ADMIN'";
+    }
+  }
+
+  private String withNonDeleted(String whereClause) {
+    if (whereClause == null || whereClause.isEmpty()) {
+      return " WHERE users.is_deleted = false";
+    } else {
+      return whereClause + " AND users.is_deleted = false";
+    }
+  }
+
   private String buildWhereClause(UserFilterOptions queryObject) {
     var nameCriteria =
         Optional.ofNullable(queryObject.namePattern())
-            .map(name -> "users.name LIKE '%" + name + "%'");
+            .map(name -> "users.name ILIKE '%" + name + "%'");
     var emailCriteria =
         Optional.ofNullable(queryObject.emailPattern())
-            .map(email -> "users.email LIKE '%" + email + "%'");
+            .map(email -> "users.email ILIKE '%" + email + "%'");
     var groupNumberCriteria =
         Optional.ofNullable(queryObject.groupNumbers())
             .filter(groupNumbers -> !groupNumbers.isEmpty())
             .map(
                 groupNumbers ->
-                    "groups.number IN ("
+                    "users.id IN ("
+                        + "SELECT user_id FROM users_groups LEFT JOIN groups ON users_groups.group_id = groups.id WHERE groups.number IN ("
                         + String.join(
                             ",", groupNumbers.stream().map(String::valueOf).toArray(String[]::new))
-                        + ")");
+                        + "))");
     var roleCriteria =
         Optional.ofNullable(queryObject.roles())
             .filter(roles -> !roles.isEmpty())

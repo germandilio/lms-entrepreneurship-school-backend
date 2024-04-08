@@ -14,8 +14,9 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Group;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.GroupRepository;
-import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
-import ru.hse.lmsteam.backend.service.model.UserFilterOptions;
+import ru.hse.lmsteam.backend.repository.UserGroupRepository;
+import ru.hse.lmsteam.backend.service.model.groups.GroupsFilterOptions;
+import ru.hse.lmsteam.backend.service.model.groups.SetUserGroupMembershipResponse;
 import ru.hse.lmsteam.backend.service.validation.GroupValidator;
 
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ import ru.hse.lmsteam.backend.service.validation.GroupValidator;
 public class GroupManagerImpl implements GroupManager {
   private final GroupValidator groupValidator;
   private final GroupRepository groupRepository;
+  private final UserGroupRepository userGroupRepository;
   private final UserManager userManager;
 
   @Transactional(readOnly = true)
@@ -93,14 +95,14 @@ public class GroupManagerImpl implements GroupManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<Page<User>> getGroupMembers(final Integer groupId, Pageable pageable) {
-    var filterOptions = new UserFilterOptions(null, null, ImmutableSet.of(groupId), null, null);
-    return userManager.findAll(filterOptions, pageable);
+  public Flux<User> getGroupMembers(final Integer groupId) {
+    return userGroupRepository.getMembers(groupId);
   }
 
   @Transactional
   @Override
-  public Flux<User> updateGroupMembers(final Integer groupId, final ImmutableSet<UUID> userIds) {
+  public Mono<SetUserGroupMembershipResponse> updateGroupMembers(
+      final Integer groupId, final ImmutableSet<UUID> userIds) {
     return userManager.setUserGroupMemberships(groupId, userIds);
   }
 

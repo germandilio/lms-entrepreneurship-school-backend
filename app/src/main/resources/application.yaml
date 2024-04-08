@@ -16,8 +16,7 @@ application:
     route: '/api/v1/auth'
     enabled: false
     jwt:
-      #      need to be at least 512 bits long (86+ characters)
-      secret-key: Gj423j1LGJghsldjasjfsdLGJASLFldfiw1x94092swsmchsfasg202sdfsf42ljl2j430sdfsfsdf080d8flj23jl242sdlfj239anv9w8l23slom9rhnhf3sjdiwe80384hihrhh238asdhkfhskfhsk2323fkhskkamnwqvg37217yehdjghf
+      secret-key: ${JWT_SECRET_KEY}
       expiration: 86400 # 1 day
 
 mail:

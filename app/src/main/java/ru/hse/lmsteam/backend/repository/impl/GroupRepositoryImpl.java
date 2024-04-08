@@ -1,19 +1,22 @@
 package ru.hse.lmsteam.backend.repository.impl;
 
+import static java.util.stream.Collectors.joining;
 import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
+import com.google.common.collect.ImmutableSet;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.Group;
 import ru.hse.lmsteam.backend.repository.GroupRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.QueryTranslator;
-import ru.hse.lmsteam.backend.service.model.GroupsFilterOptions;
+import ru.hse.lmsteam.backend.service.model.groups.GroupsFilterOptions;
 
 @Repository
 public class GroupRepositoryImpl implements GroupRepository {
@@ -32,7 +35,7 @@ public class GroupRepositoryImpl implements GroupRepository {
     if (id == null) {
       throw new IllegalArgumentException("Id is null!");
     }
-    return db.slave.selectOne(query(where("id").is(id)), Group.class);
+    return db.slave.selectOne(query(where("id").is(id).and("is_deleted").isFalse()), Group.class);
   }
 
   @Override
@@ -40,9 +43,25 @@ public class GroupRepositoryImpl implements GroupRepository {
     if (id == null) {
       throw new IllegalArgumentException("Id is null!");
     }
-    var sql = "SELECT * FROM groups WHERE id = :id" + (forUpdate ? " FOR UPDATE" : "");
+    var sql =
+        "SELECT * FROM groups WHERE id = :id AND is_deleted = false "
+            + (forUpdate ? " FOR UPDATE" : "");
 
     return db.master.getDatabaseClient().sql(sql).bind("id", id).mapProperties(Group.class).one();
+  }
+
+  @Override
+  public Flux<Group> findByIds(ImmutableSet<Integer> ids, boolean forUpdate) {
+    if (ids == null) {
+      throw new IllegalArgumentException("Id is null!");
+    }
+    var idsClause = ids.stream().map(String::valueOf).collect(joining(", ", "(", ")"));
+    var sql =
+        "SELECT * FROM groups WHERE is_deleted = false AND id IN "
+            + idsClause
+            + (forUpdate ? " FOR UPDATE" : "");
+
+    return db.master.getDatabaseClient().sql(sql).mapProperties(Group.class).all();
   }
 
   @Override

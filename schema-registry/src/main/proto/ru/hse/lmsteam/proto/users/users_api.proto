@@ -18,10 +18,15 @@ message GetUser {
   }
 }
 
+message GetUserBalance {
+  message Response {
+    // notation used: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html#toString()
+    string balance = 1;
+  }
+}
+
 message UpdateOrCreateUser {
   message Request {
-    // provide id to update existing entity, if leaved empty will be created new entity
-    google.protobuf.StringValue id = 1;
     string name = 2;
     string surname = 3;
     google.protobuf.StringValue patronymic = 4;
@@ -39,10 +44,6 @@ message UpdateOrCreateUser {
 }
 
 message DeleteUser {
-  message Request {
-    string id = 1;
-  }
-
   message Response {
     int64 entities_deleted = 1;
   }
@@ -56,12 +57,8 @@ message GetUsers {
 }
 
 message GetUserNameList {
-  message UserNameItem {
-    string id = 1;
-    string user_name = 2;
-  }
   message Response {
-    repeated UserNameItem items = 1;
+    repeated UserSnippet items = 1;
   }
 }
 
@@ -80,7 +77,14 @@ message User {
   string balance = 9;
   UserRoleNamespace.Role role = 10;
 
-  bool is_deleted = 11;
+  repeated GroupSnippet member_of_groups = 11;
+}
+
+message UserSnippet {
+  string id = 1;
+  string name = 2;
+  string surname = 3;
+  google.protobuf.StringValue patronymic = 4;
 }
 
 message UserSexNamespace {
@@ -99,5 +103,11 @@ message UserRoleNamespace {
     TRACKER = 2;
     ADMIN = 3;
   }
+}
+
+message GroupSnippet {
+  int32 id = 1;
+  int32 number = 2;
+  string title = 3;
 }
 

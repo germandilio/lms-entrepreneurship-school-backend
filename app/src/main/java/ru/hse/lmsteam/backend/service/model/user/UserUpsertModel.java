@@ -1,16 +1,17 @@
-package ru.hse.lmsteam.backend.service.model;
+package ru.hse.lmsteam.backend.service.model.user;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.Builder;
+import lombok.With;
 import ru.hse.lmsteam.backend.domain.Sex;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
 
 @Builder
 public record UserUpsertModel(
-    @Nullable UUID id,
+    @With @Nullable UUID id,
     String name,
     String surname,
     @Nullable String patronymic,
