@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;
 
@@ -20,7 +20,7 @@ public interface UsersApiProtoBuilder {
 
   GetUsers.Response buildGetUsersResponse(Page<User> users);
 
-  GetUserNameList.Response buildGetUserNameListResponse(Collection<UserNameItem> names);
+  GetUserNameList.Response buildGetUserNameListResponse(Collection<UserSnippet> names);
 
   UserUpsertModel retrieveUserUpsertModel(UUID userId, UpdateOrCreateUser.Request request);
 

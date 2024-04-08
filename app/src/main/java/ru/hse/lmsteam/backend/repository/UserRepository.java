@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 
 public interface UserRepository {
   Mono<User> findById(UUID id);
@@ -33,5 +33,5 @@ public interface UserRepository {
 
   Mono<Page<User>> findAll(UserFilterOptions filterOptions, Pageable pageable);
 
-  Flux<UserNameItem> allUserNames();
+  Flux<UserSnippet> allUserSnippets();
 }

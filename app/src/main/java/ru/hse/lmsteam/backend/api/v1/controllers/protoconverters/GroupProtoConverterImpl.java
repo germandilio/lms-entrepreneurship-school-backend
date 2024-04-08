@@ -1,12 +1,13 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.service.UserManager;
 import ru.hse.lmsteam.schema.api.groups.CreateOrUpdateGroup;
 import ru.hse.lmsteam.schema.api.groups.Group;
-import ru.hse.lmsteam.schema.api.users.GroupSnippet;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +31,12 @@ public class GroupProtoConverterImpl implements GroupProtoConverter {
       builder.setDescription(group.description());
     }
 
-    var members = userManager.findGroupMembers(group.id()).collectList().block();
+    List<User> members = null;
+    try {
+      members = userManager.findGroupMembers(group.id()).collectList().toFuture().get();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
     if (members != null) {
       builder.addAllStudents(
           members.stream()
@@ -47,15 +53,6 @@ public class GroupProtoConverterImpl implements GroupProtoConverter {
     }
 
     return builder.build();
-  }
-
-  @Override
-  public GroupSnippet toSnippet(ru.hse.lmsteam.backend.domain.Group group) {
-    return GroupSnippet.newBuilder()
-        .setId(group.id())
-        .setNumber(group.number())
-        .setTitle(group.title())
-        .build();
   }
 
   @Override

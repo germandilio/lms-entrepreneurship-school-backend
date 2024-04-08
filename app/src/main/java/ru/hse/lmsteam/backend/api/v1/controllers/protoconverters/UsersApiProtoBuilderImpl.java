@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
+import com.google.protobuf.StringValue;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.UUID;
@@ -7,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;
 
@@ -61,16 +62,20 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
   }
 
   @Override
-  public GetUserNameList.Response buildGetUserNameListResponse(Collection<UserNameItem> items) {
+  public GetUserNameList.Response buildGetUserNameListResponse(Collection<UserSnippet> items) {
     return GetUserNameList.Response.newBuilder()
         .addAllItems(
             items.stream()
                 .map(
-                    item ->
-                        GetUserNameList.UserSnippet.newBuilder()
-                            .setUserName(item.name())
-                            .setId(item.userId().toString())
-                            .build())
+                    item -> {
+                      var b =
+                          ru.hse.lmsteam.schema.api.users.UserSnippet.newBuilder()
+                              .setId(item.userId().toString())
+                              .setName(item.name())
+                              .setSurname(item.surname());
+                      item.patronymic().ifPresent(p -> b.setPatronymic(StringValue.of(p)));
+                      return b.build();
+                    })
                 .toList())
         .build();
   }

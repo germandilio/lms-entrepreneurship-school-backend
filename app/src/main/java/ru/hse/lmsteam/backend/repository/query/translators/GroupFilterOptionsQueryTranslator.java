@@ -15,6 +15,6 @@ public class GroupFilterOptionsQueryTranslator implements QueryTranslator<Groups
     var numberCriteria =
         Optional.ofNullable(queryObject.number()).map(where("number")::is).orElse(Criteria.empty());
 
-    return Query.query(numberCriteria);
+    return Query.query(numberCriteria.and(Criteria.where("is_deleted").isFalse()));
   }
 }

@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.groups.SetUserGroupMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 
 public interface UserManager {
@@ -38,7 +38,7 @@ public interface UserManager {
    *
    * @return list of usernames
    */
-  Flux<UserNameItem> getUserNamesList();
+  Flux<UserSnippet> getUserSnippets();
 
   Mono<BigDecimal> getUserBalance(UUID id);
 

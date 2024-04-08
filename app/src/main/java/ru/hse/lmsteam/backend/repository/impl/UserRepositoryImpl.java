@@ -5,6 +5,7 @@ import static org.springframework.data.relational.core.query.Query.query;
 
 import com.google.common.collect.ImmutableSet;
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +20,7 @@ import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.SimpleQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserNameItem;
+import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 
 @Slf4j
 @Repository
@@ -29,8 +30,7 @@ public class UserRepositoryImpl implements UserRepository {
 
   public UserRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("userFilterOptionsQT")
-          SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+      @Qualifier("userFilterOptionsQT") SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
     this.db = db;
     this.userFiltersQTranslator = userFiltersQTranslator;
   }
@@ -51,7 +51,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
     return db.slave
         .getDatabaseClient()
-        .sql("SELECT balance FROM users WHERE id = :id")
+        .sql("SELECT balance FROM users WHERE id = :id AND is_deleted = false")
         .bind("id", id)
         .mapValue(BigDecimal.class)
         .one();
@@ -125,11 +125,17 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public Flux<UserNameItem> allUserNames() {
+  public Flux<UserSnippet> allUserSnippets() {
     return db.slave
         .getDatabaseClient()
-        .sql("SELECT id, name FROM users")
-        .map(row -> new UserNameItem(row.get("id", UUID.class), row.get("name", String.class)))
+        .sql("SELECT id, name, surname, patronymic FROM users WHERE is_deleted = false")
+        .map(
+            row ->
+                new UserSnippet(
+                    row.get("id", UUID.class),
+                    row.get("name", String.class),
+                    row.get("surname", String.class),
+                    Optional.ofNullable(row.get("patronymic", String.class))))
         .all();
   }
 }

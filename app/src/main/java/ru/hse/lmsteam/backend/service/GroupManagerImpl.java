@@ -9,11 +9,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Group;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.GroupRepository;
-import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
+import ru.hse.lmsteam.backend.repository.UserGroupRepository;
 import ru.hse.lmsteam.backend.service.model.groups.GroupsFilterOptions;
 import ru.hse.lmsteam.backend.service.model.groups.SetUserGroupMembershipResponse;
 import ru.hse.lmsteam.backend.service.validation.GroupValidator;
@@ -23,6 +24,7 @@ import ru.hse.lmsteam.backend.service.validation.GroupValidator;
 public class GroupManagerImpl implements GroupManager {
   private final GroupValidator groupValidator;
   private final GroupRepository groupRepository;
+  private final UserGroupRepository userGroupRepository;
   private final UserManager userManager;
 
   @Transactional(readOnly = true)
@@ -93,9 +95,8 @@ public class GroupManagerImpl implements GroupManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<Page<User>> getGroupMembers(final Integer groupId, Pageable pageable) {
-    var filterOptions = new UserFilterOptions(null, null, ImmutableSet.of(groupId), null, null);
-    return userManager.findAll(filterOptions, pageable);
+  public Flux<User> getGroupMembers(final Integer groupId) {
+    return userGroupRepository.getMembers(groupId);
   }
 
   @Transactional

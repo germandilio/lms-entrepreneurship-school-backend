@@ -53,8 +53,8 @@ message UpdateGroupMembers {
 
   message Response {
     oneof data {
-     Success success = 1;
-     ValidationErrors errors = 2;
+      Success success = 1;
+      ValidationErrors errors = 2;
     }
   }
 
@@ -62,9 +62,13 @@ message UpdateGroupMembers {
   }
 
   message ValidationErrors {
+    message UserGroups {
+      ru.hse.lmsteam.proto.users.UserSnippet user = 1;
+      repeated ru.hse.lmsteam.proto.users.GroupSnippet groups = 2;
+    }
+
     repeated string not_found_user_ids = 1;
-    // map<userid, group>
-    map<string, ru.hse.lmsteam.proto.users.GroupSnippet> already_members = 2;
+    repeated UserGroups already_members = 2;
   }
 }
 

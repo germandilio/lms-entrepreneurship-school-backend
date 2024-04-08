@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
+import java.util.Collection;
 import org.springframework.data.domain.Page;
 import ru.hse.lmsteam.backend.domain.Group;
 import ru.hse.lmsteam.backend.domain.User;
@@ -17,7 +18,7 @@ public interface GroupsApiProtoBuilder {
 
   GetGroups.Response buildGetGroupsResponse(Page<Group> groups);
 
-  GetGroupMembers.Response buildGetGroupMembersResponse(Page<User> users);
+  GetGroupMembers.Response buildGetGroupMembersResponse(Collection<User> users);
 
   UpdateGroupMembers.Response buildUpdateGroupMembersResponse(
       SetUserGroupMembershipResponse response);

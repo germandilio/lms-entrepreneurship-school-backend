@@ -67,12 +67,11 @@ public class GroupsController implements GroupsControllerDocSchema {
   }
 
   @GetMapping("/{id}/members")
-  @PageableAsQueryParam
   @Override
-  public Mono<GetGroupMembers.Response> getGroupMembers(
-      @PathVariable Integer id, Pageable pageable) {
+  public Mono<GetGroupMembers.Response> getGroupMembers(@PathVariable Integer id) {
     return groupManager
-        .getGroupMembers(id, pageable)
+        .getGroupMembers(id)
+        .collectList()
         .map(groupsApiProtoBuilder::buildGetGroupMembersResponse);
   }
 

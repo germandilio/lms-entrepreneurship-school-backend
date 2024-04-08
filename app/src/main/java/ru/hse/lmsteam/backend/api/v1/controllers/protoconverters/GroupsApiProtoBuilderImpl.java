@@ -1,9 +1,8 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,7 @@ import ru.hse.lmsteam.schema.api.groups.*;
 @RequiredArgsConstructor
 public class GroupsApiProtoBuilderImpl implements GroupsApiProtoBuilder {
   private final GroupProtoConverter groupProtoConverter;
+  private final GroupSnippetConverter groupSnippetConverter;
   private final UserProtoConverter userProtoConverter;
 
   @Override
@@ -68,13 +68,8 @@ public class GroupsApiProtoBuilderImpl implements GroupsApiProtoBuilder {
   }
 
   @Override
-  public GetGroupMembers.Response buildGetGroupMembersResponse(Page<User> users) {
+  public GetGroupMembers.Response buildGetGroupMembersResponse(Collection<User> users) {
     return GetGroupMembers.Response.newBuilder()
-        .setPage(
-            ru.hse.lmsteam.schema.api.common.Page.newBuilder()
-                .setTotalPages(users.getTotalPages())
-                .setTotalElements(users.getTotalElements())
-                .build())
         .addAllUsers(users.stream().map(userProtoConverter::map).toList())
         .build();
   }
@@ -96,14 +91,22 @@ public class GroupsApiProtoBuilderImpl implements GroupsApiProtoBuilder {
             errorsBuilder.addAllNotFoundUserIds(
                 usersNotFound.orElse(ImmutableSet.of()).stream().map(UUID::toString).toList());
           }
-          if (alreadyMembers.isPresent()) {
-            errorsBuilder.putAllAlreadyMembers(
-                alreadyMembers.orElse(ImmutableMap.of()).entrySet().stream()
-                    .collect(
-                        Collectors.toMap(
-                            el -> el.getKey().toString(),
-                            el -> groupProtoConverter.toSnippet(el.getValue()))));
-          }
+
+          alreadyMembers.ifPresent(
+              alreadyMembersMap ->
+                  errorsBuilder.addAllAlreadyMembers(
+                      alreadyMembersMap.entrySet().stream()
+                          .map(
+                              entry -> {
+                                var b = UpdateGroupMembers.ValidationErrors.UserGroups.newBuilder();
+                                b.setUser(userProtoConverter.toSnippet(entry.getKey()));
+                                b.addAllGroups(
+                                    entry.getValue().stream()
+                                        .map(groupSnippetConverter::toSnippet)
+                                        .toList());
+                                return b.build();
+                              })
+                          .toList()));
           builder.setErrors(errorsBuilder.build());
           break;
         }

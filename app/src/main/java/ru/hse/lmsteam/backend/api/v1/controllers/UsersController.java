@@ -100,7 +100,7 @@ public class UsersController implements UsersControllerDocSchema {
   @Override
   public Mono<GetUserNameList.Response> getUserNameList() {
     return usersManager
-        .getUserNamesList()
+        .getUserSnippets()
         .collect(ImmutableList.toImmutableList())
         .map(usersApiProtoBuilder::buildGetUserNameListResponse);
   }

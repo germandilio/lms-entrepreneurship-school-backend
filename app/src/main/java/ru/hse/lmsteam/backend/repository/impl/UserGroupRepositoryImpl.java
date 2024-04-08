@@ -26,7 +26,7 @@ public class UserGroupRepositoryImpl implements UserGroupRepository {
     return db.slave
         .getDatabaseClient()
         .sql(
-            "SELECT users.* FROM users_groups RIGHT JOIN users ON users_groups.user_id = users.id WHERE users_groups.group_id = :groupId")
+            "SELECT users.* FROM users_groups RIGHT JOIN users ON users_groups.user_id = users.id WHERE users_groups.group_id = :groupId AND users.is_deleted = false")
         .bind("groupId", groupId)
         .mapProperties(User.class)
         .all();
@@ -41,7 +41,7 @@ public class UserGroupRepositoryImpl implements UserGroupRepository {
     return db.slave
         .getDatabaseClient()
         .sql(
-            "SELECT groups.* FROM users_groups RIGHT JOIN groups ON users_groups.group_id = groups.id WHERE users_groups.user_id = :userId")
+            "SELECT groups.* FROM users_groups RIGHT JOIN groups ON users_groups.group_id = groups.id WHERE users_groups.user_id = :userId AND groups.is_deleted = false")
         .bind("userId", userId)
         .mapProperties(Group.class)
         .all();
@@ -56,7 +56,8 @@ public class UserGroupRepositoryImpl implements UserGroupRepository {
       throw new IllegalArgumentException("UserIds is null!");
     }
 
-    var userIdsClause = userIds.stream().map(UUID::toString).reduce((a, b) -> a + ", " + b);
+    var userIdsClause =
+        userIds.stream().map(id -> "'" + id.toString() + "'").reduce((a, b) -> a + ", " + b);
 
     return db.master
         .getDatabaseClient()
@@ -70,7 +71,8 @@ public class UserGroupRepositoryImpl implements UserGroupRepository {
   }
 
   private Flux<UUID> batchInsertUserGroupMemberships(Integer groupId, ImmutableSet<UUID> userIds) {
-    var userIdsClause = userIds.stream().map(UUID::toString).reduce((a, b) -> a + ", " + b);
+    var userIdsClause =
+        userIds.stream().map(id -> "'" + id.toString() + "'").reduce((a, b) -> a + ", " + b);
 
     return db.master
         .getDatabaseClient()

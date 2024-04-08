@@ -35,7 +35,7 @@ public class GroupRepositoryImpl implements GroupRepository {
     if (id == null) {
       throw new IllegalArgumentException("Id is null!");
     }
-    return db.slave.selectOne(query(where("id").is(id)), Group.class);
+    return db.slave.selectOne(query(where("id").is(id).and("is_deleted").isFalse()), Group.class);
   }
 
   @Override
@@ -43,7 +43,9 @@ public class GroupRepositoryImpl implements GroupRepository {
     if (id == null) {
       throw new IllegalArgumentException("Id is null!");
     }
-    var sql = "SELECT * FROM groups WHERE id = :id" + (forUpdate ? " FOR UPDATE" : "");
+    var sql =
+        "SELECT * FROM groups WHERE id = :id AND is_deleted = false "
+            + (forUpdate ? " FOR UPDATE" : "");
 
     return db.master.getDatabaseClient().sql(sql).bind("id", id).mapProperties(Group.class).one();
   }
@@ -54,7 +56,10 @@ public class GroupRepositoryImpl implements GroupRepository {
       throw new IllegalArgumentException("Id is null!");
     }
     var idsClause = ids.stream().map(String::valueOf).collect(joining(", ", "(", ")"));
-    var sql = "SELECT * FROM groups WHERE id IN " + idsClause + (forUpdate ? " FOR UPDATE" : "");
+    var sql =
+        "SELECT * FROM groups WHERE is_deleted = false AND id IN "
+            + idsClause
+            + (forUpdate ? " FOR UPDATE" : "");
 
     return db.master.getDatabaseClient().sql(sql).mapProperties(Group.class).all();
   }
