@@ -19,4 +19,7 @@ public interface GroupsControllerDocSchema {
 
   Mono<UpdateGroupMembers.Response> updateGroupMembers(
       Integer groupId, UpdateGroupMembers.Request request);
+
+  Mono<UpdateGroupMembers.Response> validateGroupMembers(
+      Integer id, UpdateGroupMembers.Request request);
 }

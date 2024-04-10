@@ -51,4 +51,7 @@ public interface UserManager {
    */
   Mono<SetUserGroupMembershipResponse> setUserGroupMemberships(
       Integer groupId, ImmutableSet<UUID> userIds);
+
+  Mono<SetUserGroupMembershipResponse> validateUserGroupMemberships(
+      Integer groupId, ImmutableSet<UUID> userIds);
 }

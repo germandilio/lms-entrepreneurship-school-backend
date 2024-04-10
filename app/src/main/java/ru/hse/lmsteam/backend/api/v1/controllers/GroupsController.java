@@ -87,4 +87,17 @@ public class GroupsController implements GroupsControllerDocSchema {
         .updateGroupMembers(id, userIds)
         .map(groupsApiProtoBuilder::buildUpdateGroupMembersResponse);
   }
+
+  @GetMapping("/{id}/members/validate")
+  @Override
+  public Mono<UpdateGroupMembers.Response> validateGroupMembers(
+      @PathVariable Integer id, @RequestBody UpdateGroupMembers.Request request) {
+    var userIds =
+        request.getUserIdsList().stream()
+            .map(UUID::fromString)
+            .collect(ImmutableSet.toImmutableSet());
+    return groupManager
+        .validateGroupMembers(id, userIds)
+        .map(groupsApiProtoBuilder::buildUpdateGroupMembersResponse);
+  }
 }

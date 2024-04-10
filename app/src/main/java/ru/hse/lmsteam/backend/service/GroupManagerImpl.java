@@ -99,11 +99,16 @@ public class GroupManagerImpl implements GroupManager {
     return userGroupRepository.getMembers(groupId);
   }
 
-  @Transactional
   @Override
   public Mono<SetUserGroupMembershipResponse> updateGroupMembers(
       final Integer groupId, final ImmutableSet<UUID> userIds) {
     return userManager.setUserGroupMemberships(groupId, userIds);
+  }
+
+  @Override
+  public Mono<SetUserGroupMembershipResponse> validateGroupMembers(
+      final Integer groupId, final ImmutableSet<UUID> userIds) {
+    return userManager.validateUserGroupMemberships(groupId, userIds);
   }
 
   @Transactional(readOnly = true)

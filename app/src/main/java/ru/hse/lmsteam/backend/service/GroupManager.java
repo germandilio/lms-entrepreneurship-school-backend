@@ -25,5 +25,8 @@ public interface GroupManager {
   Mono<SetUserGroupMembershipResponse> updateGroupMembers(
       Integer groupId, ImmutableSet<UUID> userIds);
 
+  Mono<SetUserGroupMembershipResponse> validateGroupMembers(
+      Integer groupId, ImmutableSet<UUID> userIds);
+
   Mono<Page<Group>> findAll(GroupsFilterOptions filterOptions, Pageable pageable);
 }

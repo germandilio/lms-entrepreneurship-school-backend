@@ -138,10 +138,6 @@ public class UserManagerImpl implements UserManager {
     return userRepository.getUserBalance(id);
   }
 
-  // TODO 1: finish transition to multiple user groups. Final polish api + testing
-  // TODO 2: create api for lessons (very simple: indexed fields + protobuf inside database)
-  // approximately 2 evenings of work (done up to wednesday)
-
   @Transactional
   @Override
   public Mono<SetUserGroupMembershipResponse> setUserGroupMemberships(
@@ -165,6 +161,29 @@ public class UserManagerImpl implements UserManager {
                   .setUserGroupMemberships(groupId, dbUserIds)
                   .collectList()
                   .thenReturn(new Success());
+            });
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<SetUserGroupMembershipResponse> validateUserGroupMemberships(
+      Integer groupId, ImmutableSet<UUID> userIds) {
+    if (groupId == null || userIds == null) {
+      throw new IllegalArgumentException(
+          "GroupId and user ids cannot be null to update/create membership!");
+    }
+    return userRepository
+        .findAllById(userIds)
+        .collectList()
+        .flatMap(
+            foundUsers -> {
+              var dbUserIds =
+                  foundUsers.stream().map(User::id).collect(ImmutableSet.toImmutableSet());
+              Mono<ValidationErrors> validationErrors =
+                  getValidationErrorsMono(userIds, foundUsers, dbUserIds);
+              if (validationErrors != null) return validationErrors;
+
+              return Mono.just(new Success());
             });
   }
 
