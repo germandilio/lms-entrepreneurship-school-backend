@@ -28,13 +28,19 @@ public class LessonManagerImpl implements LessonManager {
   @Transactional
   @Override
   public Mono<Lesson> update(Lesson lesson) {
-    return null;
+    if (lesson == null || lesson.id() == null) {
+      return Mono.empty();
+    }
+    return lessonRepository.update(lesson);
   }
 
   @Transactional
   @Override
   public Mono<Lesson> create(Lesson lesson) {
-    return null;
+    if (lesson == null) {
+      return Mono.empty();
+    }
+    return lessonRepository.create(lesson);
   }
 
   @Transactional
@@ -49,6 +55,9 @@ public class LessonManagerImpl implements LessonManager {
   @Transactional(readOnly = true)
   @Override
   public Mono<Page<Lesson>> findAll(LessonsFilterOptions options, Pageable pageable) {
-    return null;
+    if (options == null || pageable == null) {
+      return Mono.empty();
+    }
+    return lessonRepository.findAll(options, pageable);
   }
 }

@@ -5,6 +5,7 @@ package ru.hse.lmsteam.proto.lessons;
 option java_multiple_files = true;
 option java_package = "ru.hse.lmsteam.schema.api.lessons";
 
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 import "ru/hse/lmsteam/proto/common/pageable.proto";
 
@@ -26,11 +27,25 @@ message UpdateLesson {
 
 message CreateLesson {
   message Request {
+    string title = 1;
+    int32 lesson_number = 2;
+    google.protobuf.Timestamp publish_date = 3;
 
+    // optional
+    google.protobuf.StringValue description = 4;
+    repeated string video_urls = 5;
+    repeated string presentation_urls = 6;
   }
 
   message Response {
     Lesson lesson = 1;
+  }
+}
+
+message GetLessons {
+  message Response {
+    ru.hse.lmsteam.proto.common.Page page = 1;
+    repeated Lesson lessons = 2;
   }
 }
 
@@ -41,11 +56,14 @@ message DeleteLesson {
 }
 
 message Lesson {
+  // required
   string id = 1;
   string title = 2;
   int32 lesson_number = 3;
-  // date in protobuff? publish_date
+  google.protobuf.Timestamp publish_date = 4;
 
+  // optional
   google.protobuf.StringValue description = 5;
-
+  repeated string video_urls = 6;
+  repeated string presentation_urls = 7;
 }

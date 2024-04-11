@@ -4,12 +4,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 
 @Component("userFilterOptionsQT")
-public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<UserFilterOptions> {
+public class UserFilterOptionsQueryTranslator
+    extends AbstractSimpleQueryTranslator<UserFilterOptions> {
 
   @Override
   public String translateToSql(UserFilterOptions queryObject, Pageable pageable) {
@@ -38,7 +38,8 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
     return selectBase + withNonDeleted(withAdminNonRetrievable(getWhere(queryObject)));
   }
 
-  private String getWhere(UserFilterOptions queryObject) {
+  @Override
+  protected String getWhere(UserFilterOptions queryObject) {
     var whereClause = buildWhereClause(queryObject);
     if (whereClause == null || whereClause.isEmpty()) {
       return "";
@@ -98,27 +99,5 @@ public class UserFilterOptionsQueryTranslator implements SimpleQueryTranslator<U
             nameCriteria, emailCriteria, groupNumberCriteria, roleCriteria, isDeletedCriteria)
         .flatMap(Optional::stream)
         .collect(Collectors.joining(" AND "));
-  }
-
-  private String getOrder(Sort sort) {
-    if (sort == null || sort.isEmpty()) {
-      return "";
-    }
-    var orderClause = new StringBuilder(" ORDER BY ");
-    sort.forEach(
-        order -> {
-          orderClause
-              .append(order.getProperty())
-              .append(" ")
-              .append(order.getDirection())
-              .append(", ");
-        });
-    // clear last comma
-    orderClause.delete(orderClause.length() - 2, orderClause.length());
-    return orderClause.toString();
-  }
-
-  private String getLimitAndOffset(Pageable pageable) {
-    return " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset();
   }
 }
