@@ -9,9 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.LessonsApiProtoConverter;
+import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoConverter;
 import ru.hse.lmsteam.backend.api.v1.schema.LessonsControllerDocSchema;
-import ru.hse.lmsteam.backend.service.LessonManager;
+import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;
 import ru.hse.lmsteam.schema.api.lessons.*;
 
@@ -46,7 +46,7 @@ public class LessonsController implements LessonsControllerDocSchema {
   @Override
   public Mono<CreateLesson.Response> createLesson(@RequestBody CreateLesson.Request request) {
     return lessonManager
-        .create(lessonsApiProtoConverter.retrieveUpdateModel(request))
+        .create(lessonsApiProtoConverter.retrieveCreateModel(request))
         .handle(
             (lesson, sink) -> {
               try {
@@ -60,11 +60,14 @@ public class LessonsController implements LessonsControllerDocSchema {
             });
   }
 
-  @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+  @PutMapping(
+      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE},
+      path = "/{id}")
   @Override
-  public Mono<UpdateLesson.Response> updateLesson(@RequestBody UpdateLesson.Request request) {
+  public Mono<UpdateLesson.Response> updateLesson(
+      @PathVariable UUID id, @RequestBody UpdateLesson.Request request) {
     return lessonManager
-        .update(lessonsApiProtoConverter.map(request.getLesson()))
+        .update(lessonsApiProtoConverter.map(id, request.getLesson()))
         .handle(
             (lesson, sink) -> {
               try {

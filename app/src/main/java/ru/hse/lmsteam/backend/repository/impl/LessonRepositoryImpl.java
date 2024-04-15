@@ -13,14 +13,14 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.Lesson;
 import ru.hse.lmsteam.backend.repository.LessonRepository;
-import ru.hse.lmsteam.backend.repository.query.translators.LessonsFilterOptionsQueryTranslator;
+import ru.hse.lmsteam.backend.repository.query.translators.LessonsFilterOptionsQT;
 import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;
 
 @Repository
 @RequiredArgsConstructor
 public class LessonRepositoryImpl implements LessonRepository {
   private final MasterSlaveDbOperations db;
-  private final LessonsFilterOptionsQueryTranslator lessonsFilterOptionsQT;
+  private final LessonsFilterOptionsQT lessonsFilterOptionsQT;
 
   @Override
   public Mono<Lesson> findById(UUID id) {
