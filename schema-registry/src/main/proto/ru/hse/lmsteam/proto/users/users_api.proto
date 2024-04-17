@@ -99,7 +99,7 @@ message UserSexNamespace {
 message UserRoleNamespace {
   enum Role {
     NOT_INITIALISED = 0;
-    STUDENT = 1;
+    LEARNER = 1;
     TRACKER = 2;
     ADMIN = 3;
   }
@@ -109,5 +109,6 @@ message TeamSnippet {
   string id = 1;
   int32 number = 2;
   string project_theme = 3;
+  string description = 4;
 }
 

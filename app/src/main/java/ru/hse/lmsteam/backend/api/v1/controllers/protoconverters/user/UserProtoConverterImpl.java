@@ -25,6 +25,11 @@ public class UserProtoConverterImpl implements UserProtoConverter {
 
   @Override
   public ru.hse.lmsteam.schema.api.users.User map(User user) {
+    return map(user, false);
+  }
+
+  @Override
+  public ru.hse.lmsteam.schema.api.users.User map(User user, boolean forPublicUser) {
     var userBuilder = ru.hse.lmsteam.schema.api.users.User.newBuilder();
     if (user.id() != null) {
       userBuilder.setId(user.id().toString());
@@ -50,21 +55,25 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     if (user.phoneNumber() != null) {
       userBuilder.setPhoneNumber(StringValue.of(user.phoneNumber()));
     }
-    if (user.balance() != null) {
-      userBuilder.setBalance(user.balance().toString());
-    }
     if (convertUserRole(user.role()) != null) {
       userBuilder.setRole(convertUserRole(user.role()));
     }
 
-    List<Team> teams = null;
-    try {
-      teams = userTeamRepository.getUserTeams(user.id()).collectList().toFuture().get();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    if (!teams.isEmpty()) {
-      userBuilder.addAllMemberOfTeams(teams.stream().map(teamSnippetConverter::toSnippet).toList());
+    if (!forPublicUser) {
+      if (user.balance() != null) {
+        userBuilder.setBalance(user.balance().toString());
+      }
+
+      List<Team> teams = null;
+      try {
+        teams = userTeamRepository.getUserTeams(user.id()).collectList().toFuture().get();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      if (!teams.isEmpty()) {
+        userBuilder.addAllMemberOfTeams(
+            teams.stream().map(teamSnippetConverter::toSnippet).toList());
+      }
     }
     return userBuilder.build();
   }
@@ -156,7 +165,7 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     if (role == null) return null;
     return switch (role) {
       case ADMIN -> UserRoleNamespace.Role.ADMIN;
-      case STUDENT -> UserRoleNamespace.Role.STUDENT;
+      case LEARNER -> UserRoleNamespace.Role.LEARNER;
       case TRACKER -> UserRoleNamespace.Role.TRACKER;
     };
   }
@@ -164,7 +173,7 @@ public class UserProtoConverterImpl implements UserProtoConverter {
   private UserRole convertUserRole(UserRoleNamespace.Role role) {
     return switch (role) {
       case UserRoleNamespace.Role.ADMIN -> UserRole.ADMIN;
-      case UserRoleNamespace.Role.STUDENT -> UserRole.STUDENT;
+      case UserRoleNamespace.Role.LEARNER -> UserRole.LEARNER;
       case UserRoleNamespace.Role.TRACKER -> UserRole.TRACKER;
       case NOT_INITIALISED -> null;
       case UNRECOGNIZED -> null;

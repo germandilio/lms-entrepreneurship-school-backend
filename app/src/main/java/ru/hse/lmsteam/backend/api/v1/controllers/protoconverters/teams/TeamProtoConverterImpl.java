@@ -18,7 +18,7 @@ public class TeamProtoConverterImpl implements TeamProtoConverter {
   private final UserManager userManager;
 
   @Override
-  public ru.hse.lmsteam.schema.api.teams.Team map(Team team) {
+  public ru.hse.lmsteam.schema.api.teams.Team map(Team team, boolean forPublicUser) {
     var builder = ru.hse.lmsteam.schema.api.teams.Team.newBuilder();
     if (team.id() != null) {
       builder.setId(team.id().toString());
@@ -42,19 +42,24 @@ public class TeamProtoConverterImpl implements TeamProtoConverter {
     if (members != null) {
       builder.addAllStudents(
           members.stream()
-              .filter(u -> UserRole.STUDENT.equals(u.role()))
-              .map(userProtoConverter::map)
+              .filter(u -> UserRole.LEARNER.equals(u.role()))
+              .map(u -> userProtoConverter.map(u, forPublicUser))
               .toList());
     }
     if (members != null) {
       builder.addAllTrackers(
           members.stream()
               .filter(u -> UserRole.TRACKER.equals(u.role()))
-              .map(userProtoConverter::map)
+              .map(u -> userProtoConverter.map(u, forPublicUser))
               .toList());
     }
 
     return builder.build();
+  }
+
+  @Override
+  public ru.hse.lmsteam.schema.api.teams.Team map(Team team) {
+    return map(team, false);
   }
 
   @Override

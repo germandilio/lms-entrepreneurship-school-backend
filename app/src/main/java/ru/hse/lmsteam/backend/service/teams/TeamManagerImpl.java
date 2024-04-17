@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.TeamRepository;
@@ -39,7 +40,8 @@ public class TeamManagerImpl implements TeamManager {
 
   @Transactional
   @Override
-  public Mono<Team> update(final Team team) {
+  public Mono<Tuple2<Team, SetUserTeamMembershipResponse>> update(
+      final Team team, final ImmutableSet<UUID> memberIds) {
     if (team == null) {
       throw new IllegalArgumentException(
           "Group object is mandatory for update / create operations.");
@@ -50,6 +52,7 @@ public class TeamManagerImpl implements TeamManager {
         .map(dbGroup -> team.mergeWith(dbGroup, false))
         .flatMap(teamRepository::upsert)
         .flatMap(id -> teamRepository.findById(id, false))
+        .zipWhen(group -> updateTeamMembers(group.id(), memberIds))
         .onErrorResume(
             exc -> {
               if (exc instanceof DuplicateKeyException) {
@@ -64,7 +67,8 @@ public class TeamManagerImpl implements TeamManager {
 
   @Transactional
   @Override
-  public Mono<Team> create(final Team team) {
+  public Mono<Tuple2<Team, SetUserTeamMembershipResponse>> create(
+      final Team team, final ImmutableSet<UUID> memberIds) {
     if (team == null) {
       throw new IllegalArgumentException(
           "Group object is mandatory for update / create operations.");
@@ -73,6 +77,7 @@ public class TeamManagerImpl implements TeamManager {
     return teamRepository
         .upsert(team)
         .flatMap(id -> teamRepository.findById(id, false))
+        .zipWhen(group -> updateTeamMembers(group.id(), memberIds))
         .onErrorResume(
             exc -> {
               if (exc instanceof DuplicateKeyException) {

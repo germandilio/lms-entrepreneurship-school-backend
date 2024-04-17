@@ -11,7 +11,6 @@ import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.teams.Success;
-import ru.hse.lmsteam.backend.service.model.teams.ValidationErrors;
 import ru.hse.lmsteam.schema.api.teams.*;
 
 @Component
@@ -22,31 +21,37 @@ public class TeamsApiProtoBuilderImpl implements TeamsApiProtoBuilder {
   private final UserProtoConverter userProtoConverter;
 
   @Override
-  public GetTeam.Response buildGetTeamResponse(Team team) {
+  public GetTeam.Response buildGetTeamResponse(Team team, boolean forPublicUser) {
     var builder = GetTeam.Response.newBuilder();
 
     if (team != null) {
-      builder.setTeam(teamProtoConverter.map(team));
+      builder.setTeam(teamProtoConverter.map(team, forPublicUser));
     }
     return builder.build();
   }
 
   @Override
-  public CreateOrUpdateTeam.Response buildCreateTeamResponse(Team team) {
+  public CreateOrUpdateTeam.Response buildCreateTeamResponse(
+      Team team, SetUserTeamMembershipResponse setTeamMembershipResponse) {
     var builder = CreateOrUpdateTeam.Response.newBuilder();
 
-    if (team != null) {
+    if (setTeamMembershipResponse.success()) {
       builder.setTeam(teamProtoConverter.map(team));
+    } else {
+      builder.setErrors(buildValidationErrors(setTeamMembershipResponse));
     }
     return builder.build();
   }
 
   @Override
-  public CreateOrUpdateTeam.Response buildUpdateTeamResponse(Team team) {
+  public CreateOrUpdateTeam.Response buildUpdateTeamResponse(
+      Team team, SetUserTeamMembershipResponse setMembersResponse) {
     var builder = CreateOrUpdateTeam.Response.newBuilder();
 
-    if (team != null) {
+    if (setMembersResponse.success()) {
       builder.setTeam(teamProtoConverter.map(team));
+    } else {
+      builder.setErrors(buildValidationErrors(setMembersResponse));
     }
     return builder.build();
   }
@@ -79,15 +84,31 @@ public class TeamsApiProtoBuilderImpl implements TeamsApiProtoBuilder {
   public UpdateTeamMembers.Response buildUpdateTeamMembersResponse(
       SetUserTeamMembershipResponse r) {
     var builder = UpdateTeamMembers.Response.newBuilder();
+    var errors = buildValidationErrors(r);
+    if (errors != null) {
+      builder.setErrors(errors);
+    } else {
+      builder.setSuccess(UpdateTeamMembers.Success.newBuilder().build());
+    }
+    return builder.build();
+  }
+
+  @Override
+  public Team retrieveTeamModel(UUID id, CreateOrUpdateTeam.Request request) {
+    return teamProtoConverter.retrieveUpdateModel(id, request);
+  }
+
+  private ValidationErrors buildValidationErrors(SetUserTeamMembershipResponse r) {
     switch (r) {
       case Success():
         {
-          builder.setSuccess(UpdateTeamMembers.Success.newBuilder().build());
-          break;
+          return null;
         }
-      case ValidationErrors(var usersNotFound, var alreadyMembers):
+      case ru.hse.lmsteam.backend.service.model.teams.ValidationErrors(
+          var usersNotFound,
+          var alreadyMembers):
         {
-          var errorsBuilder = UpdateTeamMembers.ValidationErrors.newBuilder();
+          var errorsBuilder = ru.hse.lmsteam.schema.api.teams.ValidationErrors.newBuilder();
           if (usersNotFound.isPresent()) {
             errorsBuilder.addAllNotFoundUserIds(
                 usersNotFound.orElse(ImmutableSet.of()).stream().map(UUID::toString).toList());
@@ -99,7 +120,9 @@ public class TeamsApiProtoBuilderImpl implements TeamsApiProtoBuilder {
                       alreadyMembersMap.entrySet().stream()
                           .map(
                               entry -> {
-                                var b = UpdateTeamMembers.ValidationErrors.UserTeams.newBuilder();
+                                var b =
+                                    ru.hse.lmsteam.schema.api.teams.ValidationErrors.UserTeams
+                                        .newBuilder();
                                 b.setUser(userProtoConverter.toSnippet(entry.getKey()));
                                 b.addAllTeams(
                                     entry.getValue().stream()
@@ -108,17 +131,10 @@ public class TeamsApiProtoBuilderImpl implements TeamsApiProtoBuilder {
                                 return b.build();
                               })
                           .toList()));
-          builder.setErrors(errorsBuilder.build());
-          break;
+          return errorsBuilder.build();
         }
       default:
         throw new IllegalStateException("Unexpected value: " + r);
     }
-    return builder.build();
-  }
-
-  @Override
-  public Team retrieveTeamModel(UUID id, CreateOrUpdateTeam.Request request) {
-    return teamProtoConverter.retrieveUpdateModel(id, request);
   }
 }

@@ -9,11 +9,13 @@ import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.schema.api.teams.*;
 
 public interface TeamsApiProtoBuilder {
-  GetTeam.Response buildGetTeamResponse(Team team);
+  GetTeam.Response buildGetTeamResponse(Team team, boolean forPublicUser);
 
-  CreateOrUpdateTeam.Response buildCreateTeamResponse(Team team);
+  CreateOrUpdateTeam.Response buildCreateTeamResponse(
+      Team team, SetUserTeamMembershipResponse setTeamMembershipResponse);
 
-  CreateOrUpdateTeam.Response buildUpdateTeamResponse(Team team);
+  CreateOrUpdateTeam.Response buildUpdateTeamResponse(
+      Team team, SetUserTeamMembershipResponse setTeamMembershipResponse);
 
   DeleteTeam.Response buildDeleteTeamResponse(long itemsDeleted);
 

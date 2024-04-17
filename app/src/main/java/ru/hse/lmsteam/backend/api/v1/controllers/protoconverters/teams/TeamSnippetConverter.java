@@ -11,6 +11,7 @@ public class TeamSnippetConverter {
         .setId(team.id().toString())
         .setNumber(team.number())
         .setProjectTheme(team.projectTheme())
+        .setDescription(team.description())
         .build();
   }
 }

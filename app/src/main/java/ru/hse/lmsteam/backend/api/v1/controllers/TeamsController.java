@@ -27,7 +27,13 @@ public class TeamsController implements TeamsControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetTeam.Response> getTeam(@PathVariable UUID id) {
-    return teamManager.findById(id).map(teamsApiProtoBuilder::buildGetTeamResponse);
+    return teamManager.findById(id).map(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, false));
+  }
+
+  @GetMapping("/{id}/public")
+  @Override
+  public Mono<GetTeam.Response> getTeamPublic(@PathVariable UUID id) {
+    return teamManager.findById(id).map(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, true));
   }
 
   @PostMapping
@@ -35,7 +41,13 @@ public class TeamsController implements TeamsControllerDocSchema {
   public Mono<CreateOrUpdateTeam.Response> createTeam(
       @RequestBody CreateOrUpdateTeam.Request request) {
     var groupToCreate = teamsApiProtoBuilder.retrieveTeamModel(null, request);
-    return teamManager.create(groupToCreate).map(teamsApiProtoBuilder::buildCreateTeamResponse);
+    var userIds =
+        request.getUserIdsList().stream()
+            .map(UUID::fromString)
+            .collect(ImmutableSet.toImmutableSet());
+    return teamManager
+        .create(groupToCreate, userIds)
+        .map(tuple -> teamsApiProtoBuilder.buildCreateTeamResponse(tuple.getT1(), tuple.getT2()));
   }
 
   @PatchMapping("/{id}")
@@ -46,7 +58,14 @@ public class TeamsController implements TeamsControllerDocSchema {
     if (groupToUpdate.id() == null) {
       throw new ValidationException("Id is null! Use POST /groups to create entity.");
     }
-    return teamManager.update(groupToUpdate).map(teamsApiProtoBuilder::buildUpdateTeamResponse);
+    var userIds =
+        request.getUserIdsList().stream()
+            .map(UUID::fromString)
+            .collect(ImmutableSet.toImmutableSet());
+
+    return teamManager
+        .update(groupToUpdate, userIds)
+        .map(tuple -> teamsApiProtoBuilder.buildUpdateTeamResponse(tuple.getT1(), tuple.getT2()));
   }
 
   @DeleteMapping("/{id}")

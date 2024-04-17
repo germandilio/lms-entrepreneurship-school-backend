@@ -7,6 +7,7 @@ import ru.hse.lmsteam.schema.api.users.UpdateOrCreateUser;
 public interface UserProtoConverter {
   ru.hse.lmsteam.schema.api.users.User map(User user);
 
+  ru.hse.lmsteam.schema.api.users.User map(User user, boolean forPublicUser);
   ru.hse.lmsteam.schema.api.users.UserSnippet toSnippet(User user);
 
   User map(ru.hse.lmsteam.schema.api.users.User user);

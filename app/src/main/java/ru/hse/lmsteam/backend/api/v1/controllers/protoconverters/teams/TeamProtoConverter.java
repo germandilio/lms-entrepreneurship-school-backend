@@ -7,5 +7,7 @@ import ru.hse.lmsteam.schema.api.teams.CreateOrUpdateTeam;
 public interface TeamProtoConverter {
   ru.hse.lmsteam.schema.api.teams.Team map(Team team);
 
+  ru.hse.lmsteam.schema.api.teams.Team map(Team team, boolean forPublicUser);
+
   Team retrieveUpdateModel(UUID id, CreateOrUpdateTeam.Request request);
 }

@@ -16,8 +16,8 @@ public class TeamValidatorImpl implements TeamValidator {
       throw new ValidationException("Group number cannot be null");
     }
 
-    if (team.projectTheme() == null || team.projectTheme().isEmpty()) {
-      throw new ValidationException("Title cannot be null or empty");
+    if (team.projectTheme() == null || team.projectTheme().isBlank()) {
+      throw new ValidationException("Title cannot be null or blank");
     }
   }
 }

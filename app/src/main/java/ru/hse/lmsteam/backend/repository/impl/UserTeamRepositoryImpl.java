@@ -56,14 +56,9 @@ public class UserTeamRepositoryImpl implements UserTeamRepository {
       throw new IllegalArgumentException("UserIds is null!");
     }
 
-    var userIdsClause =
-        userIds.stream().map(id -> "'" + id.toString() + "'").reduce((a, b) -> a + ", " + b);
-
     return db.master
         .getDatabaseClient()
-        .sql(
-            "DELETE FROM users_teams WHERE team_id = :teamId AND user_id "
-                + (userIdsClause.map(s -> "NOT IN (" + s + ")").orElse("IS NOT NULL")))
+        .sql("DELETE FROM users_teams WHERE team_id = :teamId")
         .bind("teamId", teamId)
         .fetch()
         .rowsUpdated()

@@ -8,6 +8,8 @@ import ru.hse.lmsteam.schema.api.teams.*;
 public interface TeamsControllerDocSchema {
   Mono<GetTeam.Response> getTeam(UUID id);
 
+  Mono<GetTeam.Response> getTeamPublic(UUID id);
+
   Mono<CreateOrUpdateTeam.Response> createTeam(CreateOrUpdateTeam.Request request);
 
   Mono<CreateOrUpdateTeam.Response> updateTeam(UUID id, CreateOrUpdateTeam.Request request);

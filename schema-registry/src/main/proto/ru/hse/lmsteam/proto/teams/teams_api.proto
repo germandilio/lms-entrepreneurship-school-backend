@@ -20,9 +20,14 @@ message CreateOrUpdateTeam {
     google.protobuf.Int32Value number = 2;
     google.protobuf.StringValue project_theme = 3;
     google.protobuf.StringValue description = 4;
+    repeated string user_ids = 5;
   }
+
   message Response {
-    Team team = 1;
+    oneof data {
+      Team team = 1;
+      ValidationErrors errors = 2;
+    }
   }
 }
 
@@ -59,16 +64,16 @@ message UpdateTeamMembers {
 
   message Success {
   }
+}
 
-  message ValidationErrors {
-    message UserTeams {
-      ru.hse.lmsteam.proto.users.UserSnippet user = 1;
-      repeated ru.hse.lmsteam.proto.users.TeamSnippet teams = 2;
-    }
-
-    repeated string not_found_user_ids = 1;
-    repeated UserTeams already_members = 2;
+message ValidationErrors {
+  message UserTeams {
+    ru.hse.lmsteam.proto.users.UserSnippet user = 1;
+    repeated ru.hse.lmsteam.proto.users.TeamSnippet teams = 2;
   }
+
+  repeated string not_found_user_ids = 1;
+  repeated UserTeams already_members = 2;
 }
 
 message Team {

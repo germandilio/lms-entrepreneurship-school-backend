@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.UserTeamRepository;
 import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
@@ -196,6 +197,7 @@ public class UserManagerImpl implements UserManager {
     // collect map <user, list<group>> for only users already in groups
     var occupiedStudentsGroups =
         foundUsers.stream()
+            .filter(u -> u.role() == UserRole.LEARNER)
             .map(
                 user -> {
                   try {
