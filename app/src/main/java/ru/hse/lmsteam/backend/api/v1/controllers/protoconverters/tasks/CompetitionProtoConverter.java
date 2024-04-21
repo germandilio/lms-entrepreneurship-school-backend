@@ -8,5 +8,7 @@ public interface CompetitionProtoConverter {
 
   Competition map(ru.hse.lmsteam.schema.api.competitions.Competition task);
 
+  ru.hse.lmsteam.schema.api.competitions.CompetitionSnippet toSnippet(Competition task);
+
   Competition retrieveModel(CreateOrUpdateCompetition.Request request);
 }

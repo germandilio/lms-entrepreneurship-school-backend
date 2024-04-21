@@ -5,6 +5,7 @@ import com.google.protobuf.util.Timestamps;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.schema.api.exams.CreateOrUpdateExam;
 import ru.hse.lmsteam.schema.api.exams.Exam;
+import ru.hse.lmsteam.schema.api.exams.ExamSnippet;
 
 @Component
 public class ExamProtoConverterImpl implements ExamProtoConverter {
@@ -43,6 +44,17 @@ public class ExamProtoConverterImpl implements ExamProtoConverter {
       b.publishDate(java.time.Instant.ofEpochMilli(Timestamps.toMillis(task.getPublishDate())));
     } else {
       b.publishDate(java.time.Instant.now());
+    }
+    return b.build();
+  }
+
+  @Override
+  public ExamSnippet toSnippet(ru.hse.lmsteam.backend.domain.tasks.Exam task) {
+    var b = ExamSnippet.newBuilder();
+    b.setId(task.id().toString());
+    b.setTitle(task.title());
+    if (task.deadlineDate() != null) {
+      b.setDeadlineDate(Timestamps.fromMillis(task.deadlineDate().toEpochMilli()));
     }
     return b.build();
   }

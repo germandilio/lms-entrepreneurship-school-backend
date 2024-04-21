@@ -41,7 +41,7 @@ message DeleteTest {
 message GetTests {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated Test tests = 2;
+    repeated TestSnippet tests = 2;
   }
 }
 

@@ -8,5 +8,7 @@ public interface TestProtoConverter {
 
   Test map(ru.hse.lmsteam.schema.api.tests.Test test);
 
+  ru.hse.lmsteam.schema.api.tests.TestSnippet toSnippet(Test test);
+
   Test retrieveModel(CreateOrUpdateTest.Request test);
 }

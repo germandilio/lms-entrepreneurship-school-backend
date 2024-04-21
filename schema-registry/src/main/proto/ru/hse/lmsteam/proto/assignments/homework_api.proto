@@ -42,13 +42,13 @@ message DeleteHomework {
 message GetHomeworks {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated Homework homeworks = 2;
+    repeated HomeworkSnippet homeworks = 2;
   }
 }
 
 message Homework {
   string id = 1;
-  string lesson_id = 2;
+  ru.hse.lmsteam.proto.lessons.LessonSnippet lesson = 2;
   google.protobuf.Timestamp deadline_date = 3;
   google.protobuf.Timestamp publish_date = 4;
   bool is_group_work = 5;

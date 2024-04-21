@@ -39,7 +39,7 @@ message DeleteCompetition {
 message GetCompetitions {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated Competition competitions = 2;
+    repeated CompetitionSnippet competitions = 2;
   }
 }
 

@@ -16,7 +16,7 @@ import ru.hse.lmsteam.schema.api.competitions.*;
 
 @RestController
 @RequestMapping(
-    value = "/api/v1/exams",
+    value = "/api/v1/competitions",
     produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
 @RequiredArgsConstructor
 public class CompetitionsController implements CompetitionsControllerDocSchema {

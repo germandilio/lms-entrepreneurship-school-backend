@@ -2,7 +2,7 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.user;
 
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
-import ru.hse.lmsteam.schema.api.users.UpdateOrCreateUser;
+import ru.hse.lmsteam.schema.api.users.CreateOrUpdateUser;
 
 public interface UserProtoConverter {
   ru.hse.lmsteam.schema.api.users.User map(User user);
@@ -13,5 +13,5 @@ public interface UserProtoConverter {
 
   User map(ru.hse.lmsteam.schema.api.users.User user);
 
-  UserUpsertModel map(UpdateOrCreateUser.Request request);
+  UserUpsertModel map(CreateOrUpdateUser.Request request);
 }

@@ -39,7 +39,7 @@ message DeleteExam {
 message GetExams {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated Exam exams = 2;
+    repeated ExamSnippet exams = 2;
   }
 }
 

@@ -31,7 +31,7 @@ public class ExamApiProtoBuilderImpl implements ExamApiProtoBuilder {
             .setTotalPages(exams.getTotalPages())
             .setTotalElements(exams.getTotalElements())
             .build());
-    b.addAllExams(exams.map(examProtoConverter::map));
+    b.addAllExams(exams.map(examProtoConverter::toSnippet));
     return b.build();
   }
 

@@ -17,6 +17,7 @@ import reactor.core.scheduler.Schedulers;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
+import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.service.jwt.TokenManager;
 import ru.hse.lmsteam.backend.service.mail.SetNewPasswordEmailSender;
 import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
@@ -30,6 +31,7 @@ import ru.hse.lmsteam.backend.service.validation.PasswordValidator;
 @Service
 public class UserAuthManagerImpl implements UserAuthManager {
   private final UserAuthRepository userAuthRepository;
+  private final UserRepository userRepository;
 
   private final PasswordValidator passwordValidator;
   private final PasswordEncoder passwordEncoder;
@@ -91,7 +93,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
             userAuth -> {
               log.info("Password changed for user with login {}", login);
               return withAuthToken(login)
-                  .apply(AuthResult.success(userAuth.userId(), userAuth.role()));
+                  .apply(AuthResult.success(getBlockingUser(userAuth.userId()), userAuth.role()));
             })
         .onErrorResume(
             ValidationException.class, exc -> Mono.just(AuthResult.failure(exc.getMessage())));
@@ -133,7 +135,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
             userAuth -> {
               log.info("Password set for user with login {}", login);
               return withAuthToken(login)
-                  .apply(AuthResult.success(userAuth.userId(), userAuth.role()));
+                  .apply(AuthResult.success(getBlockingUser(userAuth.userId()), userAuth.role()));
             })
         .onErrorResume(
             ValidationException.class, exc -> Mono.just(AuthResult.failure(exc.getMessage())));
@@ -233,7 +235,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
       }
 
       if (passwordEncoder.matches(password, userAuth.password())) {
-        return AuthResult.success(userAuth.userId(), userAuth.role());
+        return AuthResult.success(getBlockingUser(userAuth.userId()), userAuth.role());
       } else {
         return AuthResult.failure("Invalid password");
       }
@@ -242,9 +244,9 @@ public class UserAuthManagerImpl implements UserAuthManager {
 
   private Function<AuthResult, AuthResult> withAuthToken(String login) {
     return authResult -> {
-      if (authResult.userId().isPresent() && authResult.role().isPresent()) {
+      if (authResult.user().isPresent() && authResult.role().isPresent()) {
         return authResult.withAuthToken(
-            Optional.of(tokenManager.createToken(authResult.userId().get())));
+            Optional.of(tokenManager.createToken(authResult.user().get().id())));
       } else {
         log.error("Empty userId or role on authResult with login {}", login);
         return authResult;
@@ -255,5 +257,11 @@ public class UserAuthManagerImpl implements UserAuthManager {
   private String getPasswordForStoring(String rawPassword) {
     passwordValidator.validate(rawPassword);
     return passwordEncoder.encode(rawPassword);
+  }
+
+  /** Unsafe util method for getting userInfo for existing user_id from user_auth module */
+  private User getBlockingUser(UUID id) {
+    if (id == null) return null;
+    return userRepository.findById(id).block();
   }
 }

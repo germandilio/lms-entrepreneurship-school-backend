@@ -1,10 +1,12 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.Timestamps;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.schema.api.lessons.LessonSnippet;
 
 @Component
 public class LessonsApiProtoBuilderImpl implements LessonsApiProtoBuilder {
@@ -31,5 +33,18 @@ public class LessonsApiProtoBuilderImpl implements LessonsApiProtoBuilder {
     } catch (InvalidProtocolBufferException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public LessonSnippet toSnippet(Lesson lesson) {
+    var b =
+        LessonSnippet.newBuilder()
+            .setId(lesson.id().toString())
+            .setTitle(lesson.title())
+            .setLessonNumber(lesson.lessonNumber());
+    if (lesson.publishDate() != null) {
+      b.setPublishDate(Timestamps.fromMillis(lesson.publishDate().toEpochMilli()));
+    }
+    return b.build();
   }
 }

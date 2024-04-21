@@ -52,7 +52,7 @@ public class HomeworkApiProtoBuilderImpl implements HomeworkApiProtoBuilder {
                 .setTotalPages(assignments.getTotalPages())
                 .setTotalElements(assignments.getTotalElements())
                 .build())
-        .addAllHomeworks(assignments.map(homeworkProtoConverter::map))
+        .addAllHomeworks(assignments.map(homeworkProtoConverter::toSnippet))
         .build();
   }
 

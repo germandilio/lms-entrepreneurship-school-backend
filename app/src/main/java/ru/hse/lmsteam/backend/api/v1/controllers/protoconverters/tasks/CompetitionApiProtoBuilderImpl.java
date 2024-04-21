@@ -48,7 +48,7 @@ public class CompetitionApiProtoBuilderImpl implements CompetitionApiProtoBuilde
             .setTotalPages(competitions.getTotalPages())
             .setTotalElements(competitions.getTotalElements())
             .build());
-    b.addAllCompetitions(competitions.map(competitionProtoConverter::map));
+    b.addAllCompetitions(competitions.map(competitionProtoConverter::toSnippet));
     return b.build();
   }
 }

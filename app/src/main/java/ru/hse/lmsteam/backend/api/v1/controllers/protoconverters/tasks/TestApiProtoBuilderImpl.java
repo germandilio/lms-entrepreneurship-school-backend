@@ -54,7 +54,7 @@ public class TestApiProtoBuilderImpl implements TestApiProtoBuilder {
             .setTotalPages(tests.getTotalPages())
             .setTotalElements(tests.getTotalElements())
             .build());
-    b.addAllTests(tests.map(testProtoConverter::map));
+    b.addAllTests(tests.map(testProtoConverter::toSnippet));
     return b.build();
   }
 

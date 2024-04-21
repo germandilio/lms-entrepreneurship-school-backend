@@ -12,9 +12,9 @@ public interface UsersControllerDocSchema {
 
   Mono<GetUserBalance.Response> getUserBalance(UUID id);
 
-  Mono<UpdateOrCreateUser.Response> createUser(UpdateOrCreateUser.Request request);
+  Mono<CreateOrUpdateUser.Response> createUser(CreateOrUpdateUser.Request request);
 
-  Mono<UpdateOrCreateUser.Response> updateUser(UUID userId, UpdateOrCreateUser.Request request);
+  Mono<CreateOrUpdateUser.Response> updateUser(UUID userId, CreateOrUpdateUser.Request request);
 
   Mono<DeleteUser.Response> deleteUser(UUID id);
 

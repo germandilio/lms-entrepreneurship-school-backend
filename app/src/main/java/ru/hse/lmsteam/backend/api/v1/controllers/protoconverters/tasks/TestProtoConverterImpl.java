@@ -2,18 +2,28 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.Timestamps;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoBuilder;
+import ru.hse.lmsteam.backend.service.lesson.LessonManager;
+import ru.hse.lmsteam.schema.api.lessons.LessonSnippet;
 import ru.hse.lmsteam.schema.api.tests.CreateOrUpdateTest;
 import ru.hse.lmsteam.schema.api.tests.Test;
+import ru.hse.lmsteam.schema.api.tests.TestSnippet;
 
+@RequiredArgsConstructor
 @Component
 public class TestProtoConverterImpl implements TestProtoConverter {
+  private final LessonManager lessonManager;
+  private final LessonsApiProtoBuilder lessonsApiProtoBuilder;
+
   @Override
   public Test map(ru.hse.lmsteam.backend.domain.tasks.Test task) {
     try {
       var builder = Test.parseFrom(task.payload()).toBuilder();
       builder.setId(task.id().toString());
-      builder.setLessonId(task.lessonId().toString());
       builder.setTitle(task.title());
       if (task.publishDate() != null) {
         builder.setPublishDate(Timestamps.fromMillis(task.publishDate().toEpochMilli()));
@@ -21,8 +31,11 @@ public class TestProtoConverterImpl implements TestProtoConverter {
       if (task.deadlineDate() != null) {
         builder.setDeadlineDate(Timestamps.fromMillis(task.deadlineDate().toEpochMilli()));
       }
+
+      Optional.ofNullable(lessonManager.findById(task.lessonId()).toFuture().get())
+          .ifPresent(lesson -> builder.setLesson(lessonsApiProtoBuilder.toSnippet(lesson)));
       return builder.build();
-    } catch (InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException | InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     }
   }
@@ -33,8 +46,8 @@ public class TestProtoConverterImpl implements TestProtoConverter {
     if (!task.getId().isBlank()) {
       builder.id(java.util.UUID.fromString(task.getId()));
     }
-    if (!task.getLessonId().isBlank()) {
-      builder.lessonId(java.util.UUID.fromString(task.getLessonId()));
+    if (task.hasLesson()) {
+      builder.lessonId(java.util.UUID.fromString(task.getLesson().getId()));
     }
     if (task.hasPublishDate()) {
       builder.publishDate(
@@ -50,10 +63,26 @@ public class TestProtoConverterImpl implements TestProtoConverter {
   }
 
   @Override
+  public TestSnippet toSnippet(ru.hse.lmsteam.backend.domain.tasks.Test test) {
+    var b = TestSnippet.newBuilder();
+    b.setId(test.id().toString());
+    b.setTitle(test.title());
+
+    try {
+      Optional.ofNullable(lessonManager.findById(test.lessonId()).toFuture().get())
+          .ifPresent(lesson -> b.setLesson(lessonsApiProtoBuilder.toSnippet(lesson)));
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
+
+    return b.build();
+  }
+
+  @Override
   public ru.hse.lmsteam.backend.domain.tasks.Test retrieveModel(
       CreateOrUpdateTest.Request request) {
     var b = Test.newBuilder();
-    b.setLessonId(request.getLessonId());
+    b.setLesson(LessonSnippet.newBuilder().setId(request.getLessonId()).build());
     b.setTitle(request.getTitle());
     b.setDescription(request.getDescription());
     b.setGradingCriteria(request.getGradingCriteria());

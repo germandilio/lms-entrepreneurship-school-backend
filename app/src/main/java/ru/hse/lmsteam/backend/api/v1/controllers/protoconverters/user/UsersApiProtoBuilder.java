@@ -14,7 +14,7 @@ public interface UsersApiProtoBuilder {
 
   GetUserBalance.Response buildGetUserBalanceResponse(BigDecimal balance);
 
-  UpdateOrCreateUser.Response buildUpdateUserResponse(User user);
+  CreateOrUpdateUser.Response buildUpdateUserResponse(User user);
 
   DeleteUser.Response buildDeleteUserResponse(long itemsDeleted);
 
@@ -22,7 +22,7 @@ public interface UsersApiProtoBuilder {
 
   GetUserNameList.Response buildGetUserNameListResponse(Collection<UserSnippet> names);
 
-  UserUpsertModel retrieveUserUpsertModel(UUID userId, UpdateOrCreateUser.Request request);
+  UserUpsertModel retrieveUserUpsertModel(UUID userId, CreateOrUpdateUser.Request request);
 
-  UserUpsertModel retrieveUserUpsertModel(UpdateOrCreateUser.Request request);
+  UserUpsertModel retrieveUserUpsertModel(CreateOrUpdateUser.Request request);
 }

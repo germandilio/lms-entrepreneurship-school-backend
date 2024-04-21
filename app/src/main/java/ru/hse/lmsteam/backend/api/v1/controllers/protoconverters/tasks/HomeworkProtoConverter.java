@@ -8,5 +8,7 @@ public interface HomeworkProtoConverter {
 
   Homework map(ru.hse.lmsteam.schema.api.homeworks.Homework homeAssignment);
 
+  ru.hse.lmsteam.schema.api.homeworks.HomeworkSnippet toSnippet(Homework homeAssignment);
+
   Homework retrieveModel(CreateOrUpdateHomework.Request request);
 }

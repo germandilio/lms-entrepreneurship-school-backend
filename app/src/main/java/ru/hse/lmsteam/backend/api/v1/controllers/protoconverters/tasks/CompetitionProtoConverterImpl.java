@@ -5,6 +5,7 @@ import com.google.protobuf.util.Timestamps;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.schema.api.competitions.Competition;
+import ru.hse.lmsteam.schema.api.competitions.CompetitionSnippet;
 import ru.hse.lmsteam.schema.api.competitions.CreateOrUpdateCompetition;
 
 @Component
@@ -44,6 +45,15 @@ public class CompetitionProtoConverterImpl implements CompetitionProtoConverter 
     }
     builder.payload(task.toByteArray());
     return builder.build();
+  }
+
+  @Override
+  public CompetitionSnippet toSnippet(ru.hse.lmsteam.backend.domain.tasks.Competition task) {
+    var b = CompetitionSnippet.newBuilder().setId(task.id().toString()).setTitle(task.title());
+    if (task.deadlineDate() != null) {
+      b.setDeadlineDate(Timestamps.fromMillis(task.deadlineDate().toEpochMilli()));
+    }
+    return b.build();
   }
 
   @Override
