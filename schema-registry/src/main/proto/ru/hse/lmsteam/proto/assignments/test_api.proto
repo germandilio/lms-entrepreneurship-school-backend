@@ -8,6 +8,7 @@ option java_package = "ru.hse.lmsteam.schema.api.tests";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
 import "ru/hse/lmsteam/proto/common/pageable.proto";
+import "ru/hse/lmsteam/proto/lessons/lessons_api.proto";
 
 message GetTest {
   message Response {
@@ -46,11 +47,18 @@ message GetTests {
 
 message Test {
   string id = 1;
-  string lesson_id = 2;
+  ru.hse.lmsteam.proto.lessons.LessonSnippet lesson = 2;
   google.protobuf.Timestamp deadline_date = 3;
   google.protobuf.Timestamp publish_date = 4;
   string title = 5;
   string description = 6;
   string grading_criteria = 7;
   repeated string external_material_urls = 8;
+}
+
+message TestSnippet {
+  string id = 1;
+  ru.hse.lmsteam.proto.lessons.LessonSnippet lesson = 2;
+  string title = 3;
+  google.protobuf.Timestamp deadline_date = 4;
 }

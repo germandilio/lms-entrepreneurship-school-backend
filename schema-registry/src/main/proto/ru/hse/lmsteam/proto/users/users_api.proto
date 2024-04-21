@@ -25,7 +25,7 @@ message GetUserBalance {
   }
 }
 
-message UpdateOrCreateUser {
+message CreateOrUpdateUser {
   message Request {
     string name = 2;
     string surname = 3;

@@ -25,7 +25,7 @@ message UpdateLesson {
   }
 }
 
-message CreateLesson {
+message CreateOrUpdateLesson {
   message Request {
     string title = 1;
     int32 lesson_number = 2;
@@ -45,7 +45,7 @@ message CreateLesson {
 message GetLessons {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated Lesson lessons = 2;
+    repeated LessonSnippet lessons = 2;
   }
 }
 
@@ -77,9 +77,4 @@ message LessonSnippet {
   string title = 2;
   int32 lesson_number = 3;
   google.protobuf.Timestamp publish_date = 4;
-
-  // optional
-  google.protobuf.StringValue description = 5;
-  repeated string video_urls = 6;
-  repeated string presentation_urls = 7;
 }

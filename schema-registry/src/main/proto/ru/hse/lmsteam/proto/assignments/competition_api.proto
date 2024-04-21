@@ -52,3 +52,9 @@ message Competition {
   string grading_criteria = 6;
   repeated string external_material_urls = 7;
 }
+
+message CompetitionSnippet {
+  string id = 1;
+  string title = 2;
+  google.protobuf.Timestamp deadline_date = 3;
+}

@@ -49,6 +49,9 @@ message Success {
   string token = 1;
   string role = 2;
   string user_id = 3;
+  string name = 4;
+  string surname = 5;
+  google.protobuf.StringValue patronymic = 6;
 }
 
 message Failure {
