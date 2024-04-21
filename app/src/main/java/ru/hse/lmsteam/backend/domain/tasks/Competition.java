@@ -1,0 +1,13 @@
+package ru.hse.lmsteam.backend.domain.tasks;
+
+import java.time.Instant;
+import java.util.UUID;
+import lombok.Builder;
+import lombok.With;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+@Builder
+@Table("competitions")
+public record Competition(
+    @With @Id UUID id, String title, Instant publishDate, Instant deadlineDate, byte[] payload) {}

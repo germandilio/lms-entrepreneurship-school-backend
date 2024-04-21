@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.api.v1.schema;
+package ru.hse.lmsteam.backend.api.v1.schema.tasks;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.schema.api.homeworks.*;
 
-public interface HomeworksControllerSchemaDoc {
+public interface HomeworksControllerDocSchema {
   Mono<GetHomework.Response> getHomework(UUID id);
 
   Mono<CreateOrUpdateHomework.Response> createHomework(CreateOrUpdateHomework.Request request);

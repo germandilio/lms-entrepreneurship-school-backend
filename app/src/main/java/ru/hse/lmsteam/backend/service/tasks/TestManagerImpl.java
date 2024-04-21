@@ -7,29 +7,29 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.tasks.Homework;
-import ru.hse.lmsteam.backend.repository.impl.tasks.HomeworkRepository;
+import ru.hse.lmsteam.backend.domain.tasks.Test;
+import ru.hse.lmsteam.backend.repository.impl.tasks.TestRepository;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
-import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
+import ru.hse.lmsteam.backend.service.model.tasks.TestFilterOptions;
 
 @Service
 @RequiredArgsConstructor
-public class HomeworkManagerImpl implements HomeworkManager {
-  private final HomeworkRepository homeworkRepository;
+public class TestManagerImpl implements TestManager {
+  private final TestRepository testRepository;
   private final LessonManager lessonManager;
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<Homework> findById(UUID id) {
+  public Mono<Test> findById(UUID id) {
     if (id == null) {
       return Mono.empty();
     }
-    return homeworkRepository.findById(id);
+    return testRepository.findById(id);
   }
 
   @Transactional
   @Override
-  public Mono<Homework> create(Homework assignment) {
+  public Mono<Test> create(Test assignment) {
     if (assignment == null) {
       return Mono.empty();
     }
@@ -37,12 +37,12 @@ public class HomeworkManagerImpl implements HomeworkManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(homeworkRepository.create(assignment));
+        .then(testRepository.create(assignment));
   }
 
   @Transactional
   @Override
-  public Mono<Homework> update(Homework assignment) {
+  public Mono<Test> update(Test assignment) {
     if (assignment == null || assignment.id() == null) {
       return Mono.empty();
     }
@@ -50,7 +50,7 @@ public class HomeworkManagerImpl implements HomeworkManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(homeworkRepository.update(assignment));
+        .then(testRepository.update(assignment));
   }
 
   @Transactional
@@ -59,15 +59,15 @@ public class HomeworkManagerImpl implements HomeworkManager {
     if (assignmentId == null) {
       return Mono.just(0L);
     }
-    return homeworkRepository.delete(assignmentId);
+    return testRepository.delete(assignmentId);
   }
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<Page<Homework>> findAll(HomeworkFilterOptions filterOptions, Pageable pageable) {
+  public Mono<Page<Test>> findAll(TestFilterOptions filterOptions, Pageable pageable) {
     if (filterOptions == null || pageable == null) {
       return Mono.empty();
     }
-    return homeworkRepository.findAll(filterOptions, pageable);
+    return testRepository.findAll(filterOptions, pageable);
   }
 }

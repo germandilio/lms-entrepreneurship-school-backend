@@ -1,6 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks;
 
-import ru.hse.lmsteam.backend.domain.Homework;
+import ru.hse.lmsteam.backend.domain.tasks.Homework;
 import ru.hse.lmsteam.schema.api.homeworks.CreateOrUpdateHomework;
 
 public interface HomeworkProtoConverter {

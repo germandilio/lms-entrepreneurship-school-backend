@@ -15,7 +15,7 @@ message GetTest {
   }
 }
 
-message UpdateTest {
+message CreateOrUpdateTest {
   message Request {
     string lesson_id = 1;
     google.protobuf.Timestamp deadline_date = 2;
@@ -24,16 +24,6 @@ message UpdateTest {
     string description = 5;
     string grading_criteria = 6;
     repeated string external_material_urls = 7;
-  }
-
-  message Response {
-    Test test = 1;
-  }
-}
-
-message CreateTest {
-  message Request {
-    Test test = 1;
   }
 
   message Response {

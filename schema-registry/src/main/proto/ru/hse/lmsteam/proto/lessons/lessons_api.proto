@@ -66,4 +66,20 @@ message Lesson {
   google.protobuf.StringValue description = 5;
   repeated string video_urls = 6;
   repeated string presentation_urls = 7;
+
+  repeated string homework_ids = 8;
+  repeated string test_ids = 9;
+}
+
+message LessonSnippet {
+  // required
+  string id = 1;
+  string title = 2;
+  int32 lesson_number = 3;
+  google.protobuf.Timestamp publish_date = 4;
+
+  // optional
+  google.protobuf.StringValue description = 5;
+  repeated string video_urls = 6;
+  repeated string presentation_urls = 7;
 }

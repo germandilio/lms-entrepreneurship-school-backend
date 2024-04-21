@@ -3,7 +3,7 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.domain.Homework;
+import ru.hse.lmsteam.backend.domain.tasks.Homework;
 import ru.hse.lmsteam.schema.api.homeworks.*;
 import ru.hse.lmsteam.schema.api.homeworks.GetHomework;
 
@@ -59,10 +59,5 @@ public class HomeworkApiProtoBuilderImpl implements HomeworkApiProtoBuilder {
   @Override
   public Homework retrieveHomeworkModel(CreateOrUpdateHomework.Request request) {
     return homeworkProtoConverter.retrieveModel(request);
-  }
-
-  @Override
-  public Homework map(ru.hse.lmsteam.schema.api.homeworks.Homework homeAssignment) {
-    return homeworkProtoConverter.map(homeAssignment);
   }
 }

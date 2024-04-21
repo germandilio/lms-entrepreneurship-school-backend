@@ -26,8 +26,7 @@ public class TeamRepositoryImpl implements TeamRepository {
 
   public TeamRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("teamFilterOptionsQT")
-          QueryTranslator<TeamsFilterOptions> teamsFilterOptionsQTranslator) {
+      @Qualifier("teamFilterOptionsQT") QueryTranslator<TeamsFilterOptions> teamsFilterOptionsQTranslator) {
     this.db = db;
     this.teamsFilterOptionsQTranslator = teamsFilterOptionsQTranslator;
   }

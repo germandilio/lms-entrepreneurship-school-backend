@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.api.v1.controllers;
+package ru.hse.lmsteam.backend.api.v1.controllers.tasks;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks.HomeworkApiProtoBuilder;
-import ru.hse.lmsteam.backend.api.v1.schema.HomeworksControllerSchemaDoc;
+import ru.hse.lmsteam.backend.api.v1.schema.tasks.HomeworksControllerDocSchema;
 import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 import ru.hse.lmsteam.backend.service.tasks.HomeworkManager;
 import ru.hse.lmsteam.schema.api.homeworks.*;
@@ -19,7 +19,7 @@ import ru.hse.lmsteam.schema.api.homeworks.*;
     value = "/api/v1/homeworks",
     produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
 @RequiredArgsConstructor
-public class HomeworksController implements HomeworksControllerSchemaDoc {
+public class HomeworksController implements HomeworksControllerDocSchema {
   private final HomeworkManager homeworkManager;
   private final HomeworkApiProtoBuilder homeworkApiProtoBuilder;
 
