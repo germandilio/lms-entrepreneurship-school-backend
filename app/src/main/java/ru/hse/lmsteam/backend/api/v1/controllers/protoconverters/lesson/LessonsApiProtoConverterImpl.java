@@ -1,12 +1,12 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.Lesson;
 import ru.hse.lmsteam.schema.api.lessons.CreateLesson;
+import ru.hse.lmsteam.schema.api.lessons.GetLesson;
 import ru.hse.lmsteam.schema.api.lessons.GetLessons;
 
 @Component
@@ -31,8 +31,7 @@ public class LessonsApiProtoConverterImpl implements LessonsApiProtoConverter {
   }
 
   @Override
-  public ru.hse.lmsteam.schema.api.lessons.Lesson map(Lesson lesson)
-      throws InvalidProtocolBufferException {
+  public ru.hse.lmsteam.schema.api.lessons.Lesson map(Lesson lesson) {
     return lessonsApiProtoBuilder.toProto(lesson);
   }
 
@@ -49,17 +48,14 @@ public class LessonsApiProtoConverterImpl implements LessonsApiProtoConverter {
                 .setTotalPages(lessons.getTotalPages())
                 .setTotalElements(lessons.getTotalElements())
                 .build())
-        .addAllLessons(
-            lessons.stream()
-                .map(
-                    lesson -> {
-                      try {
-                        return lessonsApiProtoBuilder.toProto(lesson);
-                      } catch (InvalidProtocolBufferException e) {
-                        throw new RuntimeException(e);
-                      }
-                    })
-                .toList())
+        .addAllLessons(lessons.stream().map(lessonsApiProtoBuilder::toProto).toList())
+        .build();
+  }
+
+  @Override
+  public GetLesson.Response buildGetLessonResponse(Lesson lesson) {
+    return GetLesson.Response.newBuilder()
+        .setLesson(lessonsApiProtoBuilder.toProto(lesson))
         .build();
   }
 }

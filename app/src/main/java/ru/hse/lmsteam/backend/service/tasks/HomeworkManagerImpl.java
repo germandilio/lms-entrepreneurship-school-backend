@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.service.assignments;
+package ru.hse.lmsteam.backend.service.tasks;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -7,18 +7,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.HomeAssignment;
+import ru.hse.lmsteam.backend.domain.Homework;
 import ru.hse.lmsteam.backend.repository.HomeAssignmentRepository;
-import ru.hse.lmsteam.backend.service.model.assignments.HomeAssignmentFilterOptions;
+import ru.hse.lmsteam.backend.service.lesson.LessonManager;
+import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 
 @Service
 @RequiredArgsConstructor
-public class HomeAssignmentManagerImpl implements HomeAssignmentManager {
+public class HomeworkManagerImpl implements HomeworkManager {
   private final HomeAssignmentRepository homeAssignmentRepository;
+  private final LessonManager lessonManager;
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<HomeAssignment> findById(UUID id) {
+  public Mono<Homework> findById(UUID id) {
     if (id == null) {
       return Mono.empty();
     }
@@ -27,20 +29,28 @@ public class HomeAssignmentManagerImpl implements HomeAssignmentManager {
 
   @Transactional
   @Override
-  public Mono<HomeAssignment> create(HomeAssignment assignment) {
-    if (assignment == null || assignment.id() == null) {
+  public Mono<Homework> create(Homework assignment) {
+    if (assignment == null) {
       return Mono.empty();
     }
-    return homeAssignmentRepository.create(assignment);
+
+    return lessonManager
+        .findById(assignment.lessonId())
+        .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
+        .then(homeAssignmentRepository.create(assignment));
   }
 
   @Transactional
   @Override
-  public Mono<HomeAssignment> upsert(HomeAssignment assignment) {
-    if (assignment == null) {
+  public Mono<Homework> update(Homework assignment) {
+    if (assignment == null || assignment.id() == null) {
       return Mono.empty();
     }
-    return homeAssignmentRepository.update(assignment);
+
+    return lessonManager
+        .findById(assignment.lessonId())
+        .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
+        .then(homeAssignmentRepository.update(assignment));
   }
 
   @Transactional
@@ -54,8 +64,7 @@ public class HomeAssignmentManagerImpl implements HomeAssignmentManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Mono<Page<HomeAssignment>> findAll(
-      HomeAssignmentFilterOptions filterOptions, Pageable pageable) {
+  public Mono<Page<Homework>> findAll(HomeworkFilterOptions filterOptions, Pageable pageable) {
     if (filterOptions == null || pageable == null) {
       return Mono.empty();
     }

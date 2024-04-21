@@ -1,66 +1,56 @@
 syntax = "proto3";
 
-package ru.hse.lmsteam.proto.assignments;
+package ru.hse.lmsteam.proto.homeworks;
 
 option java_multiple_files = true;
-option java_package = "ru.hse.lmsteam.schema.api.assignments";
+option java_package = "ru.hse.lmsteam.schema.api.homeworks";
 
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
 import "ru/hse/lmsteam/proto/common/pageable.proto";
 
-message GetHomeAssigment {
+message GetHomework {
   message Response {
-    HomeAssignment home_assignment = 1;
+    Homework homework = 1;
   }
 }
 
-message UpdateHomeAssignment {
+message CreateOrUpdateHomework {
   message Request {
     string lesson_id = 1;
     google.protobuf.Timestamp deadline_date = 2;
     google.protobuf.Timestamp publish_date = 3;
-    bool is_group_assignment = 4;
+    bool is_group_work = 4;
     string title = 5;
     string description = 6;
-    string gradingCriteria = 7;
+    string grading_criteria = 7;
     repeated string external_material_urls = 8;
   }
 
   message Response {
-    HomeAssignment home_assignment = 1;
+    Homework homework = 1;
   }
 }
 
-message CreateHomeAssignment {
-  message Request {
-    HomeAssignment home_assignment = 1;
-  }
-
-  message Response {
-    HomeAssignment home_assignment = 1;
-  }
-}
-
-message DeleteHomeAssignment {
+message DeleteHomework {
   message Response {
     int64 entries_deleted = 1;
   }
 }
 
-message GetHomeAssignments {
+message GetHomeworks {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated HomeAssignment home_assignments = 2;
+    repeated Homework homeworks = 2;
   }
 }
 
-message HomeAssignment {
+message Homework {
   string id = 1;
   string lesson_id = 2;
   google.protobuf.Timestamp deadline_date = 3;
   google.protobuf.Timestamp publish_date = 4;
-  bool is_group_assignment = 5;
+  bool is_group_work = 5;
   string title = 6;
   string description = 7;
   string grading_criteria = 8;

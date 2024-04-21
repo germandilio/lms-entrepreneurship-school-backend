@@ -23,10 +23,13 @@ public class LessonsApiProtoBuilderImpl implements LessonsApiProtoBuilder {
   }
 
   @Override
-  public ru.hse.lmsteam.schema.api.lessons.Lesson toProto(Lesson lesson)
-      throws InvalidProtocolBufferException {
-    if (lesson == null) return null;
-    var proto = ru.hse.lmsteam.schema.api.lessons.Lesson.parseFrom(lesson.payload());
-    return proto.toBuilder().setId(lesson.id().toString()).build();
+  public ru.hse.lmsteam.schema.api.lessons.Lesson toProto(Lesson lesson) {
+    try {
+      if (lesson == null) return null;
+      var proto = ru.hse.lmsteam.schema.api.lessons.Lesson.parseFrom(lesson.payload());
+      return proto.toBuilder().setId(lesson.id().toString()).build();
+    } catch (InvalidProtocolBufferException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

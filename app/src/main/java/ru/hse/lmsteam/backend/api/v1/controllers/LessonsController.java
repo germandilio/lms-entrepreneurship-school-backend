@@ -1,6 +1,5 @@
 package ru.hse.lmsteam.backend.api.v1.controllers;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,19 +26,7 @@ public class LessonsController implements LessonsControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetLesson.Response> getLesson(@PathVariable UUID id) {
-    return lessonManager
-        .findById(id)
-        .handle(
-            (lesson, sink) -> {
-              try {
-                sink.next(
-                    GetLesson.Response.newBuilder()
-                        .setLesson(lessonsApiProtoConverter.map(lesson))
-                        .build());
-              } catch (InvalidProtocolBufferException e) {
-                sink.error(new RuntimeException(e));
-              }
-            });
+    return lessonManager.findById(id).map(lessonsApiProtoConverter::buildGetLessonResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -47,17 +34,11 @@ public class LessonsController implements LessonsControllerDocSchema {
   public Mono<CreateLesson.Response> createLesson(@RequestBody CreateLesson.Request request) {
     return lessonManager
         .create(lessonsApiProtoConverter.retrieveCreateModel(request))
-        .handle(
-            (lesson, sink) -> {
-              try {
-                sink.next(
-                    CreateLesson.Response.newBuilder()
-                        .setLesson(lessonsApiProtoConverter.map(lesson))
-                        .build());
-              } catch (InvalidProtocolBufferException e) {
-                sink.error(new RuntimeException(e));
-              }
-            });
+        .map(
+            lesson ->
+                CreateLesson.Response.newBuilder()
+                    .setLesson(lessonsApiProtoConverter.map(lesson))
+                    .build());
   }
 
   @PutMapping(
@@ -68,17 +49,11 @@ public class LessonsController implements LessonsControllerDocSchema {
       @PathVariable UUID id, @RequestBody UpdateLesson.Request request) {
     return lessonManager
         .update(lessonsApiProtoConverter.map(id, request.getLesson()))
-        .handle(
-            (lesson, sink) -> {
-              try {
-                sink.next(
-                    UpdateLesson.Response.newBuilder()
-                        .setLesson(lessonsApiProtoConverter.map(lesson))
-                        .build());
-              } catch (InvalidProtocolBufferException e) {
-                sink.error(new RuntimeException(e));
-              }
-            });
+        .map(
+            lesson ->
+                UpdateLesson.Response.newBuilder()
+                    .setLesson(lessonsApiProtoConverter.map(lesson))
+                    .build());
   }
 
   @DeleteMapping("/{id}")
