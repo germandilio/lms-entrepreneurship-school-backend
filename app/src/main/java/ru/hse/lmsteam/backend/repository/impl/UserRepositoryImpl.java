@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
-import ru.hse.lmsteam.backend.repository.query.translators.SimpleQueryTranslator;
+import ru.hse.lmsteam.backend.repository.query.translators.PlainSQLQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 
@@ -26,11 +26,11 @@ import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
   private final MasterSlaveDbOperations db;
-  private final SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator;
+  private final PlainSQLQueryTranslator<UserFilterOptions> userFiltersQTranslator;
 
   public UserRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("userFilterOptionsQT") SimpleQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+      @Qualifier("userFilterOptionsQT") PlainSQLQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
     this.db = db;
     this.userFiltersQTranslator = userFiltersQTranslator;
   }

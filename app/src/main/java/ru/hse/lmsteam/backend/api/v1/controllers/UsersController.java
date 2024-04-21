@@ -11,10 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.UsersApiProtoBuilder;
+import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.user.UsersApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.UsersControllerDocSchema;
-import ru.hse.lmsteam.backend.service.UserManagerImpl;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
+import ru.hse.lmsteam.backend.service.user.UserManagerImpl;
 import ru.hse.lmsteam.schema.api.users.*;
 
 @RestController
@@ -96,7 +96,7 @@ public class UsersController implements UsersControllerDocSchema {
         .map(usersApiProtoBuilder::buildGetUsersResponse);
   }
 
-  @GetMapping("/names")
+  @GetMapping("/snippets")
   @Override
   public Mono<GetUserNameList.Response> getUserNameList() {
     return usersManager

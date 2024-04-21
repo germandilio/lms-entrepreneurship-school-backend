@@ -1,5 +1,5 @@
 drop table if exists users;
-drop table if exists groups;
+drop table if exists teams;
 drop table if exists users_groups;
 drop table if exists users_auth;
 drop table if exists roles;
@@ -14,13 +14,13 @@ create table "users"
     sex               varchar(10)                                not null,
     email             varchar(256)                               not null,
     phone_number      varchar(16),
-    group_id          integer references groups (id),
+    group_id          integer references teams (id),
     role              varchar(16)                                not null,
     balance           decimal(13, 4)   default 0                 not null,
     is_deleted        boolean          default false             not null
 );
 
-create table "groups"
+create table "teams"
 (
     id          serial primary key,
     number      integer               not null,

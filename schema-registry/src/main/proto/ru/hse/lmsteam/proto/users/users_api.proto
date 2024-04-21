@@ -77,7 +77,7 @@ message User {
   string balance = 9;
   UserRoleNamespace.Role role = 10;
 
-  repeated GroupSnippet member_of_groups = 11;
+  repeated TeamSnippet member_of_teams = 11;
 }
 
 message UserSnippet {
@@ -99,15 +99,16 @@ message UserSexNamespace {
 message UserRoleNamespace {
   enum Role {
     NOT_INITIALISED = 0;
-    STUDENT = 1;
+    LEARNER = 1;
     TRACKER = 2;
     ADMIN = 3;
   }
 }
 
-message GroupSnippet {
-  int32 id = 1;
+message TeamSnippet {
+  string id = 1;
   int32 number = 2;
-  string title = 3;
+  string project_theme = 3;
+  string description = 4;
 }
 
