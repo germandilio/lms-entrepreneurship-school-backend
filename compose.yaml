@@ -2,13 +2,16 @@ version: '3.8'
 services:
   app:
     platform: linux/amd64
-    image: docker.io/ru/hse/lmsteam/lms_backend
+    image: docker.io/germandilio/lms_backend:latest
     ports:
       - "3000:3000"
     environment:
       - JWT_SECRET_KEY=
       - SMTP_PASSWORD=
       - SMTP_USERNAME=
+    depends_on:
+      - pg-0
+      - pg-1
   pg-0:
     image: docker.io/bitnami/postgresql-repmgr:16.2.0
     ports:
