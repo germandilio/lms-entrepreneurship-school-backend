@@ -22,6 +22,7 @@ dependencies {
 
 	implementation 'com.google.guava:guava:33.0.0-jre'
 	implementation 'com.google.protobuf:protobuf-java-util:3.25.3'
+	implementation 'io.github.daggerok:liquibase-r2dbc-spring-boot-starter:3.1.3'
 
 	// TODO remove if not used in future
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'

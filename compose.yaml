@@ -9,6 +9,10 @@ services:
       - JWT_SECRET_KEY=
       - SMTP_PASSWORD=
       - SMTP_USERNAME=
+      - MASTER_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@localhost:5433/lms_db
+      - SLAVE_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@localhost:5434/lms_db
+      - POSTGRESQL_PASSWORD=lms_backend_dev_password
+      - POSTGRESQL_USERNAME=lms_dev_backend
     depends_on:
       - pg-0
       - pg-1
