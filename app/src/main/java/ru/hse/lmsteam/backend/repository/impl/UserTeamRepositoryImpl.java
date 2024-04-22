@@ -69,12 +69,12 @@ public class UserTeamRepositoryImpl implements UserTeamRepository {
     var userIdsClause =
         userIds.stream().map(id -> "'" + id.toString() + "'").reduce((a, b) -> a + ", " + b);
 
+    var sqlIdsClause = userIdsClause.map(s -> " id IN (" + s + ")").orElse("1=1");
     return db.master
         .getDatabaseClient()
         .sql(
-            "INSERT INTO users_teams (team_id, user_id) SELECT :teamId, id FROM users WHERE id IN ("
-                + userIdsClause.get()
-                + ")")
+            "INSERT INTO users_teams (team_id, user_id) SELECT :teamId, id FROM users WHERE "
+                + sqlIdsClause)
         .bind("teamId", teamId)
         .fetch()
         .rowsUpdated()

@@ -2,7 +2,9 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.user;
 
 import com.google.protobuf.StringValue;
 import org.springframework.stereotype.Component;
+import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
+import ru.hse.lmsteam.schema.api.users.UserRoleNamespace;
 import ru.hse.lmsteam.schema.api.users.auth.AuthResponse;
 import ru.hse.lmsteam.schema.api.users.auth.Failure;
 import ru.hse.lmsteam.schema.api.users.auth.Success;
@@ -19,7 +21,7 @@ public class UserAuthProtoConverterImpl implements UserAuthProtoConverter {
               .setUserId(user.id().toString())
               .setName(user.name())
               .setSurname(user.surname())
-              .setRole(model.role().get().name())
+              .setRole(convertUserRole(model.role().get()))
               .setToken(model.authToken().get());
       if (user.patronymic() != null) {
         successBuilder.setPatronymic(StringValue.of(user.patronymic()));
@@ -31,5 +33,14 @@ public class UserAuthProtoConverterImpl implements UserAuthProtoConverter {
     }
 
     return builder.build();
+  }
+
+  private UserRoleNamespace.Role convertUserRole(UserRole role) {
+    if (role == null) return null;
+    return switch (role) {
+      case ADMIN -> UserRoleNamespace.Role.ADMIN;
+      case LEARNER -> UserRoleNamespace.Role.LEARNER;
+      case TRACKER -> UserRoleNamespace.Role.TRACKER;
+    };
   }
 }
