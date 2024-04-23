@@ -20,7 +20,7 @@ import ru.hse.lmsteam.schema.api.users.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/users",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
 @RequiredArgsConstructor
 public class UsersController implements UsersControllerDocSchema {
   private final UserManagerImpl usersManager;

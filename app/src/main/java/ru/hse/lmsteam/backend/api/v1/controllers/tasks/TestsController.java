@@ -17,7 +17,7 @@ import ru.hse.lmsteam.schema.api.tests.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/tests",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
 @RequiredArgsConstructor
 public class TestsController implements TestsControllerDocSchema {
   private final TestManager testManager;

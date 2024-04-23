@@ -20,7 +20,7 @@ import ru.hse.lmsteam.schema.api.exams.GetExams;
 @RestController
 @RequestMapping(
     value = "/api/v1/exams",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
 @RequiredArgsConstructor
 public class ExamsController implements ExamsControllerDocSchema {
   private final ExamManager examManager;
