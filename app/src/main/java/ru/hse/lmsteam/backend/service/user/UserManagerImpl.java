@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import jakarta.validation.ValidationException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,8 @@ import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.UserTeamRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.teams.Success;
 import ru.hse.lmsteam.backend.service.model.teams.ValidationErrors;
@@ -53,6 +54,9 @@ public class UserManagerImpl implements UserManager {
   @Transactional(readOnly = true)
   @Override
   public Flux<User> findTeamMembers(UUID teamId) {
+    if (teamId == null) {
+      throw new IllegalArgumentException("TeamId cannot be null.");
+    }
     return userTeamRepository.getMembers(teamId);
   }
 
@@ -70,7 +74,7 @@ public class UserManagerImpl implements UserManager {
             exc -> {
               if (exc instanceof DuplicateKeyException) {
                 return Mono.error(
-                    new ValidationException(
+                    new BusinessLogicConflictException(
                         "User with login" + userUpsertModel.email() + " already exists"));
               } else {
                 return Mono.error(exc);
@@ -133,7 +137,7 @@ public class UserManagerImpl implements UserManager {
   @Override
   public Mono<BigDecimal> getUserBalance(UUID id) {
     if (id == null) {
-      throw new IllegalArgumentException("Id cannot be null to get balance!");
+      return Mono.empty();
     }
     return userRepository.getUserBalance(id);
   }
@@ -143,7 +147,7 @@ public class UserManagerImpl implements UserManager {
   public Mono<SetUserTeamMembershipResponse> setUserTeamMemberships(
       UUID teamId, ImmutableSet<UUID> userIds) {
     if (teamId == null || userIds == null) {
-      throw new IllegalArgumentException(
+      throw new BusinessLogicExpectationFailedException(
           "GroupId and user ids cannot be null to update/create membership!");
     }
     return userRepository
@@ -169,7 +173,7 @@ public class UserManagerImpl implements UserManager {
   public Mono<SetUserTeamMembershipResponse> validateUserTeamMemberships(
       UUID teamId, ImmutableSet<UUID> userIds) {
     if (teamId == null || userIds == null) {
-      throw new IllegalArgumentException(
+      throw new BusinessLogicExpectationFailedException(
           "GroupId and user ids cannot be null to update/create membership!");
     }
     return userRepository

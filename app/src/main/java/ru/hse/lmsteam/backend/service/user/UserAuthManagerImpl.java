@@ -18,6 +18,9 @@ import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
 import ru.hse.lmsteam.backend.repository.UserRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.jwt.TokenManager;
 import ru.hse.lmsteam.backend.service.mail.SetNewPasswordEmailSender;
 import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
@@ -46,7 +49,8 @@ public class UserAuthManagerImpl implements UserAuthManager {
     return userAuthRepository
         .findByLogin(login, false)
         .switchIfEmpty(
-            Mono.error(new ValidationException("User with login " + login + " not found")))
+            Mono.error(
+                new BusinessLogicNotFoundException("User with login " + login + " not found")))
         .map(auth -> doAuthenticate(auth).apply(login, password))
         .flatMap(withAuthToken(login));
   }
@@ -75,7 +79,8 @@ public class UserAuthManagerImpl implements UserAuthManager {
     return userAuthRepository
         .findByLogin(login, true)
         .switchIfEmpty(
-            Mono.error(new ValidationException("User with login " + login + " not found")))
+            Mono.error(
+                new BusinessLogicNotFoundException("User with login " + login + " not found")))
         .flatMap(
             userAuth ->
                 doAuthenticate(userAuth)
@@ -111,16 +116,18 @@ public class UserAuthManagerImpl implements UserAuthManager {
     return userAuthRepository
         .findByLogin(login, true)
         .switchIfEmpty(
-            Mono.error(new ValidationException("User with login " + login + " not found")))
+            Mono.error(
+                new BusinessLogicNotFoundException("User with login " + login + " not found")))
         .<UserAuth>handle(
             (userAuth, sink) -> {
               if (userAuth.password() != null) {
-                sink.error(new ValidationException("Password already set for user"));
+                sink.error(
+                    new BusinessLogicExpectationFailedException("Password already set for user"));
                 return;
               }
               if (userAuth.passwordResetToken() == null
                   || !userAuth.passwordResetToken().equals(token)) {
-                sink.error(new ValidationException("Provided invalid token"));
+                sink.error(new BusinessLogicExpectationFailedException("Provided invalid token"));
                 return;
               }
               sink.next(userAuth);
@@ -156,7 +163,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
   @Override
   public Mono<UserAuth> register(User user) {
     if (user == null || user.id() == null) {
-      throw new IllegalArgumentException("User or user id is null!");
+      throw new BusinessLogicExpectationFailedException("User or user id is null!");
     }
 
     // keep password empty (it will be set by user later by setPassword with special
@@ -186,7 +193,8 @@ public class UserAuthManagerImpl implements UserAuthManager {
             exc -> {
               if (exc instanceof DuplicateKeyException) {
                 return Mono.error(
-                    new ValidationException("User with login " + user.email() + " already exists"));
+                    new BusinessLogicConflictException(
+                        "User with login " + user.email() + " already exists"));
               } else {
                 return Mono.error(exc);
               }
