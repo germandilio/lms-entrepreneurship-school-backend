@@ -50,6 +50,7 @@ public class UserManagerImpl implements UserManager {
     return userRepository.findById(id);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Flux<User> findTeamMembers(UUID teamId) {
     return userTeamRepository.getMembers(teamId);

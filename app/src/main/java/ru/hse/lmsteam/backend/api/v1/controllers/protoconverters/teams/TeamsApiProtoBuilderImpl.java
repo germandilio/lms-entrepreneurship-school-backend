@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.user.UserProtoConverter;
 import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
@@ -21,39 +22,30 @@ public class TeamsApiProtoBuilderImpl implements TeamsApiProtoBuilder {
   private final UserProtoConverter userProtoConverter;
 
   @Override
-  public GetTeam.Response buildGetTeamResponse(Team team, boolean forPublicUser) {
-    var builder = GetTeam.Response.newBuilder();
-
-    if (team != null) {
-      builder.setTeam(teamProtoConverter.map(team, forPublicUser));
-    }
-    return builder.build();
+  public Mono<GetTeam.Response> buildGetTeamResponse(Team team, boolean forPublicUser) {
+    return teamProtoConverter
+        .map(team, forPublicUser)
+        .map(
+            t -> {
+              var builder = GetTeam.Response.newBuilder();
+              builder.setTeam(t);
+              return builder.build();
+            });
   }
 
   @Override
-  public CreateOrUpdateTeam.Response buildCreateTeamResponse(
+  public Mono<CreateOrUpdateTeam.Response> buildCreateOrUpdateTeamResponse(
       Team team, SetUserTeamMembershipResponse setTeamMembershipResponse) {
-    var builder = CreateOrUpdateTeam.Response.newBuilder();
-
     if (setTeamMembershipResponse.success()) {
-      builder.setTeam(teamProtoConverter.map(team));
+      return teamProtoConverter
+          .map(team)
+          .map(t -> CreateOrUpdateTeam.Response.newBuilder().setTeam(t).build());
     } else {
-      builder.setErrors(buildValidationErrors(setTeamMembershipResponse));
+      return Mono.just(
+          CreateOrUpdateTeam.Response.newBuilder()
+              .setErrors(buildValidationErrors(setTeamMembershipResponse))
+              .build());
     }
-    return builder.build();
-  }
-
-  @Override
-  public CreateOrUpdateTeam.Response buildUpdateTeamResponse(
-      Team team, SetUserTeamMembershipResponse setMembersResponse) {
-    var builder = CreateOrUpdateTeam.Response.newBuilder();
-
-    if (setMembersResponse.success()) {
-      builder.setTeam(teamProtoConverter.map(team));
-    } else {
-      builder.setErrors(buildValidationErrors(setMembersResponse));
-    }
-    return builder.build();
   }
 
   @Override

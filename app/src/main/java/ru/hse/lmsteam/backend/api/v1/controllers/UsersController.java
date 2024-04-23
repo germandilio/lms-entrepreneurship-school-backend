@@ -40,8 +40,8 @@ public class UsersController implements UsersControllerDocSchema {
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
-  public Mono<UpdateOrCreateUser.Response> createUser(
-      @RequestBody UpdateOrCreateUser.Request request) {
+  public Mono<CreateOrUpdateUser.Response> createUser(
+      @RequestBody CreateOrUpdateUser.Request request) {
     var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(request);
     return usersManager.create(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
@@ -54,8 +54,8 @@ public class UsersController implements UsersControllerDocSchema {
       value = "/{userId}",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
-  public Mono<UpdateOrCreateUser.Response> updateUser(
-      @PathVariable UUID userId, @RequestBody UpdateOrCreateUser.Request request) {
+  public Mono<CreateOrUpdateUser.Response> updateUser(
+      @PathVariable UUID userId, @RequestBody CreateOrUpdateUser.Request request) {
     var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(userId, request);
     return usersManager.update(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
@@ -67,7 +67,6 @@ public class UsersController implements UsersControllerDocSchema {
   }
 
   // TODO protection over inconsistent properties and sql injections
-  // also test groups module
 
   @GetMapping("/list")
   @Override

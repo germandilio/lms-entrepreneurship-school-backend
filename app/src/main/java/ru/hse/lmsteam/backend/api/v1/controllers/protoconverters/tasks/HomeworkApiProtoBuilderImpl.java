@@ -3,7 +3,9 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.domain.Homework;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import ru.hse.lmsteam.backend.domain.tasks.Homework;
 import ru.hse.lmsteam.schema.api.homeworks.*;
 import ru.hse.lmsteam.schema.api.homeworks.GetHomework;
 
@@ -13,30 +15,19 @@ public class HomeworkApiProtoBuilderImpl implements HomeworkApiProtoBuilder {
   private final HomeworkProtoConverter homeworkProtoConverter;
 
   @Override
-  public GetHomework.Response buildGetHomeworkResponse(Homework homework) {
-    var b = GetHomework.Response.newBuilder();
-    if (homework != null) {
-      b.setHomework(homeworkProtoConverter.map(homework));
-    }
-    return b.build();
+  public Mono<GetHomework.Response> buildGetHomeworkResponse(Homework homework) {
+    return homeworkProtoConverter
+        .map(homework)
+        .map(homeworkProto -> GetHomework.Response.newBuilder().setHomework(homeworkProto).build());
   }
 
   @Override
-  public CreateOrUpdateHomework.Response buildCreateHomeworkResponse(Homework group) {
-    var b = CreateOrUpdateHomework.Response.newBuilder();
-    if (group != null) {
-      b.setHomework(homeworkProtoConverter.map(group));
-    }
-    return b.build();
-  }
-
-  @Override
-  public CreateOrUpdateHomework.Response buildUpdateHomeworkResponse(Homework group) {
-    var b = CreateOrUpdateHomework.Response.newBuilder();
-    if (group != null) {
-      b.setHomework(homeworkProtoConverter.map(group));
-    }
-    return b.build();
+  public Mono<CreateOrUpdateHomework.Response> buildCreateOrUpdateHomeworkResponse(Homework group) {
+    return homeworkProtoConverter
+        .map(group)
+        .map(
+            homeworkProto ->
+                CreateOrUpdateHomework.Response.newBuilder().setHomework(homeworkProto).build());
   }
 
   @Override
@@ -45,24 +36,24 @@ public class HomeworkApiProtoBuilderImpl implements HomeworkApiProtoBuilder {
   }
 
   @Override
-  public GetHomeworks.Response buildGetHomeworksResponse(Page<Homework> assignments) {
-    return GetHomeworks.Response.newBuilder()
-        .setPage(
-            ru.hse.lmsteam.schema.api.common.Page.newBuilder()
-                .setTotalPages(assignments.getTotalPages())
-                .setTotalElements(assignments.getTotalElements())
-                .build())
-        .addAllHomeworks(assignments.map(homeworkProtoConverter::map))
-        .build();
+  public Mono<GetHomeworks.Response> buildGetHomeworksResponse(Page<Homework> assignments) {
+    return Flux.fromIterable(assignments.toList())
+        .flatMap(homeworkProtoConverter::toSnippet)
+        .collectList()
+        .map(
+            snippets ->
+                GetHomeworks.Response.newBuilder()
+                    .setPage(
+                        ru.hse.lmsteam.schema.api.common.Page.newBuilder()
+                            .setTotalPages(assignments.getTotalPages())
+                            .setTotalElements(assignments.getTotalElements())
+                            .build())
+                    .addAllHomeworks(snippets)
+                    .build());
   }
 
   @Override
   public Homework retrieveHomeworkModel(CreateOrUpdateHomework.Request request) {
     return homeworkProtoConverter.retrieveModel(request);
-  }
-
-  @Override
-  public Homework map(ru.hse.lmsteam.schema.api.homeworks.Homework homeAssignment) {
-    return homeworkProtoConverter.map(homeAssignment);
   }
 }

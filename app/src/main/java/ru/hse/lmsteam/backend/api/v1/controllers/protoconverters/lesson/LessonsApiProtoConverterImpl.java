@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.domain.Lesson;
-import ru.hse.lmsteam.schema.api.lessons.CreateLesson;
+import ru.hse.lmsteam.schema.api.lessons.CreateOrUpdateLesson;
 import ru.hse.lmsteam.schema.api.lessons.GetLesson;
 import ru.hse.lmsteam.schema.api.lessons.GetLessons;
 
@@ -15,7 +15,7 @@ public class LessonsApiProtoConverterImpl implements LessonsApiProtoConverter {
   private final LessonsApiProtoBuilder lessonsApiProtoBuilder;
 
   @Override
-  public Lesson retrieveCreateModel(CreateLesson.Request request) {
+  public Lesson retrieveCreateModel(CreateOrUpdateLesson.Request request) {
     var b = ru.hse.lmsteam.schema.api.lessons.Lesson.newBuilder();
     b.setTitle(request.getTitle());
     b.setLessonNumber(request.getLessonNumber());
@@ -48,7 +48,7 @@ public class LessonsApiProtoConverterImpl implements LessonsApiProtoConverter {
                 .setTotalPages(lessons.getTotalPages())
                 .setTotalElements(lessons.getTotalElements())
                 .build())
-        .addAllLessons(lessons.stream().map(lessonsApiProtoBuilder::toProto).toList())
+        .addAllLessons(lessons.stream().map(lessonsApiProtoBuilder::toSnippet).toList())
         .build();
   }
 

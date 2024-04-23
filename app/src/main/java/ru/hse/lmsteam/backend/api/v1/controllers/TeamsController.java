@@ -27,13 +27,17 @@ public class TeamsController implements TeamsControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetTeam.Response> getTeam(@PathVariable UUID id) {
-    return teamManager.findById(id).map(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, false));
+    return teamManager
+        .findById(id)
+        .flatMap(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, false));
   }
 
   @GetMapping("/{id}/public")
   @Override
   public Mono<GetTeam.Response> getTeamPublic(@PathVariable UUID id) {
-    return teamManager.findById(id).map(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, true));
+    return teamManager
+        .findById(id)
+        .flatMap(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, true));
   }
 
   @PostMapping
@@ -47,7 +51,9 @@ public class TeamsController implements TeamsControllerDocSchema {
             .collect(ImmutableSet.toImmutableSet());
     return teamManager
         .create(groupToCreate, userIds)
-        .map(tuple -> teamsApiProtoBuilder.buildCreateTeamResponse(tuple.getT1(), tuple.getT2()));
+        .flatMap(
+            tuple ->
+                teamsApiProtoBuilder.buildCreateOrUpdateTeamResponse(tuple.getT1(), tuple.getT2()));
   }
 
   @PatchMapping("/{id}")
@@ -65,7 +71,9 @@ public class TeamsController implements TeamsControllerDocSchema {
 
     return teamManager
         .update(groupToUpdate, userIds)
-        .map(tuple -> teamsApiProtoBuilder.buildUpdateTeamResponse(tuple.getT1(), tuple.getT2()));
+        .flatMap(
+            tuple ->
+                teamsApiProtoBuilder.buildCreateOrUpdateTeamResponse(tuple.getT1(), tuple.getT2()));
   }
 
   @DeleteMapping("/{id}")

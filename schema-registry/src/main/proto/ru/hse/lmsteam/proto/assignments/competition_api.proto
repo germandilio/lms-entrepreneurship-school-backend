@@ -15,7 +15,7 @@ message GetCompetition {
   }
 }
 
-message UpdateCompetition {
+message CreateOrUpdateCompetition {
   message Request {
     google.protobuf.Timestamp deadline_date = 2;
     google.protobuf.Timestamp publish_date = 3;
@@ -23,16 +23,6 @@ message UpdateCompetition {
     string description = 6;
     string grading_criteria = 7;
     repeated string external_material_urls = 8;
-  }
-
-  message Response {
-    Competition competition = 1;
-  }
-}
-
-message CreateCompetition {
-  message Request {
-    Competition competition = 1;
   }
 
   message Response {
@@ -49,7 +39,7 @@ message DeleteCompetition {
 message GetCompetitions {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated Competition competition = 2;
+    repeated CompetitionSnippet competitions = 2;
   }
 }
 
@@ -61,4 +51,10 @@ message Competition {
   string description = 5;
   string grading_criteria = 6;
   repeated string external_material_urls = 7;
+}
+
+message CompetitionSnippet {
+  string id = 1;
+  string title = 2;
+  google.protobuf.Timestamp deadline_date = 3;
 }

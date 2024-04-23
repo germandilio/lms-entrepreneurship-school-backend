@@ -1,9 +1,9 @@
 package ru.hse.lmsteam.backend.service.model.auth;
 
 import java.util.Optional;
-import java.util.UUID;
 import lombok.Builder;
 import lombok.With;
+import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
 
 @Builder
@@ -12,15 +12,15 @@ public record AuthResult(
     String message,
     @With Optional<String> authToken,
     Optional<UserRole> role,
-    Optional<UUID> userId) {
+    Optional<User> user) {
 
-  public static AuthResult success(UUID userId, UserRole role) {
+  public static AuthResult success(User user, UserRole role) {
     return AuthResult.builder()
         .success(true)
         .message("Success")
         .authToken(Optional.empty())
         .role(Optional.of(role))
-        .userId(Optional.of(userId))
+        .user(Optional.of(user))
         .build();
   }
 
@@ -30,7 +30,7 @@ public record AuthResult(
         .message(message)
         .authToken(Optional.empty())
         .role(Optional.empty())
-        .userId(Optional.empty())
+        .user(Optional.empty())
         .build();
   }
 }

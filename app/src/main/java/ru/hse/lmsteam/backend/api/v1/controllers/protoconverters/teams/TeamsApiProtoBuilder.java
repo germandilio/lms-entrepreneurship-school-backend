@@ -3,18 +3,16 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.teams;
 import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
+import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.schema.api.teams.*;
 
 public interface TeamsApiProtoBuilder {
-  GetTeam.Response buildGetTeamResponse(Team team, boolean forPublicUser);
+  Mono<GetTeam.Response> buildGetTeamResponse(Team team, boolean forPublicUser);
 
-  CreateOrUpdateTeam.Response buildCreateTeamResponse(
-      Team team, SetUserTeamMembershipResponse setTeamMembershipResponse);
-
-  CreateOrUpdateTeam.Response buildUpdateTeamResponse(
+  Mono<CreateOrUpdateTeam.Response> buildCreateOrUpdateTeamResponse(
       Team team, SetUserTeamMembershipResponse setTeamMembershipResponse);
 
   DeleteTeam.Response buildDeleteTeamResponse(long itemsDeleted);

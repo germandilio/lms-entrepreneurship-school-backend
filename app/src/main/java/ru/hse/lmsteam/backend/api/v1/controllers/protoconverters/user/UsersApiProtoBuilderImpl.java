@@ -36,8 +36,8 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
   }
 
   @Override
-  public UpdateOrCreateUser.Response buildUpdateUserResponse(User user) {
-    var builder = UpdateOrCreateUser.Response.newBuilder();
+  public CreateOrUpdateUser.Response buildUpdateUserResponse(User user) {
+    var builder = CreateOrUpdateUser.Response.newBuilder();
     if (user != null) {
       builder.setUser(userProtoConverter.map(user));
     }
@@ -81,13 +81,13 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
   }
 
   @Override
-  public UserUpsertModel retrieveUserUpsertModel(UUID userId, UpdateOrCreateUser.Request request) {
+  public UserUpsertModel retrieveUserUpsertModel(UUID userId, CreateOrUpdateUser.Request request) {
     var model = retrieveUserUpsertModel(request);
     return model.withId(userId);
   }
 
   @Override
-  public UserUpsertModel retrieveUserUpsertModel(UpdateOrCreateUser.Request request) {
+  public UserUpsertModel retrieveUserUpsertModel(CreateOrUpdateUser.Request request) {
     return userProtoConverter.map(request);
   }
 }

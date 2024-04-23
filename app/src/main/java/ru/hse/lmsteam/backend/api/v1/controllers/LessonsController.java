@@ -31,12 +31,13 @@ public class LessonsController implements LessonsControllerDocSchema {
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
-  public Mono<CreateLesson.Response> createLesson(@RequestBody CreateLesson.Request request) {
+  public Mono<CreateOrUpdateLesson.Response> createLesson(
+      @RequestBody CreateOrUpdateLesson.Request request) {
     return lessonManager
         .create(lessonsApiProtoConverter.retrieveCreateModel(request))
         .map(
             lesson ->
-                CreateLesson.Response.newBuilder()
+                CreateOrUpdateLesson.Response.newBuilder()
                     .setLesson(lessonsApiProtoConverter.map(lesson))
                     .build());
   }

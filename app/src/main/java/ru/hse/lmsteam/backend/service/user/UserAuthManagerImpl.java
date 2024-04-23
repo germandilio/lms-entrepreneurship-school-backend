@@ -17,6 +17,7 @@ import reactor.core.scheduler.Schedulers;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
+import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.service.jwt.TokenManager;
 import ru.hse.lmsteam.backend.service.mail.SetNewPasswordEmailSender;
 import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
@@ -30,6 +31,7 @@ import ru.hse.lmsteam.backend.service.validation.PasswordValidator;
 @Service
 public class UserAuthManagerImpl implements UserAuthManager {
   private final UserAuthRepository userAuthRepository;
+  private final UserRepository userRepository;
 
   private final PasswordValidator passwordValidator;
   private final PasswordEncoder passwordEncoder;
@@ -46,7 +48,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
         .switchIfEmpty(
             Mono.error(new ValidationException("User with login " + login + " not found")))
         .map(auth -> doAuthenticate(auth).apply(login, password))
-        .map(withAuthToken(login));
+        .flatMap(withAuthToken(login));
   }
 
   @Transactional(readOnly = true)
@@ -74,24 +76,31 @@ public class UserAuthManagerImpl implements UserAuthManager {
         .findByLogin(login, true)
         .switchIfEmpty(
             Mono.error(new ValidationException("User with login " + login + " not found")))
-        .<UserAuth>handle(
-            (userAuth, sink) -> {
-              var authResult = doAuthenticate(userAuth).apply(login, oldPassword);
-              if (!authResult.success()) {
-                sink.error(new ValidationException(authResult.message()));
-                return;
-              }
-              sink.next(userAuth);
-            })
+        .flatMap(
+            userAuth ->
+                doAuthenticate(userAuth)
+                    .apply(login, oldPassword)
+                    .<UserAuth>handle(
+                        (r, sink) -> {
+                          if (r.success()) {
+                            sink.next(userAuth);
+                          } else {
+                            sink.error(new ValidationException(r.message()));
+                          }
+                        }))
         .flatMap(
             userAuth ->
                 userAuthRepository.update(
                     userAuth.withPassword(getPasswordForStoring(newPassword))))
-        .map(
+        .flatMap(
             userAuth -> {
               log.info("Password changed for user with login {}", login);
-              return withAuthToken(login)
-                  .apply(AuthResult.success(userAuth.userId(), userAuth.role()));
+              return userRepository
+                  .findById(userAuth.userId())
+                  .flatMap(
+                      user ->
+                          withAuthToken(login)
+                              .apply(Mono.just(AuthResult.success(user, userAuth.role()))));
             })
         .onErrorResume(
             ValidationException.class, exc -> Mono.just(AuthResult.failure(exc.getMessage())));
@@ -129,11 +138,15 @@ public class UserAuthManagerImpl implements UserAuthManager {
                       false);
               return userAuthRepository.update(updatedUser);
             })
-        .map(
+        .flatMap(
             userAuth -> {
               log.info("Password set for user with login {}", login);
-              return withAuthToken(login)
-                  .apply(AuthResult.success(userAuth.userId(), userAuth.role()));
+              return userRepository
+                  .findById(userAuth.userId())
+                  .flatMap(
+                      user ->
+                          withAuthToken(login)
+                              .apply(Mono.just(AuthResult.success(user, userAuth.role()))));
             })
         .onErrorResume(
             ValidationException.class, exc -> Mono.just(AuthResult.failure(exc.getMessage())));
@@ -222,34 +235,39 @@ public class UserAuthManagerImpl implements UserAuthManager {
     return Mono.fromFuture(setNewPasswordEmailSender.sendEmail(userEmail, token.toString()));
   }
 
-  private BiFunction<String, String, AuthResult> doAuthenticate(UserAuth userAuth) {
+  private BiFunction<String, String, Mono<AuthResult>> doAuthenticate(UserAuth userAuth) {
     return (String login, String password) -> {
       if (userAuth.isDeleted()) {
-        return AuthResult.failure("User with login " + login + " is deleted");
+        return Mono.just(AuthResult.failure("User with login " + login + " is deleted"));
       }
       if (userAuth.password() == null) {
-        return AuthResult.failure(
-            "User with login " + login + " needs to set password before authorizing");
+        return Mono.just(
+            AuthResult.failure(
+                "User with login " + login + " needs to set password before authorizing"));
       }
 
       if (passwordEncoder.matches(password, userAuth.password())) {
-        return AuthResult.success(userAuth.userId(), userAuth.role());
+        return userRepository
+            .findById(userAuth.userId())
+            .map(user -> AuthResult.success(user, userAuth.role()));
       } else {
-        return AuthResult.failure("Invalid password");
+        return Mono.just(AuthResult.failure("Invalid password"));
       }
     };
   }
 
-  private Function<AuthResult, AuthResult> withAuthToken(String login) {
-    return authResult -> {
-      if (authResult.userId().isPresent() && authResult.role().isPresent()) {
-        return authResult.withAuthToken(
-            Optional.of(tokenManager.createToken(authResult.userId().get())));
-      } else {
-        log.error("Empty userId or role on authResult with login {}", login);
-        return authResult;
-      }
-    };
+  private Function<Mono<AuthResult>, Mono<AuthResult>> withAuthToken(String login) {
+    return authR ->
+        authR.map(
+            authResult -> {
+              if (authResult.user().isPresent() && authResult.role().isPresent()) {
+                return authResult.withAuthToken(
+                    Optional.of(tokenManager.createToken(authResult.user().get().id())));
+              } else {
+                log.error("Empty userId or role on authResult with login {}", login);
+                return authResult;
+              }
+            });
   }
 
   private String getPasswordForStoring(String rawPassword) {

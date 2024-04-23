@@ -9,7 +9,7 @@ import ru.hse.lmsteam.schema.api.lessons.*;
 public interface LessonsControllerDocSchema {
   Mono<GetLesson.Response> getLesson(UUID id);
 
-  Mono<CreateLesson.Response> createLesson(CreateLesson.Request request);
+  Mono<CreateOrUpdateLesson.Response> createLesson(CreateOrUpdateLesson.Request request);
 
   Mono<UpdateLesson.Response> updateLesson(UUID id, UpdateLesson.Request request);
 

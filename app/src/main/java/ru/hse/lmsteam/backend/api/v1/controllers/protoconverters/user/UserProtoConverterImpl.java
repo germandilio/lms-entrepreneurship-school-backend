@@ -13,7 +13,7 @@ import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.repository.UserTeamRepository;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
-import ru.hse.lmsteam.schema.api.users.UpdateOrCreateUser;
+import ru.hse.lmsteam.schema.api.users.CreateOrUpdateUser;
 import ru.hse.lmsteam.schema.api.users.UserRoleNamespace;
 import ru.hse.lmsteam.schema.api.users.UserSnippet;
 
@@ -119,7 +119,7 @@ public class UserProtoConverterImpl implements UserProtoConverter {
   }
 
   @Override
-  public UserUpsertModel map(UpdateOrCreateUser.Request request) {
+  public UserUpsertModel map(CreateOrUpdateUser.Request request) {
     var userModelBuilder = UserUpsertModel.builder();
     userModelBuilder.name(request.getName());
     userModelBuilder.surname(request.getSurname());

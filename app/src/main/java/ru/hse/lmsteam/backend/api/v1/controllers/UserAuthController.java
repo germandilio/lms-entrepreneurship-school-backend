@@ -21,7 +21,7 @@ public class UserAuthController {
   private final UserAuthManager userAuthManager;
   private final UserAuthProtoConverter userAuthProtoConverter;
 
-  @GetMapping("/login")
+  @PostMapping("/login")
   public Mono<Login.Response> login(@RequestParam String login, @RequestParam String password) {
     return userAuthManager
         .authenticate(login, password)

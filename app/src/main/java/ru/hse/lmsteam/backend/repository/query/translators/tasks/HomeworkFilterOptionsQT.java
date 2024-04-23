@@ -1,15 +1,14 @@
-package ru.hse.lmsteam.backend.repository.query.translators;
+package ru.hse.lmsteam.backend.repository.query.translators.tasks;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import ru.hse.lmsteam.backend.repository.query.translators.AbstractSimpleQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 
 @Component
-public class HomeAssignmentFilterOptionsQT
-    extends AbstractSimpleQueryTranslator<HomeworkFilterOptions> {
+public class HomeworkFilterOptionsQT extends AbstractSimpleQueryTranslator<HomeworkFilterOptions> {
 
   @Override
   public String translateToSql(HomeworkFilterOptions queryObject, Pageable pageable) {
@@ -57,21 +56,5 @@ public class HomeAssignmentFilterOptionsQT
         .reduce((a, b) -> a + " AND " + b)
         .map(s -> " WHERE " + s)
         .orElse("");
-  }
-
-  private Optional<String> getTimestampRangeClause(Instant from, Instant to, String columnName) {
-    if (from != null && to != null) {
-      return Optional.of(
-          String.format(
-              " %s IS NOT NULL AND %s BETWEEN '%s' AND '%s'", columnName, columnName, from, to));
-    } else if (from != null) {
-      return Optional.of(
-          String.format(" %s IS NOT NULL AND %s >= '%s'", columnName, columnName, from));
-    } else if (to != null) {
-      return Optional.of(
-          String.format(" %s IS NOT NULL AND %s <= '%s'", columnName, columnName, to));
-    } else {
-      return Optional.empty();
-    }
   }
 }

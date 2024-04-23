@@ -1,9 +1,34 @@
 version: '3.8'
 services:
+  app:
+    platform: linux/amd64
+    image: docker.io/germandilio/lms_backend:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - lms_network
+    environment:
+      - JWT_SECRET_KEY=
+      - SMTP_PASSWORD=
+      - SMTP_USERNAME=
+      - MASTER_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@pg-0:5432/lms_db
+      - SLAVE_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@pg-1:5432/lms_db?readOnly=true
+      - POSTGRESQL_PASSWORD=lms_backend_dev_password
+      - POSTGRESQL_USERNAME=lms_dev_backend
+      - R2DBC_LIQUIBASE_URL=r2dbc:postgresql://pg-0:5432/lms_db
+    depends_on:
+      pg-0:
+        condition: service_healthy
+      pg-1:
+        condition: service_healthy
   pg-0:
     image: docker.io/bitnami/postgresql-repmgr:16.2.0
     ports:
       - "5433:5432"
+    expose:
+      - "5432"
+    networks:
+      - lms_network
     volumes:
       - pg_0_data:/bitnami/postgresql
     environment:
@@ -18,10 +43,20 @@ services:
       - REPMGR_NODE_NAME=pg-0
       - REPMGR_NODE_NETWORK_NAME=pg-0
       - REPMGR_PORT_NUMBER=5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U lms_dev_backend -d lms_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   pg-1:
     image: docker.io/bitnami/postgresql-repmgr:16.2.0
     ports:
       - "5434:5432"
+    expose:
+      - "5432"
+    networks:
+      - lms_network
     volumes:
       - pg_1_data:/bitnami/postgresql
     environment:
@@ -36,8 +71,18 @@ services:
       - REPMGR_NODE_NAME=pg-1
       - REPMGR_NODE_NETWORK_NAME=pg-1
       - REPMGR_PORT_NUMBER=5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U lms_dev_backend -d lms_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pg_0_data:
     driver: local
   pg_1_data:
     driver: local
+
+networks:
+  lms_network:
+    driver: bridge

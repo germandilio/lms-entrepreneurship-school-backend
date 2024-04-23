@@ -15,7 +15,7 @@ message GetExam {
   }
 }
 
-message UpdateExam {
+message CreateOrUpdateExam {
   message Request {
     google.protobuf.Timestamp deadline_date = 2;
     google.protobuf.Timestamp publish_date = 3;
@@ -23,16 +23,6 @@ message UpdateExam {
     string description = 6;
     string grading_criteria = 7;
     repeated string external_material_urls = 8;
-  }
-
-  message Response {
-    Exam exam = 1;
-  }
-}
-
-message CreateExam {
-  message Request {
-    Exam exam = 1;
   }
 
   message Response {
@@ -49,7 +39,7 @@ message DeleteExam {
 message GetExams {
   message Response {
     ru.hse.lmsteam.proto.common.Page page = 1;
-    repeated Exam exam = 2;
+    repeated ExamSnippet exams = 2;
   }
 }
 
@@ -61,4 +51,10 @@ message Exam {
   string description = 5;
   string grading_criteria = 6;
   repeated string external_material_urls = 7;
+}
+
+message ExamSnippet {
+  string id = 1;
+  string title = 2;
+  google.protobuf.Timestamp deadline_date = 3;
 }

@@ -7,15 +7,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Homework;
-import ru.hse.lmsteam.backend.repository.HomeAssignmentRepository;
+import ru.hse.lmsteam.backend.domain.tasks.Homework;
+import ru.hse.lmsteam.backend.repository.impl.tasks.HomeworkRepository;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 
 @Service
 @RequiredArgsConstructor
 public class HomeworkManagerImpl implements HomeworkManager {
-  private final HomeAssignmentRepository homeAssignmentRepository;
+  private final HomeworkRepository homeworkRepository;
   private final LessonManager lessonManager;
 
   @Transactional(readOnly = true)
@@ -24,7 +24,7 @@ public class HomeworkManagerImpl implements HomeworkManager {
     if (id == null) {
       return Mono.empty();
     }
-    return homeAssignmentRepository.findById(id);
+    return homeworkRepository.findById(id);
   }
 
   @Transactional
@@ -37,7 +37,7 @@ public class HomeworkManagerImpl implements HomeworkManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(homeAssignmentRepository.create(assignment));
+        .then(homeworkRepository.create(assignment));
   }
 
   @Transactional
@@ -50,7 +50,7 @@ public class HomeworkManagerImpl implements HomeworkManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(homeAssignmentRepository.update(assignment));
+        .then(homeworkRepository.update(assignment));
   }
 
   @Transactional
@@ -59,7 +59,7 @@ public class HomeworkManagerImpl implements HomeworkManager {
     if (assignmentId == null) {
       return Mono.just(0L);
     }
-    return homeAssignmentRepository.delete(assignmentId);
+    return homeworkRepository.delete(assignmentId);
   }
 
   @Transactional(readOnly = true)
@@ -68,6 +68,6 @@ public class HomeworkManagerImpl implements HomeworkManager {
     if (filterOptions == null || pageable == null) {
       return Mono.empty();
     }
-    return homeAssignmentRepository.findAll(filterOptions, pageable);
+    return homeworkRepository.findAll(filterOptions, pageable);
   }
 }
