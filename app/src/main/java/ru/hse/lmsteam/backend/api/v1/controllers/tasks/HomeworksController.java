@@ -26,7 +26,7 @@ public class HomeworksController implements HomeworksControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetHomework.Response> getHomework(@PathVariable UUID id) {
-    return homeworkManager.findById(id).map(homeworkApiProtoBuilder::buildGetHomeworkResponse);
+    return homeworkManager.findById(id).flatMap(homeworkApiProtoBuilder::buildGetHomeworkResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -35,7 +35,9 @@ public class HomeworksController implements HomeworksControllerDocSchema {
       @RequestBody CreateOrUpdateHomework.Request request) {
     var model = homeworkApiProtoBuilder.retrieveHomeworkModel(request);
 
-    return homeworkManager.create(model).map(homeworkApiProtoBuilder::buildCreateHomeworkResponse);
+    return homeworkManager
+        .create(model)
+        .flatMap(homeworkApiProtoBuilder::buildCreateOrUpdateHomeworkResponse);
   }
 
   @PutMapping(
@@ -45,7 +47,9 @@ public class HomeworksController implements HomeworksControllerDocSchema {
   public Mono<CreateOrUpdateHomework.Response> updateHomework(
       @PathVariable UUID id, @RequestBody CreateOrUpdateHomework.Request request) {
     var model = homeworkApiProtoBuilder.retrieveHomeworkModel(request).withId(id);
-    return homeworkManager.update(model).map(homeworkApiProtoBuilder::buildUpdateHomeworkResponse);
+    return homeworkManager
+        .update(model)
+        .flatMap(homeworkApiProtoBuilder::buildCreateOrUpdateHomeworkResponse);
   }
 
   @DeleteMapping("/{id}")
@@ -71,6 +75,6 @@ public class HomeworksController implements HomeworksControllerDocSchema {
             title, lessonId, publishFrom, publishTo, deadlineFrom, deadlineTo, isGroup);
     return homeworkManager
         .findAll(options, pageable)
-        .map(homeworkApiProtoBuilder::buildGetHomeworksResponse);
+        .flatMap(homeworkApiProtoBuilder::buildGetHomeworksResponse);
   }
 }

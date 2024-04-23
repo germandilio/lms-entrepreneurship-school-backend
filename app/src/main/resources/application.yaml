@@ -8,9 +8,11 @@ spring:
       url: ${SLAVE_URL}
   r2dbc:
     #    for liquibase schema changing
-    url: r2dbc:postgresql://localhost:5433/lms_db?pooled=false
+    url: ${R2DBC_LIQUIBASE_URL}
     username: ${POSTGRESQL_USERNAME}
     password: ${POSTGRESQL_PASSWORD}
+    pool:
+      enabled: false
 
   liquibase:
     change-log: classpath:liquibase/changelog.xml

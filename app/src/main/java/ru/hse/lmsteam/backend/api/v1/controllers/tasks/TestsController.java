@@ -26,7 +26,7 @@ public class TestsController implements TestsControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetTest.Response> getTest(@PathVariable UUID id) {
-    return testManager.findById(id).map(testApiProtoBuilder::buildGetTestResponse);
+    return testManager.findById(id).flatMap(testApiProtoBuilder::buildGetTestResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -35,7 +35,7 @@ public class TestsController implements TestsControllerDocSchema {
       @RequestBody CreateOrUpdateTest.Request request) {
     var model = testApiProtoBuilder.retrieveTestModel(request);
 
-    return testManager.create(model).map(testApiProtoBuilder::buildCreateTestResponse);
+    return testManager.create(model).flatMap(testApiProtoBuilder::buildCreateOrUpdateTestResponse);
   }
 
   @PutMapping(
@@ -45,7 +45,7 @@ public class TestsController implements TestsControllerDocSchema {
   public Mono<CreateOrUpdateTest.Response> updateTest(
       @PathVariable UUID id, @RequestBody CreateOrUpdateTest.Request request) {
     var model = testApiProtoBuilder.retrieveTestModel(request).withId(id);
-    return testManager.update(model).map(testApiProtoBuilder::buildUpdateTestResponse);
+    return testManager.update(model).flatMap(testApiProtoBuilder::buildCreateOrUpdateTestResponse);
   }
 
   @DeleteMapping("/{id}")
@@ -67,6 +67,8 @@ public class TestsController implements TestsControllerDocSchema {
       Pageable pageable) {
     var options =
         new TestFilterOptions(title, lessonId, publishFrom, publishTo, deadlineFrom, deadlineTo);
-    return testManager.findAll(options, pageable).map(testApiProtoBuilder::buildGetTestsResponse);
+    return testManager
+        .findAll(options, pageable)
+        .flatMap(testApiProtoBuilder::buildGetTestsResponse);
   }
 }
