@@ -15,7 +15,7 @@ import ru.hse.lmsteam.schema.api.users.auth.SetPassword;
 @RestController
 @RequestMapping(
     value = "/api/v1/auth",
-    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class UserAuthController {
   private final UserAuthManager userAuthManager;

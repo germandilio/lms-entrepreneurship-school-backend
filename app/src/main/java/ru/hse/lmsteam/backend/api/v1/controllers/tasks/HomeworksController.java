@@ -17,7 +17,7 @@ import ru.hse.lmsteam.schema.api.homeworks.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/homeworks",
-    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class HomeworksController implements HomeworksControllerDocSchema {
   private final HomeworkManager homeworkManager;

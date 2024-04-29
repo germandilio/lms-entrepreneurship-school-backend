@@ -17,7 +17,7 @@ import ru.hse.lmsteam.schema.api.lessons.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/lessons",
-    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class LessonsController implements LessonsControllerDocSchema {
   private final LessonManager lessonManager;

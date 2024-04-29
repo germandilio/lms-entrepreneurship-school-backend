@@ -18,7 +18,7 @@ import ru.hse.lmsteam.schema.api.teams.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/teams",
-    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class TeamsController implements TeamsControllerDocSchema {
   private final TeamManager teamManager;

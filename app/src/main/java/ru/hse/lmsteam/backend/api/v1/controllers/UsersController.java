@@ -21,7 +21,7 @@ import ru.hse.lmsteam.schema.api.users.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/users",
-    produces = {MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class UsersController implements UsersControllerDocSchema {
   private final UserManagerImpl usersManager;
@@ -52,6 +52,8 @@ public class UsersController implements UsersControllerDocSchema {
     var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(request);
     return usersManager.create(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
+
+  // TODO починить update на юзере
 
   /**
    * If user entity provided without ID, or if there is no entity with provided ID method will fall
