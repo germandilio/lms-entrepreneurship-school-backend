@@ -30,6 +30,10 @@ public class SetNewPasswordEmailSender {
     log.info("Sending new passport email to user {} with token {}", targetEmail, token);
     try {
       var message = sender.getMessageTemplate(Set.of(targetEmail));
+      if (message == null) {
+        log.info("Skip on null message");
+        return;
+      }
       message.setSubject("Set new password");
 
       String msg =

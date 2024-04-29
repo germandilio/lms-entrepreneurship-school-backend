@@ -29,7 +29,7 @@ public class CommonExceptionsControllersHandler {
   public ResponseEntity<?> handleExpectationFailedException(
       BusinessLogicExpectationFailedException e) {
     log.info("Expectations failed exception");
-    return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
   }
 
   @ExceptionHandler(BusinessLogicConflictException.class)

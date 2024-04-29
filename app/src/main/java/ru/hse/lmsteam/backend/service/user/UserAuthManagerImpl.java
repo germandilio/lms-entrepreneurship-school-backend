@@ -211,6 +211,7 @@ public class UserAuthManagerImpl implements UserAuthManager {
   protected Mono<UserAuth> doAuthUpdate(User user, UserAuth dbAuth) {
     var updatedUserAuth =
         UserAuth.builder()
+            .id(dbAuth.id())
             .userId(user.id())
             .login(user.email())
             .password(dbAuth.password())

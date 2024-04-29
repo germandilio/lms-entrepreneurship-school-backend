@@ -34,6 +34,11 @@ public class EmailSenderImpl implements EmailSender {
 
   @Override
   public Message getMessageTemplate(Collection<String> targetEmails) {
+    if (!enableSending) {
+      log.info("Skip sending email because sending is disabled");
+      return null;
+    }
+
     try {
       var message = new MimeMessage(sessionFactory.newSession());
       message.setFrom(fromEmail);
