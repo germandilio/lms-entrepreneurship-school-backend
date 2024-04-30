@@ -31,14 +31,15 @@ public class SetNewPasswordEmailSender {
     try {
       var message = sender.getMessageTemplate(Set.of(targetEmail));
       if (message == null) {
-        log.info("Skip on null message");
+        log.debug("Skip on null message. Sender is disabled.");
         return;
       }
       message.setSubject("Set new password");
 
       String msg =
-          "To set password follow this link: <a href=\"https://google.com/\">Set password</a>.\nToken = "
-              + token;
+          "Для заверщения регистрации пройдите по ссылке: <a href=\"localhost:3000/set-password?token="
+              + token
+              + "\">Установить пароль</a>.";
 
       BodyPart mimeBodyPart = new MimeBodyPart();
       mimeBodyPart.setContent(msg, "text/html; charset=utf-8");

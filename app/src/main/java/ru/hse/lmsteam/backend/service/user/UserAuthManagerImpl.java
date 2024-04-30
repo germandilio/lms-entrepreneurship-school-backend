@@ -23,16 +23,13 @@ import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedE
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.jwt.TokenManager;
 import ru.hse.lmsteam.backend.service.mail.SetNewPasswordEmailSender;
-import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
-import ru.hse.lmsteam.backend.service.model.auth.AuthorizationResult;
-import ru.hse.lmsteam.backend.service.model.auth.FailedAuthorizationResult;
-import ru.hse.lmsteam.backend.service.model.auth.SuccessfulAuthorizationResult;
+import ru.hse.lmsteam.backend.service.model.auth.*;
 import ru.hse.lmsteam.backend.service.validation.PasswordValidator;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserAuthManagerImpl implements UserAuthManager {
+public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
   private final UserAuthRepository userAuthRepository;
   private final UserRepository userRepository;
 
@@ -66,6 +63,24 @@ public class UserAuthManagerImpl implements UserAuthManager {
             userAuth -> {
               if (!userAuth.isDeleted()) {
                 return new SuccessfulAuthorizationResult(userAuth.userId(), userAuth.role());
+              } else {
+                return new FailedAuthorizationResult();
+              }
+            })
+        .switchIfEmpty(Mono.just(new FailedAuthorizationResult()));
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<? extends AuthorizationResult> tryRetrieveUser(String token) {
+    return tokenManager
+        .getUserId(token)
+        .map(id -> userAuthRepository.findById(id, false))
+        .orElse(Mono.empty())
+        .map(
+            userAuth -> {
+              if (!userAuth.isDeleted()) {
+                return new InternalAuthorizationResult(userAuth);
               } else {
                 return new FailedAuthorizationResult();
               }
@@ -112,12 +127,10 @@ public class UserAuthManagerImpl implements UserAuthManager {
   }
 
   @Override
-  public Mono<AuthResult> setPassword(String login, UUID token, String newPassword) {
+  public Mono<AuthResult> setPassword(UUID token, String newPassword) {
     return userAuthRepository
-        .findByLogin(login, true)
-        .switchIfEmpty(
-            Mono.error(
-                new BusinessLogicNotFoundException("User with login " + login + " not found")))
+        .findByToken(token)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("User not found")))
         .<UserAuth>handle(
             (userAuth, sink) -> {
               if (userAuth.password() != null) {
@@ -147,12 +160,12 @@ public class UserAuthManagerImpl implements UserAuthManager {
             })
         .flatMap(
             userAuth -> {
-              log.info("Password set for user with login {}", login);
+              log.info("Password set for user with login {}", userAuth.login());
               return userRepository
                   .findById(userAuth.userId())
                   .flatMap(
                       user ->
-                          withAuthToken(login)
+                          withAuthToken(userAuth.login())
                               .apply(Mono.just(AuthResult.success(user, userAuth.role()))));
             })
         .onErrorResume(
@@ -229,8 +242,8 @@ public class UserAuthManagerImpl implements UserAuthManager {
           .flatMap(
               auth -> {
                 log.info("User auth updated for userId = {}", auth.userId());
-                if (!Objects.equals(updatedUserAuth.login(), dbAuth.login())
-                    && updatedUserAuth.passwordResetToken() != null) {
+                if (!Objects.equals(updatedUserAuth.login(), dbAuth.login())) {
+                  // TODO maybe sent different texts in email, (update email or registered)
                   sendEmailWithToken(updatedUserAuth.login(), updatedUserAuth.passwordResetToken())
                       .subscribe();
                 }

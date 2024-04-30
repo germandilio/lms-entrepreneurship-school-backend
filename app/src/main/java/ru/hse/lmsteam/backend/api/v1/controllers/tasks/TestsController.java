@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks.TestApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.tasks.TestsControllerDocSchema;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.tasks.TestFilterOptions;
 import ru.hse.lmsteam.backend.service.tasks.TestManager;
 import ru.hse.lmsteam.schema.api.tests.*;
@@ -26,7 +27,10 @@ public class TestsController implements TestsControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetTest.Response> getTest(@PathVariable UUID id) {
-    return testManager.findById(id).flatMap(testApiProtoBuilder::buildGetTestResponse);
+    return testManager
+        .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Test not found.")))
+        .flatMap(testApiProtoBuilder::buildGetTestResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -51,7 +55,10 @@ public class TestsController implements TestsControllerDocSchema {
   @DeleteMapping("/{id}")
   @Override
   public Mono<DeleteTest.Response> deleteTest(@PathVariable UUID id) {
-    return testManager.delete(id).map(testApiProtoBuilder::buildDeleteTestResponse);
+    return testManager
+        .delete(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Test not found.")))
+        .map(testApiProtoBuilder::buildDeleteTestResponse);
   }
 
   @PageableAsQueryParam

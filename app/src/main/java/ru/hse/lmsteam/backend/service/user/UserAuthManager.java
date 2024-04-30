@@ -12,7 +12,7 @@ public interface UserAuthManager extends AuthorizationManager {
 
   Mono<AuthResult> changePassword(String login, String oldPassword, String newPassword);
 
-  Mono<AuthResult> setPassword(String login, UUID token, String newPassword);
+  Mono<AuthResult> setPassword(UUID token, String newPassword);
 
   Mono<UserAuth> register(User user);
 

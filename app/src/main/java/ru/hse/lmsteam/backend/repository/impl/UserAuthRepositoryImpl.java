@@ -45,6 +45,14 @@ public class UserAuthRepositoryImpl implements UserAuthRepository {
   }
 
   @Override
+  public Mono<UserAuth> findByToken(UUID token) {
+    if (token == null) {
+      throw new IllegalArgumentException("Token is null!");
+    }
+    return db.slave.selectOne(query(where("password_reset_token").is(token)), UserAuth.class);
+  }
+
+  @Override
   public Mono<UserAuth> insert(UserAuth userAuth) {
     if (userAuth == null) {
       throw new IllegalArgumentException("UserAuth is null!");

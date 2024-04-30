@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoConverter;
 import ru.hse.lmsteam.backend.api.v1.schema.LessonsControllerDocSchema;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;
 import ru.hse.lmsteam.schema.api.lessons.*;
@@ -26,7 +27,10 @@ public class LessonsController implements LessonsControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetLesson.Response> getLesson(@PathVariable UUID id) {
-    return lessonManager.findById(id).map(lessonsApiProtoConverter::buildGetLessonResponse);
+    return lessonManager
+        .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Lesson not found.")))
+        .map(lessonsApiProtoConverter::buildGetLessonResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -62,6 +66,7 @@ public class LessonsController implements LessonsControllerDocSchema {
   public Mono<DeleteLesson.Response> deleteLesson(@PathVariable UUID id) {
     return lessonManager
         .delete(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Lesson not found.")))
         .map(count -> DeleteLesson.Response.newBuilder().setEntitiesDeleted(count).build());
   }
 

@@ -22,19 +22,19 @@ public class CommonExceptionsControllersHandler {
   @ExceptionHandler(BusinessLogicUnauthorizedException.class)
   public ResponseEntity<?> handleUnauthorizedException(BusinessLogicUnauthorizedException e) {
     log.info("Unauthorized exception");
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
   }
 
-  @ExceptionHandler(BusinessLogicExpectationFailedException.class)
+  @ExceptionHandler({BusinessLogicExpectationFailedException.class, IllegalArgumentException.class})
   public ResponseEntity<?> handleExpectationFailedException(
       BusinessLogicExpectationFailedException e) {
     log.info("Expectations failed exception");
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
   }
 
   @ExceptionHandler(BusinessLogicConflictException.class)
   public ResponseEntity<?> handleConflictException(BusinessLogicConflictException e) {
     log.info("Conflict exception");
-    return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
   }
 }
