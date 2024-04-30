@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks.CompetitionApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.tasks.CompetitionsControllerDocSchema;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.tasks.CompetitionFilterOptions;
 import ru.hse.lmsteam.backend.service.tasks.CompetitionManager;
 import ru.hse.lmsteam.schema.api.competitions.*;
@@ -17,7 +18,7 @@ import ru.hse.lmsteam.schema.api.competitions.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/competitions",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class CompetitionsController implements CompetitionsControllerDocSchema {
   private final CompetitionManager competitionManager;
@@ -28,6 +29,7 @@ public class CompetitionsController implements CompetitionsControllerDocSchema {
   public Mono<GetCompetition.Response> getCompetition(@PathVariable UUID id) {
     return competitionManager
         .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Competition not found.")))
         .map(competitionApiProtoBuilder::buildGetCompetitionResponse);
   }
 
@@ -59,6 +61,7 @@ public class CompetitionsController implements CompetitionsControllerDocSchema {
   public Mono<DeleteCompetition.Response> deleteCompetition(@PathVariable UUID id) {
     return competitionManager
         .delete(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Competition not found.")))
         .map(competitionApiProtoBuilder::buildDeleteCompetitionResponse);
   }
 

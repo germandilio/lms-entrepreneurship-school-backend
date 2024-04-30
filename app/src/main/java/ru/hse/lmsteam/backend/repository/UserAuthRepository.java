@@ -11,6 +11,8 @@ public interface UserAuthRepository {
 
   Mono<UserAuth> findById(UUID userId, boolean operateOnMaster);
 
+  Mono<UserAuth> findByToken(UUID token);
+
   Mono<UserAuth> insert(UserAuth userAuth);
 
   Mono<UserAuth> update(UserAuth userAuth);

@@ -28,11 +28,11 @@ application:
     enabled: false
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      expiration: 86400 # 1 day
+      expiration: ${JWT_EXPIRATION}
 
 mail:
   sending:
-    enabled: false
+    enabled: ${MAIL_SENDING_ENABLED}
   from: ${SMTP_USERNAME}
   smtp:
     auth: true
@@ -51,7 +51,7 @@ logging:
     ru.hse.lmsteam: DEBUG
 
 server:
-  port: 3000
+  port: ${SERVER_PORT}
   compression:
     enabled: true
 springdoc:

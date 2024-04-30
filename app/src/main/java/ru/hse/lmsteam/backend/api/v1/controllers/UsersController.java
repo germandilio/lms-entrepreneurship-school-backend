@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.user.UsersApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.UsersControllerDocSchema;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 import ru.hse.lmsteam.backend.service.user.UserManagerImpl;
 import ru.hse.lmsteam.schema.api.users.*;
@@ -20,7 +21,7 @@ import ru.hse.lmsteam.schema.api.users.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/users",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class UsersController implements UsersControllerDocSchema {
   private final UserManagerImpl usersManager;
@@ -29,13 +30,19 @@ public class UsersController implements UsersControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetUser.Response> getUser(@PathVariable UUID id) {
-    return usersManager.findById(id).map(usersApiProtoBuilder::buildGetUserResponse);
+    return usersManager
+        .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("User not found.")))
+        .map(usersApiProtoBuilder::buildGetUserResponse);
   }
 
   @GetMapping("/{id}/balance")
   @Override
   public Mono<GetUserBalance.Response> getUserBalance(@PathVariable UUID id) {
-    return usersManager.getUserBalance(id).map(usersApiProtoBuilder::buildGetUserBalanceResponse);
+    return usersManager
+        .getUserBalance(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("User not found.")))
+        .map(usersApiProtoBuilder::buildGetUserBalanceResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -45,6 +52,8 @@ public class UsersController implements UsersControllerDocSchema {
     var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(request);
     return usersManager.create(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
+
+  // TODO починить update на юзере
 
   /**
    * If user entity provided without ID, or if there is no entity with provided ID method will fall
@@ -63,7 +72,10 @@ public class UsersController implements UsersControllerDocSchema {
   @DeleteMapping("/{id}")
   @Override
   public Mono<DeleteUser.Response> deleteUser(@PathVariable UUID id) {
-    return usersManager.delete(id).map(usersApiProtoBuilder::buildDeleteUserResponse);
+    return usersManager
+        .delete(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("User not found.")))
+        .map(usersApiProtoBuilder::buildDeleteUserResponse);
   }
 
   // TODO protection over inconsistent properties and sql injections

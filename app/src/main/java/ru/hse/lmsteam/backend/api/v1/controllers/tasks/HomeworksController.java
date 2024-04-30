@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks.HomeworkApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.tasks.HomeworksControllerDocSchema;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 import ru.hse.lmsteam.backend.service.tasks.HomeworkManager;
 import ru.hse.lmsteam.schema.api.homeworks.*;
@@ -17,7 +18,7 @@ import ru.hse.lmsteam.schema.api.homeworks.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/homeworks",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class HomeworksController implements HomeworksControllerDocSchema {
   private final HomeworkManager homeworkManager;
@@ -26,7 +27,10 @@ public class HomeworksController implements HomeworksControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetHomework.Response> getHomework(@PathVariable UUID id) {
-    return homeworkManager.findById(id).flatMap(homeworkApiProtoBuilder::buildGetHomeworkResponse);
+    return homeworkManager
+        .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Homework not found.")))
+        .flatMap(homeworkApiProtoBuilder::buildGetHomeworkResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -55,7 +59,10 @@ public class HomeworksController implements HomeworksControllerDocSchema {
   @DeleteMapping("/{id}")
   @Override
   public Mono<DeleteHomework.Response> deleteHomework(@PathVariable UUID id) {
-    return homeworkManager.delete(id).map(homeworkApiProtoBuilder::buildDeleteHomeworkResponse);
+    return homeworkManager
+        .delete(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Homework not found.")))
+        .map(homeworkApiProtoBuilder::buildDeleteHomeworkResponse);
   }
 
   @PageableAsQueryParam

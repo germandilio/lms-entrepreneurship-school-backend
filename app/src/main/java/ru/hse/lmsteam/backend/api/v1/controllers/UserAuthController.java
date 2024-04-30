@@ -15,7 +15,7 @@ import ru.hse.lmsteam.schema.api.users.auth.SetPassword;
 @RestController
 @RequestMapping(
     value = "/api/v1/auth",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class UserAuthController {
   private final UserAuthManager userAuthManager;
@@ -50,8 +50,7 @@ public class UserAuthController {
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   public Mono<SetPassword.Response> setPassword(@RequestBody SetPassword.Request request) {
     return userAuthManager
-        .setPassword(
-            request.getLogin(), UUID.fromString(request.getToken()), request.getNewPassword())
+        .setPassword(UUID.fromString(request.getToken()), request.getNewPassword())
         .map(
             auth ->
                 SetPassword.Response.newBuilder()

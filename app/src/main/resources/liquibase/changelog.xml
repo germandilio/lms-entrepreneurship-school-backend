@@ -9,4 +9,5 @@
     <include file="tables/tests/tests.sql" relativeToChangelogFile="true" />
     <include file="tables/exams/exams.sql" relativeToChangelogFile="true" />
     <include file="tables/competitions/competitions.sql" relativeToChangelogFile="true" />
+    <include file="tables/users_auth/add_token_index.sql" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks.ExamApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.tasks.ExamsControllerDocSchema;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.tasks.ExamFilterOptions;
 import ru.hse.lmsteam.backend.service.tasks.ExamManager;
 import ru.hse.lmsteam.schema.api.exams.CreateOrUpdateExam;
@@ -20,7 +21,7 @@ import ru.hse.lmsteam.schema.api.exams.GetExams;
 @RestController
 @RequestMapping(
     value = "/api/v1/exams",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class ExamsController implements ExamsControllerDocSchema {
   private final ExamManager examManager;
@@ -29,7 +30,10 @@ public class ExamsController implements ExamsControllerDocSchema {
   @GetMapping("/{id}")
   @Override
   public Mono<GetExam.Response> getExam(@PathVariable UUID id) {
-    return examManager.findById(id).map(examApiProtoBuilder::buildGetExamResponse);
+    return examManager
+        .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Exam not found.")))
+        .map(examApiProtoBuilder::buildGetExamResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -54,7 +58,10 @@ public class ExamsController implements ExamsControllerDocSchema {
   @DeleteMapping("/{id}")
   @Override
   public Mono<DeleteExam.Response> deleteExam(@PathVariable UUID id) {
-    return examManager.delete(id).map(examApiProtoBuilder::buildDeleteExamResponse);
+    return examManager
+        .delete(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Exam not found.")))
+        .map(examApiProtoBuilder::buildDeleteExamResponse);
   }
 
   @PageableAsQueryParam

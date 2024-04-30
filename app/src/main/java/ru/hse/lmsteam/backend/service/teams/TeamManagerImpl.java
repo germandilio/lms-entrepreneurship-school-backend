@@ -16,6 +16,7 @@ import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.TeamRepository;
 import ru.hse.lmsteam.backend.repository.UserTeamRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.teams.TeamsFilterOptions;
 import ru.hse.lmsteam.backend.service.user.UserManager;
@@ -102,6 +103,9 @@ public class TeamManagerImpl implements TeamManager {
   @Transactional(readOnly = true)
   @Override
   public Flux<User> getTeamMembers(final UUID teamId) {
+    if (teamId == null) {
+      throw new BusinessLogicExpectationFailedException("TeamId cannot be null.");
+    }
     return userTeamRepository.getMembers(teamId);
   }
 

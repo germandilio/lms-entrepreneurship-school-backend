@@ -2,13 +2,13 @@ package ru.hse.lmsteam.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.protobuf.ProtobufJsonFormatHttpMessageConverter;
+import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 
 @Configuration
 public class ProtobufHttpSupportConfig {
 
   @Bean
-  public ProtobufJsonFormatHttpMessageConverter protobufHttpMessageConverter() {
-    return new ProtobufJsonFormatHttpMessageConverter();
+  public ProtobufHttpMessageConverter protobufHttpMessageConverter() {
+    return new ProtobufHttpMessageConverter();
   }
 }

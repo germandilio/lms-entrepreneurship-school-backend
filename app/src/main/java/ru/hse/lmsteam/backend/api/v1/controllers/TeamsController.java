@@ -1,7 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.controllers;
 
 import com.google.common.collect.ImmutableSet;
-import jakarta.validation.ValidationException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -11,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.teams.TeamsApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.TeamsControllerDocSchema;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.teams.TeamsFilterOptions;
 import ru.hse.lmsteam.backend.service.teams.TeamManager;
 import ru.hse.lmsteam.schema.api.teams.*;
@@ -18,7 +19,7 @@ import ru.hse.lmsteam.schema.api.teams.*;
 @RestController
 @RequestMapping(
     value = "/api/v1/teams",
-    produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
+    produces = {MediaType.APPLICATION_PROTOBUF_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class TeamsController implements TeamsControllerDocSchema {
   private final TeamManager teamManager;
@@ -29,6 +30,7 @@ public class TeamsController implements TeamsControllerDocSchema {
   public Mono<GetTeam.Response> getTeam(@PathVariable UUID id) {
     return teamManager
         .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Team not found.")))
         .flatMap(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, false));
   }
 
@@ -37,6 +39,7 @@ public class TeamsController implements TeamsControllerDocSchema {
   public Mono<GetTeam.Response> getTeamPublic(@PathVariable UUID id) {
     return teamManager
         .findById(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Team not found.")))
         .flatMap(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, true));
   }
 
@@ -62,7 +65,8 @@ public class TeamsController implements TeamsControllerDocSchema {
       @PathVariable UUID id, @RequestBody CreateOrUpdateTeam.Request request) {
     var groupToUpdate = teamsApiProtoBuilder.retrieveTeamModel(id, request);
     if (groupToUpdate.id() == null) {
-      throw new ValidationException("Id is null! Use POST /groups to create entity.");
+      throw new BusinessLogicExpectationFailedException(
+          "Id is null! Use POST /groups to create entity.");
     }
     var userIds =
         request.getUserIdsList().stream()
@@ -79,7 +83,10 @@ public class TeamsController implements TeamsControllerDocSchema {
   @DeleteMapping("/{id}")
   @Override
   public Mono<DeleteTeam.Response> deleteTeam(@PathVariable UUID id) {
-    return teamManager.delete(id).map(teamsApiProtoBuilder::buildDeleteTeamResponse);
+    return teamManager
+        .delete(id)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Team not found.")))
+        .map(teamsApiProtoBuilder::buildDeleteTeamResponse);
   }
 
   @GetMapping("/list")
