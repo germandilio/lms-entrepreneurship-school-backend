@@ -14,7 +14,7 @@ import ru.hse.lmsteam.backend.repository.query.translators.PlainSQLQueryTranslat
 
 public abstract class AbstractTasksRepository<TaskType, Id, FOptionsType>
     implements TaskRepository<TaskType, Id, FOptionsType> {
-  private final MasterSlaveDbOperations db;
+  protected final MasterSlaveDbOperations db;
   private final PlainSQLQueryTranslator<FOptionsType> filterOptionsQT;
   private final Class<TaskType> taskTypeClass;
 
