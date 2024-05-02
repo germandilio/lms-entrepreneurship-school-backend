@@ -50,14 +50,15 @@ public class LessonsController implements LessonsControllerDocSchema {
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE},
       path = "/{id}")
   @Override
-  public Mono<UpdateLesson.Response> updateLesson(
-      @PathVariable UUID id, @RequestBody UpdateLesson.Request request) {
+  public Mono<CreateOrUpdateLesson.Response> updateLesson(
+      @PathVariable UUID id, @RequestBody CreateOrUpdateLesson.Request request) {
+    var lesson = lessonsApiProtoConverter.retrieveCreateModel(request).withId(id);
     return lessonManager
-        .update(lessonsApiProtoConverter.map(id, request.getLesson()))
+        .update(lesson)
         .map(
-            lesson ->
-                UpdateLesson.Response.newBuilder()
-                    .setLesson(lessonsApiProtoConverter.map(lesson))
+            lessonResponse ->
+                CreateOrUpdateLesson.Response.newBuilder()
+                    .setLesson(lessonsApiProtoConverter.map(lessonResponse))
                     .build());
   }
 

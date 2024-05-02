@@ -11,7 +11,7 @@ public interface LessonsControllerDocSchema {
 
   Mono<CreateOrUpdateLesson.Response> createLesson(CreateOrUpdateLesson.Request request);
 
-  Mono<UpdateLesson.Response> updateLesson(UUID id, UpdateLesson.Request request);
+  Mono<CreateOrUpdateLesson.Response> updateLesson(UUID id, CreateOrUpdateLesson.Request request);
 
   Mono<DeleteLesson.Response> deleteLesson(UUID id);
 
