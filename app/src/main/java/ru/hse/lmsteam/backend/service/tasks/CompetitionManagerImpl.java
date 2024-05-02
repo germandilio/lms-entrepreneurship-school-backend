@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.service.tasks;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Competition;
 import ru.hse.lmsteam.backend.repository.impl.tasks.CompetitionRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.model.tasks.CompetitionFilterOptions;
 
 @RequiredArgsConstructor
@@ -32,7 +34,18 @@ public class CompetitionManagerImpl implements CompetitionManager {
       return Mono.empty();
     }
 
-    return competitionRepository.create(assignment);
+    return competitionRepository
+        .create(assignment)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Competition with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional
@@ -42,7 +55,18 @@ public class CompetitionManagerImpl implements CompetitionManager {
       return Mono.empty();
     }
 
-    return competitionRepository.update(assignment);
+    return competitionRepository
+        .update(assignment)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Competition with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional

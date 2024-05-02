@@ -188,6 +188,16 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
 
     return userAuthRepository
         .insert(userAuth)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "UserAuth with the same login already exists!"));
+              }
+
+              return Mono.error(exc);
+            })
         .map(
             auth -> {
               log.info("User auth created for userId = {}", auth.userId());

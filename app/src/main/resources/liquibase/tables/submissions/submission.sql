@@ -11,3 +11,7 @@ create table submissions
     submission_date timestamp not null,
     payload         bytea     not null
 );
+
+-- changeset germandilio:create_submissions_indexes
+create index submissions_task_id_index on submissions (task_id);
+create index submissions_owner_id_index on submissions (owner_id);

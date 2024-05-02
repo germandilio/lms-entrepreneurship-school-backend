@@ -53,8 +53,6 @@ public class UsersController implements UsersControllerDocSchema {
     return usersManager.create(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
 
-  // TODO починить update на юзере
-
   /**
    * If user entity provided without ID, or if there is no entity with provided ID method will fall
    * back to createUser logic.

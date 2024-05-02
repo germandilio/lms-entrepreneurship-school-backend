@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.service.tasks;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Homework;
 import ru.hse.lmsteam.backend.repository.impl.tasks.HomeworkRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 
@@ -37,7 +39,17 @@ public class HomeworkManagerImpl implements HomeworkManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(homeworkRepository.create(assignment));
+        .then(homeworkRepository.create(assignment))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Homework with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional
@@ -50,7 +62,17 @@ public class HomeworkManagerImpl implements HomeworkManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(homeworkRepository.update(assignment));
+        .then(homeworkRepository.update(assignment))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Homework with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional

@@ -2,6 +2,8 @@ package ru.hse.lmsteam.backend.service.lesson;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Lesson;
 import ru.hse.lmsteam.backend.repository.LessonRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;
 
 @Service
@@ -31,7 +35,21 @@ public class LessonManagerImpl implements LessonManager {
     if (lesson == null || lesson.id() == null) {
       return Mono.empty();
     }
-    return lessonRepository.update(lesson);
+    return lessonRepository
+        .update(lesson)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DataIntegrityViolationException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Lesson with the same number already exists!"));
+              } else if (exc instanceof TransientDataAccessException) {
+                return Mono.error(
+                    new BusinessLogicNotFoundException("Lesson with the specified id not found!"));
+              }
+
+              return Mono.error(exc);
+            });
   }
 
   @Transactional
@@ -40,7 +58,18 @@ public class LessonManagerImpl implements LessonManager {
     if (lesson == null) {
       return Mono.empty();
     }
-    return lessonRepository.create(lesson);
+    return lessonRepository
+        .create(lesson)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DataIntegrityViolationException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Lesson with the same number already exists!"));
+              }
+
+              return Mono.error(exc);
+            });
   }
 
   @Transactional

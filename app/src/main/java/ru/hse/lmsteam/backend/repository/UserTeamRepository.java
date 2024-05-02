@@ -11,5 +11,7 @@ public interface UserTeamRepository {
 
   Flux<Team> getUserTeams(UUID userId);
 
+  Flux<User> getTeammates(UUID memberId);
+
   Flux<UUID> setUserTeamMemberships(UUID teamId, ImmutableSet<UUID> userIds);
 }

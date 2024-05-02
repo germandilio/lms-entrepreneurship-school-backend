@@ -39,13 +39,31 @@ public class TeamManagerImpl implements TeamManager {
     return teamRepository.findById(id);
   }
 
+  @Override
+  public Flux<Team> findByMember(UUID memberId) {
+    if (memberId == null) {
+      throw new IllegalArgumentException("MemberId cannot be null.");
+    }
+
+    return userTeamRepository.getUserTeams(memberId);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<User> findTeammates(UUID memberId) {
+    if (memberId == null) {
+      throw new IllegalArgumentException("MemberId cannot be null.");
+    }
+
+    return userTeamRepository.getTeammates(memberId);
+  }
+
   @Transactional
   @Override
   public Mono<Tuple2<Team, SetUserTeamMembershipResponse>> update(
       final Team team, final ImmutableSet<UUID> memberIds) {
     if (team == null) {
-      throw new IllegalArgumentException(
-          "Group object is mandatory for update / create operations.");
+      throw new IllegalArgumentException("Team is mandatory for update / create operations.");
     }
     teamValidator.validateForSave(team);
     return teamRepository

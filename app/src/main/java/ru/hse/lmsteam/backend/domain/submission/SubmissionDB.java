@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.service.model.submissions;
+package ru.hse.lmsteam.backend.domain.submission;
 
 import java.time.Instant;
 import java.util.UUID;

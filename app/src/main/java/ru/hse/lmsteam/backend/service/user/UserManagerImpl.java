@@ -96,7 +96,19 @@ public class UserManagerImpl implements UserManager {
         .doOnNext(userValidator::validateForSave)
         .flatMap(userRepository::upsert)
         .flatMap(id -> userRepository.findById(id, false))
-        .flatMap(user -> userAuthManager.onUserChanged(user).thenReturn(user));
+        .flatMap(user -> userAuthManager.onUserChanged(user).thenReturn(user))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "User with login"
+                            + userUpsertModel.email()
+                            + " already exists. Cannot update user."));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional
