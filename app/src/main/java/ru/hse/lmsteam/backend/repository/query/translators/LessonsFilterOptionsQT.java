@@ -46,14 +46,13 @@ public class LessonsFilterOptionsQT extends AbstractSimpleQueryTranslator<Lesson
 
   private String buildWhereClause(LessonsFilterOptions options) {
     var titleCriteria =
-        Optional.ofNullable(options.title())
-            .map(title -> "lessons.projectTheme ILIKE '%" + title + "%'");
+        Optional.ofNullable(options.title()).map(title -> "lessons.title ILIKE '%" + title + "%'");
     var numberCriteria =
         Optional.ofNullable(options.lessonNumber())
             .map(number -> "lessons.lesson_number = " + number);
     var publishDateCriteria =
-        Optional.ofNullable(options.publishDate())
-            .map(date -> "lessons.publish_date = '" + date + "'");
+        getTimestampRangeClause(
+            options.publishDateFrom(), options.publishDateTimeTo(), "lessons.publish_date");
 
     return Stream.of(titleCriteria, numberCriteria, publishDateCriteria)
         .flatMap(Optional::stream)

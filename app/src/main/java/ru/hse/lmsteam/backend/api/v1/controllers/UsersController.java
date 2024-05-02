@@ -76,8 +76,6 @@ public class UsersController implements UsersControllerDocSchema {
         .map(usersApiProtoBuilder::buildDeleteUserResponse);
   }
 
-  // TODO protection over inconsistent properties and sql injections
-
   @GetMapping("/list")
   @Override
   @PageableAsQueryParam

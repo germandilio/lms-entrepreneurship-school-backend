@@ -1,6 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.controllers;
 
-import java.time.LocalDate;
+import java.time.*;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -77,13 +77,15 @@ public class LessonsController implements LessonsControllerDocSchema {
   public Mono<GetLessons.Response> getLessons(
       @RequestParam(required = false) Integer lessonNumber,
       @RequestParam(required = false) String title,
-      @RequestParam(required = false) LocalDate publishDate,
+      @RequestParam(required = false) Instant publishDateFrom,
+      @RequestParam(required = false) Instant publishDateTo,
       Pageable pageable) {
     var filterOptions =
         LessonsFilterOptions.builder()
             .lessonNumber(lessonNumber)
             .title(title)
-            .publishDate(publishDate)
+            .publishDateFrom(publishDateFrom)
+            .publishDateTimeTo(publishDateTo)
             .build();
     return lessonManager
         .findAll(filterOptions, pageable)

@@ -14,14 +14,20 @@ public class LessonsApiProtoBuilderImpl implements LessonsApiProtoBuilder {
   @Override
   public Lesson toDomain(ru.hse.lmsteam.schema.api.lessons.Lesson lesson) {
     if (lesson == null) return null;
-    var id = lesson.getId().isBlank() ? null : UUID.fromString(lesson.getId());
-    return new Lesson(
-        id,
-        lesson.getLessonNumber(),
-        lesson.getTitle(),
-        Instant.ofEpochSecond(
-            lesson.getPublishDate().getSeconds(), lesson.getPublishDate().getNanos()),
-        lesson.toByteArray());
+    var b = Lesson.builder();
+    if (!lesson.getId().isBlank()) {
+      b.id(UUID.fromString(lesson.getId()));
+    }
+    b.lessonNumber(lesson.getLessonNumber());
+    b.title(lesson.getTitle());
+    b.payload(lesson.toByteArray());
+    var publishDate =
+        lesson.hasPublishDate()
+            ? Instant.ofEpochSecond(
+                lesson.getPublishDate().getSeconds(), lesson.getPublishDate().getNanos())
+            : Instant.now();
+    b.publishDate(publishDate);
+    return b.build();
   }
 
   @Override

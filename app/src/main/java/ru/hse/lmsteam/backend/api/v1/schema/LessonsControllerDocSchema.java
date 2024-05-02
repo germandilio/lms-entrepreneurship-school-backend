@@ -1,6 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.schema;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Mono;
@@ -16,5 +16,9 @@ public interface LessonsControllerDocSchema {
   Mono<DeleteLesson.Response> deleteLesson(UUID id);
 
   Mono<GetLessons.Response> getLessons(
-      Integer lessonNumber, String title, LocalDate publishDate, Pageable pageable);
+      Integer lessonNumber,
+      String title,
+      Instant publishDateFrom,
+      Instant publishDateTo,
+      Pageable pageable);
 }
