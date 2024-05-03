@@ -78,11 +78,15 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
   }
 
   @Override
-  public Mono<SubmissionDB> save(SubmissionDB submission) {
+  public Mono<SubmissionDB> upsert(SubmissionDB submission) {
     if (submission == null) {
       throw new IllegalArgumentException("Submission is null!");
     }
 
-    return this.db.master.insert(submission);
+    if (submission.id() == null) {
+      return this.db.master.insert(submission);
+    } else {
+      return this.db.master.update(submission);
+    }
   }
 }

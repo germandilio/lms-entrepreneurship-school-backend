@@ -4,9 +4,11 @@ import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
 import com.google.common.reflect.TypeToken;
+import java.util.Collection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.repository.TaskRepository;
@@ -33,6 +35,14 @@ public abstract class AbstractTasksRepository<TaskType, Id, FOptionsType>
       throw new IllegalArgumentException("Id is null!");
     }
     return db.slave.selectOne(query(where("id").is(id)), taskTypeClass);
+  }
+
+  @Override
+  public Flux<TaskType> findByIds(Collection<Id> ids) {
+    if (ids == null) {
+      throw new IllegalArgumentException("Id is null!");
+    }
+    return db.slave.select(query(where("id").in(ids)), taskTypeClass);
   }
 
   @Override

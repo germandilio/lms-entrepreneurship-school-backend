@@ -2,6 +2,8 @@ package ru.hse.lmsteam.backend.service.teams;
 
 import com.google.common.collect.ImmutableSet;
 import jakarta.validation.ValidationException;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -37,6 +39,15 @@ public class TeamManagerImpl implements TeamManager {
       return Mono.empty();
     }
     return teamRepository.findById(id);
+  }
+
+  @Override
+  public Mono<Map<UUID, Team>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return teamRepository.findByIds(ImmutableSet.copyOf(ids), false).collectMap(Team::id);
   }
 
   @Override

@@ -3,16 +3,13 @@ package ru.hse.lmsteam.backend.service.submissions;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
@@ -67,9 +64,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         .findAll(filterOptions, pageable)
         .flatMap(
             page ->
-                Flux.fromIterable(page.getContent())
-                    .flatMap(this::buildSubmission)
-                    .collectList()
+                buildSubmissions(page.getContent())
                     .map(
                         (submissions) ->
                             new PageImpl<>(
@@ -105,15 +100,6 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
   }
 
   private Mono<Submission> buildSubmission(SubmissionDB submissionDb) {
-    var submissionBuilder = Submission.builder();
-    submissionBuilder.id(submissionDb.id());
-    submissionBuilder.submissionDate(submissionDb.submissionDate());
-    try {
-      submissionBuilder.payload(SubmissionPayload.parseFrom(submissionDb.payload()));
-    } catch (InvalidProtocolBufferException e) {
-      return Mono.error(e);
-    }
-
     var ownerF =
         userManager
             .findById(submissionDb.ownerId())
@@ -136,14 +122,62 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
             : userManager.findById(submissionDb.publisherId());
 
     return Mono.zip(ownerF, homeworkF, groupF, publisherF)
-        .doOnNext(
+        .map(
+            tuple ->
+                buildSubmission(
+                    tuple.getT1(), tuple.getT2(), tuple.getT3(), tuple.getT4(), submissionDb));
+  }
+
+  private Mono<List<Submission>> buildSubmissions(Collection<SubmissionDB> submissionsDb) {
+    var ownersF = userManager.findByIds(submissionsDb.stream().map(SubmissionDB::ownerId).toList());
+    var homeworksF =
+        homeworkManager.findByIds(submissionsDb.stream().map(SubmissionDB::taskId).toList());
+    var groupsF =
+        teamManager.findByIds(
+            submissionsDb.stream().map(SubmissionDB::groupId).filter(Objects::nonNull).toList());
+    var publishersF =
+        userManager.findByIds(submissionsDb.stream().map(SubmissionDB::publisherId).toList());
+    return Mono.zip(ownersF, homeworksF, groupsF, publishersF)
+        .map(
             tuple -> {
-              submissionBuilder.owner(tuple.getT1());
-              submissionBuilder.homework(tuple.getT2());
-              tuple.getT3().ifPresent(submissionBuilder::team);
-              submissionBuilder.publisher(tuple.getT4());
-            })
-        .then(Mono.just(submissionBuilder.build()));
+              var owners = tuple.getT1();
+              var homeworks = tuple.getT2();
+              var groups = tuple.getT3();
+              var publishers = tuple.getT4();
+              return submissionsDb.stream()
+                  .map(
+                      submissionDb -> {
+                        var owner = owners.get(submissionDb.ownerId());
+                        var homework = homeworks.get(submissionDb.taskId());
+                        var group = Optional.ofNullable(groups.get(submissionDb.groupId()));
+                        var publisher = publishers.get(submissionDb.publisherId());
+                        return buildSubmission(owner, homework, group, publisher, submissionDb);
+                      })
+                  .toList();
+            });
+  }
+
+  private Submission buildSubmission(
+      User owner,
+      Homework homework,
+      Optional<Team> teamOpt,
+      User publisher,
+      SubmissionDB submissionDB) {
+    var submissionBuilder = Submission.builder();
+    submissionBuilder.id(submissionDB.id());
+    submissionBuilder.submissionDate(submissionDB.submissionDate());
+    try {
+      submissionBuilder.payload(SubmissionPayload.parseFrom(submissionDB.payload()));
+    } catch (InvalidProtocolBufferException e) {
+      throw new IllegalStateException("Failed to parse submission payload", e);
+    }
+
+    submissionBuilder.owner(owner);
+    submissionBuilder.homework(homework);
+    teamOpt.ifPresent(submissionBuilder::team);
+    submissionBuilder.publisher(publisher);
+
+    return submissionBuilder.build();
   }
 
   private Mono<Submission> upsertSubmission(
@@ -152,31 +186,78 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       User publisher,
       Instant submissionDate,
       SubmissionPayload payload) {
-    // get submission by task and owner
-    // if group:
-    // if exists:
-    // update for group
-    // else update for owner
-    // if not exists:
+    if (!hw.isGroup()) {
+      return upsertIndividualSubmission(
+          hw, existingSubmissionOpt, publisher, submissionDate, payload);
+    }
 
-    // if group submission was on person in 5 group
-    // this person transit to 6 group
-    // tries to update submission
+    return teamManager
+        .findTeammates(publisher.id())
+        .collectList()
+        .flatMap(
+            unfilteredTeammates -> {
+              if (unfilteredTeammates.isEmpty()) {
+                return upsertIndividualSubmission(
+                    hw, existingSubmissionOpt, publisher, submissionDate, payload);
+              } else {
+                return upsertGroupSubmission(
+                    unfilteredTeammates,
+                    hw,
+                    existingSubmissionOpt,
+                    publisher,
+                    submissionDate,
+                    payload);
+              }
+            });
+  }
 
-    //    if (hw.isGroup()) {
-    //      if (existingSubmissionOpt.isEmpty()) {
-    //        return saveGroupSubmission();
-    //      } else {
-    //        return updateGroupSubmission();
-    //      }
-    //    } else {
-    //      if (existingSubmissionOpt.isEmpty()) {
-    //        return saveIndividualSubmission();
-    //      } else {
-    //        return updateIndividualSubmission();
-    //      }
-    //    }
+  private Mono<Submission> upsertIndividualSubmission(
+      Homework hw,
+      Optional<SubmissionDB> existingSubmissionOpt,
+      User publisher,
+      Instant submissionDate,
+      SubmissionPayload payload) {
+    if (existingSubmissionOpt.isPresent()) {
+      var submission = existingSubmissionOpt.get();
+      if (!submission.ownerId().equals(publisher.id()) || !submission.taskId().equals(hw.id())) {
+        return Mono.error(
+            new IllegalStateException(
+                "Submission already exists and is not owned by the publisher, or is not for the same task"));
+      }
 
+      var updatedSubmission =
+          SubmissionDB.builder()
+              .id(submission.id())
+              .ownerId(publisher.id())
+              .publisherId(publisher.id())
+              .taskId(hw.id())
+              // if the submission became individual, we should remove the group id
+              .groupId(null)
+              .submissionDate(submissionDate)
+              .payload(payload.toByteArray())
+              .build();
+      return submissionRepository.upsert(updatedSubmission).flatMap(this::buildSubmission);
+    } else {
+      var newSubmission =
+          SubmissionDB.builder()
+              .ownerId(publisher.id())
+              .publisherId(publisher.id())
+              .taskId(hw.id())
+              .submissionDate(submissionDate)
+              .payload(payload.toByteArray())
+              .build();
+      return submissionRepository.upsert(newSubmission).flatMap(this::buildSubmission);
+    }
+  }
+
+  private Mono<Submission> upsertGroupSubmission(
+      List<User> unfilteredTeammates,
+      Homework hw,
+      Optional<SubmissionDB> existingSubmissionOpt,
+      User publisher,
+      Instant submissionDate,
+      SubmissionPayload payload) {
+    // TODO batch upsert in db
     return null;
   }
 }

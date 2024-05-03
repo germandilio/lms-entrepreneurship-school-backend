@@ -16,5 +16,5 @@ public interface SubmissionRepository {
 
   Mono<Page<SubmissionDB>> findAll(SubmissionFilterOptions filterOptions, Pageable pageable);
 
-  Mono<SubmissionDB> save(SubmissionDB submission);
+  Mono<SubmissionDB> upsert(SubmissionDB submission);
 }

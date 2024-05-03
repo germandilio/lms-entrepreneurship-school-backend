@@ -1,6 +1,8 @@
 package ru.hse.lmsteam.backend.service.teams;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,8 @@ import ru.hse.lmsteam.backend.service.model.teams.TeamsFilterOptions;
 
 public interface TeamManager {
   Mono<Team> findById(UUID id);
+
+  Mono<Map<UUID, Team>> findByIds(Collection<UUID> id);
 
   Flux<Team> findByMember(UUID memberId);
 

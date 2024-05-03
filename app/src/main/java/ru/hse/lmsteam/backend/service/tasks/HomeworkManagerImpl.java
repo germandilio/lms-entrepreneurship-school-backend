@@ -1,5 +1,7 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -7,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Homework;
 import ru.hse.lmsteam.backend.repository.impl.tasks.HomeworkRepository;
@@ -27,6 +30,26 @@ public class HomeworkManagerImpl implements HomeworkManager {
       return Mono.empty();
     }
     return homeworkRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Homework>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return homeworkRepository.findByIds(ids).collectMap(Homework::id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Homework> findHomeworksByLesson(UUID lessonId) {
+    if (lessonId == null) {
+      return Flux.empty();
+    }
+
+    return homeworkRepository.findTasksByLesson(lessonId);
   }
 
   @Transactional

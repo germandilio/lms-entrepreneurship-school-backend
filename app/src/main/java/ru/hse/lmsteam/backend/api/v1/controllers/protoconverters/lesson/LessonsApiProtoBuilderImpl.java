@@ -4,12 +4,19 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.Timestamps;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.backend.service.tasks.HomeworkManager;
+import ru.hse.lmsteam.backend.service.tasks.TestManager;
 import ru.hse.lmsteam.schema.api.lessons.LessonSnippet;
 
 @Component
+@RequiredArgsConstructor
 public class LessonsApiProtoBuilderImpl implements LessonsApiProtoBuilder {
+  private final HomeworkManager homeworkManager;
+  private final TestManager testManager;
 
   @Override
   public Lesson toDomain(ru.hse.lmsteam.schema.api.lessons.Lesson lesson) {
@@ -31,14 +38,33 @@ public class LessonsApiProtoBuilderImpl implements LessonsApiProtoBuilder {
   }
 
   @Override
-  public ru.hse.lmsteam.schema.api.lessons.Lesson toProto(Lesson lesson) {
-    try {
-      if (lesson == null) return null;
-      var proto = ru.hse.lmsteam.schema.api.lessons.Lesson.parseFrom(lesson.payload());
-      return proto.toBuilder().setId(lesson.id().toString()).build();
-    } catch (InvalidProtocolBufferException e) {
-      throw new RuntimeException(e);
-    }
+  public Mono<ru.hse.lmsteam.schema.api.lessons.Lesson> toProto(Lesson lesson) {
+    if (lesson == null) return Mono.empty();
+    return Mono.zip(
+            homeworkManager.findHomeworksByLesson(lesson.id()).collectList(),
+            testManager.findTestsByLesson(lesson.id()).collectList())
+        .handle(
+            (tuple, sink) -> {
+              var homeworks = tuple.getT1();
+              var tests = tuple.getT2();
+              try {
+                var proto =
+                    ru.hse.lmsteam.schema.api.lessons.Lesson.parseFrom(lesson.payload())
+                        .toBuilder();
+
+                sink.next(
+                    proto
+                        .addAllHomeworkIds(homeworks.stream().map(h -> h.id().toString()).toList())
+                        .addAllTestIds(tests.stream().map(t -> t.id().toString()).toList())
+                        .setId(lesson.id().toString())
+                        .setLessonNumber(lesson.lessonNumber())
+                        .setTitle(lesson.title())
+                        .setPublishDate(Timestamps.fromMillis(lesson.publishDate().toEpochMilli()))
+                        .build());
+              } catch (InvalidProtocolBufferException e) {
+                sink.error(new RuntimeException(e));
+              }
+            });
   }
 
   @Override

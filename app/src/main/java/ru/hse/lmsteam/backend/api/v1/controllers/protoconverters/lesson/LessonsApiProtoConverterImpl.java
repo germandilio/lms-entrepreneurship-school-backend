@@ -4,6 +4,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Lesson;
 import ru.hse.lmsteam.schema.api.lessons.CreateOrUpdateLesson;
 import ru.hse.lmsteam.schema.api.lessons.GetLesson;
@@ -31,7 +32,7 @@ public class LessonsApiProtoConverterImpl implements LessonsApiProtoConverter {
   }
 
   @Override
-  public ru.hse.lmsteam.schema.api.lessons.Lesson map(Lesson lesson) {
+  public Mono<ru.hse.lmsteam.schema.api.lessons.Lesson> map(Lesson lesson) {
     return lessonsApiProtoBuilder.toProto(lesson);
   }
 
@@ -53,9 +54,7 @@ public class LessonsApiProtoConverterImpl implements LessonsApiProtoConverter {
   }
 
   @Override
-  public GetLesson.Response buildGetLessonResponse(Lesson lesson) {
-    return GetLesson.Response.newBuilder()
-        .setLesson(lessonsApiProtoBuilder.toProto(lesson))
-        .build();
+  public Mono<GetLesson.Response> buildGetLessonResponse(Lesson lesson) {
+    return map(lesson).map(l -> GetLesson.Response.newBuilder().setLesson(l).build());
   }
 }

@@ -30,7 +30,7 @@ public class LessonsController implements LessonsControllerDocSchema {
     return lessonManager
         .findById(id)
         .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Lesson not found.")))
-        .map(lessonsApiProtoConverter::buildGetLessonResponse);
+        .flatMap(lessonsApiProtoConverter::buildGetLessonResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -39,11 +39,8 @@ public class LessonsController implements LessonsControllerDocSchema {
       @RequestBody CreateOrUpdateLesson.Request request) {
     return lessonManager
         .create(lessonsApiProtoConverter.retrieveCreateModel(request))
-        .map(
-            lesson ->
-                CreateOrUpdateLesson.Response.newBuilder()
-                    .setLesson(lessonsApiProtoConverter.map(lesson))
-                    .build());
+        .flatMap(lessonsApiProtoConverter::map)
+        .map(l -> CreateOrUpdateLesson.Response.newBuilder().setLesson(l).build());
   }
 
   @PutMapping(
@@ -55,11 +52,8 @@ public class LessonsController implements LessonsControllerDocSchema {
     var lesson = lessonsApiProtoConverter.retrieveCreateModel(request).withId(id);
     return lessonManager
         .update(lesson)
-        .map(
-            lessonResponse ->
-                CreateOrUpdateLesson.Response.newBuilder()
-                    .setLesson(lessonsApiProtoConverter.map(lessonResponse))
-                    .build());
+        .flatMap(lessonsApiProtoConverter::map)
+        .map(l -> CreateOrUpdateLesson.Response.newBuilder().setLesson(l).build());
   }
 
   @DeleteMapping("/{id}")

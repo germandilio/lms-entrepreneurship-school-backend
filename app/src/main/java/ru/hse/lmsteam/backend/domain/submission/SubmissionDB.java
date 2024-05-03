@@ -3,6 +3,7 @@ package ru.hse.lmsteam.backend.domain.submission;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -13,6 +14,6 @@ public record SubmissionDB(
     UUID taskId,
     UUID ownerId,
     UUID publisherId,
-    UUID groupId,
+    @Nullable UUID groupId,
     Instant submissionDate,
     byte[] payload) {}

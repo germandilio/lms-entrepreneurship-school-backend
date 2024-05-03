@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Test;
 import ru.hse.lmsteam.backend.repository.impl.tasks.TestRepository;
@@ -27,6 +28,16 @@ public class TestManagerImpl implements TestManager {
       return Mono.empty();
     }
     return testRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Test> findTestsByLesson(UUID lessonId) {
+    if (lessonId == null) {
+      return Flux.empty();
+    }
+
+    return testRepository.findTasksByLesson(lessonId);
   }
 
   @Transactional

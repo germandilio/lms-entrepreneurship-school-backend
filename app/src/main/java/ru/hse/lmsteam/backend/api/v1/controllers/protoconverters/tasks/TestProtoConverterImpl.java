@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.Timestamps;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -56,12 +57,12 @@ public class TestProtoConverterImpl implements TestProtoConverter {
       builder.lessonId(java.util.UUID.fromString(task.getLesson().getId()));
     }
     if (task.hasPublishDate()) {
-      builder.publishDate(
-          java.time.Instant.ofEpochMilli(Timestamps.toMillis(task.getPublishDate())));
+      builder.publishDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getPublishDate())));
+    } else {
+      builder.publishDate(Instant.now());
     }
     if (task.hasDeadlineDate()) {
-      builder.deadlineDate(
-          java.time.Instant.ofEpochMilli(Timestamps.toMillis(task.getDeadlineDate())));
+      builder.deadlineDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getDeadlineDate())));
     }
     builder.title(task.getTitle());
     builder.payload(task.toByteArray());

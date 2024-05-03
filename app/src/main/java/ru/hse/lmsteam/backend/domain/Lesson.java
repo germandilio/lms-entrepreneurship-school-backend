@@ -2,7 +2,6 @@ package ru.hse.lmsteam.backend.domain;
 
 import java.time.Instant;
 import java.util.UUID;
-
 import lombok.Builder;
 import lombok.With;
 import org.springframework.data.annotation.Id;

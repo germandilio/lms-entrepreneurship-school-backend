@@ -2,6 +2,8 @@ package ru.hse.lmsteam.backend.service.user;
 
 import com.google.common.collect.ImmutableSet;
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +17,8 @@ import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 
 public interface UserManager {
   Mono<User> findById(UUID id);
+
+  Mono<Map<UUID, User>> findByIds(Collection<UUID> id);
 
   Flux<User> findTeamMembers(UUID teamId);
 
