@@ -37,7 +37,7 @@ public class SetNewPasswordEmailSender {
       message.setSubject("Set new password");
 
       String msg =
-          "Для заверщения регистрации пройдите по ссылке: <a href=\"localhost:3000/set-password?token="
+          "Для заверщения регистрации пройдите по ссылке: <a href=\"http://localhost:3000/set-password?token="
               + token
               + "\">Установить пароль</a>.";
 
