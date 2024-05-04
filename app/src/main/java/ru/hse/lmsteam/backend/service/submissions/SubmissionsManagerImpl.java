@@ -151,7 +151,10 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
                       submissionDb -> {
                         var owner = owners.get(submissionDb.ownerId());
                         var homework = homeworks.get(submissionDb.taskId());
-                        var group = Optional.ofNullable(groups.get(submissionDb.teamId()));
+                        Optional<Team> group =
+                            submissionDb.teamId() == null
+                                ? Optional.empty()
+                                : Optional.ofNullable(groups.get(submissionDb.teamId()));
                         var publisher = publishers.get(submissionDb.publisherId());
                         return buildSubmission(owner, homework, group, publisher, submissionDb);
                       })
