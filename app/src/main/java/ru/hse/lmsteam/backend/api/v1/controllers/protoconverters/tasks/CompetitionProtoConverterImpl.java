@@ -37,8 +37,7 @@ public class CompetitionProtoConverterImpl implements CompetitionProtoConverter 
     }
     builder.title(task.getTitle());
     if (task.hasPublishDate()) {
-      builder.publishDate(
-          java.time.Instant.ofEpochMilli(Timestamps.toMillis(task.getPublishDate())));
+      builder.publishDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getPublishDate())));
     } else {
       builder.publishDate(Instant.now());
     }

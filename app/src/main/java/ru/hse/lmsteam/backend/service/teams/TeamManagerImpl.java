@@ -41,6 +41,7 @@ public class TeamManagerImpl implements TeamManager {
     return teamRepository.findById(id);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Mono<Map<UUID, Team>> findByIds(Collection<UUID> ids) {
     if (ids == null || ids.isEmpty()) {
@@ -50,6 +51,7 @@ public class TeamManagerImpl implements TeamManager {
     return teamRepository.findByIds(ImmutableSet.copyOf(ids), false).collectMap(Team::id);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Flux<Team> findByMember(UUID memberId) {
     if (memberId == null) {

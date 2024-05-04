@@ -80,6 +80,7 @@ public class TestProtoConverterImpl implements TestProtoConverter {
               b.setId(test.id().toString());
               b.setTitle(test.title());
               lessonOpt.ifPresent(lesson -> b.setLesson(lessonsApiProtoBuilder.toSnippet(lesson)));
+              b.setDeadlineDate(Timestamps.fromMillis(test.deadlineDate().toEpochMilli()));
               return b.build();
             });
   }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
@@ -78,8 +79,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
     return Mono.zip(
             homeworkManager
                 .findById(taskId)
-                .switchIfEmpty(
-                    Mono.error(new BusinessLogicNotFoundException("Task with not found"))),
+                .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Task not found"))),
             submissionRepository
                 .findByTaskAndOwner(taskId, publisherId)
                 .map(Optional::of)
@@ -94,8 +94,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
                       }
                       sink.next(user);
                     })
-                .switchIfEmpty(
-                    Mono.error(new BusinessLogicNotFoundException("User with not found"))))
+                .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("User not found"))))
         .flatMap((t) -> upsertSubmission(t.getT1(), t.getT2(), t.getT3(), submissionDate, payload));
   }
 
@@ -112,7 +111,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         homeworkF.flatMap(
             homework -> {
               if (homework.isGroup()) {
-                return teamManager.findById(submissionDb.groupId()).map(Optional::of);
+                return teamManager.findById(submissionDb.teamId()).map(Optional::of);
               } else return Mono.just(Optional.<Team>empty());
             });
 
@@ -134,7 +133,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         homeworkManager.findByIds(submissionsDb.stream().map(SubmissionDB::taskId).toList());
     var groupsF =
         teamManager.findByIds(
-            submissionsDb.stream().map(SubmissionDB::groupId).filter(Objects::nonNull).toList());
+            submissionsDb.stream().map(SubmissionDB::teamId).filter(Objects::nonNull).toList());
     var publishersF =
         userManager.findByIds(submissionsDb.stream().map(SubmissionDB::publisherId).toList());
     return Mono.zip(ownersF, homeworksF, groupsF, publishersF)
@@ -149,7 +148,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
                       submissionDb -> {
                         var owner = owners.get(submissionDb.ownerId());
                         var homework = homeworks.get(submissionDb.taskId());
-                        var group = Optional.ofNullable(groups.get(submissionDb.groupId()));
+                        var group = Optional.ofNullable(groups.get(submissionDb.teamId()));
                         var publisher = publishers.get(submissionDb.publisherId());
                         return buildSubmission(owner, homework, group, publisher, submissionDb);
                       })
@@ -232,7 +231,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
               .publisherId(publisher.id())
               .taskId(hw.id())
               // if the submission became individual, we should remove the group id
-              .groupId(null)
+              .teamId(null)
               .submissionDate(submissionDate)
               .payload(payload.toByteArray())
               .build();
@@ -257,7 +256,81 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       User publisher,
       Instant submissionDate,
       SubmissionPayload payload) {
-    // TODO batch upsert in db
-    return null;
+    return teamManager
+        .findByMember(publisher.id())
+        .collectList()
+        .flatMap(
+            teams -> {
+              if (teams.size() != 1) {
+                return Mono.error(new IllegalStateException("Learner is not in exactly one team"));
+              }
+              var team = teams.getFirst();
+              return doUpsertGroupSubmission(
+                      team,
+                      unfilteredTeammates,
+                      hw,
+                      existingSubmissionOpt,
+                      publisher,
+                      submissionDate,
+                      payload)
+                  .collectList()
+                  .flatMap(
+                      storedSubmissions -> {
+                        if (storedSubmissions.isEmpty()) {
+                          return Mono.error(
+                              new IllegalStateException("Failed to store group submission"));
+                        }
+                        var storedOwnerSubmission =
+                            storedSubmissions.stream()
+                                .filter(submission -> publisher.id().equals(submission.ownerId()))
+                                .findFirst()
+                                .get();
+                        return buildSubmission(storedOwnerSubmission);
+                      });
+            });
+  }
+
+  private Flux<SubmissionDB> doUpsertGroupSubmission(
+      Team team,
+      List<User> unfilteredTeammates,
+      Homework hw,
+      Optional<SubmissionDB> existingSubmissionOpt,
+      User publisher,
+      Instant submissionDate,
+      SubmissionPayload payload) {
+    var filteredTeammates =
+        unfilteredTeammates.stream().filter(user -> UserRole.LEARNER.equals(user.role())).toList();
+
+    // delete existing group submission (task_id, team_id):
+    // this will remove dangling submission for person who left switch the group, and now
+    // somebody
+    // in his new group submitting the same task. (For deduplication reasons, but doing it
+    // only on
+    // new submission not to occasionally clear previous tasks)
+    Mono<Long> removeDanglingSubmissions;
+    if (existingSubmissionOpt.isPresent()) {
+      assert (existingSubmissionOpt.get().teamId() == team.id());
+      assert (existingSubmissionOpt.get().taskId() == hw.id());
+      removeDanglingSubmissions =
+          submissionRepository.deleteAllGroupSubmissions(hw.id(), team.id());
+    } else {
+      removeDanglingSubmissions = Mono.just(0L);
+    }
+
+    var newSubmissions =
+        filteredTeammates.stream()
+            .map(
+                user ->
+                    SubmissionDB.builder()
+                        .taskId(hw.id())
+                        .teamId(team.id())
+                        .ownerId(user.id())
+                        .publisherId(publisher.id())
+                        .submissionDate(submissionDate)
+                        .payload(payload.toByteArray())
+                        .build())
+            .toList();
+
+    return removeDanglingSubmissions.thenMany(submissionRepository.batchUpsert(newSubmissions));
   }
 }

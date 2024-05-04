@@ -2,13 +2,13 @@ package ru.hse.lmsteam.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.http.converter.protobuf.ProtobufJsonFormatHttpMessageConverter;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration
-public class ProtobufHttpSupportConfig {
-
+public class ProtobufHttpSupportConfig implements WebFluxConfigurer {
   @Bean
-  public ProtobufHttpMessageConverter protobufHttpMessageConverter() {
-    return new ProtobufHttpMessageConverter();
+  public ProtobufJsonFormatHttpMessageConverter protobufHttpMessageConverter() {
+    return new ProtobufJsonFormatHttpMessageConverter();
   }
 }

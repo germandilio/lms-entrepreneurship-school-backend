@@ -6,11 +6,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - JWT_SECRET_KEY=asljdflsdfjslfjsq420842kshfksdhfkhw29429429skhfkshfksww29042048skfhskhfksq0482084kxfksdhfkhs290487204skhfkshfks02840284akhjfdkshdfkw09284u092ksdhfks
+      - JWT_SECRET_KEY=
       - JWT_EXPIRATION=86400
-      - SMTP_PASSWORD=jspflaqyuwtlfhfm
-      - SMTP_USERNAME=glmikhaylov@edu.hse.ru
-      - MAIL_SENDING_ENABLED=false
+      - SMTP_PASSWORD=
+      - SMTP_USERNAME=
+      - MAIL_SENDING_ENABLED=true
       - SERVER_PORT=3000
       - MASTER_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@pg-0:5432/lms_db
       - SLAVE_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@pg-1:5432/lms_db?readOnly=true

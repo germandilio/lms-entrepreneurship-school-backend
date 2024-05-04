@@ -16,4 +16,4 @@ create table "users"
     is_deleted        boolean          default false             not null
 );
 
-INSERT INTO users (id, name, surname, sex, email, role) VALUES ('bb7a1698-f64c-4ded-b544-3a9803d74ac1', 'admin', 'admin', 'MALE', 'glmkikhaylov@edu.hse.ru', 'ADMIN') ON CONFLICT DO NOTHING;
+INSERT INTO users (id, name, surname, sex, email, role) VALUES ('bb7a1698-f64c-4ded-b544-3a9803d74ac1', 'admin', 'admin', 'MALE', 'admin', 'ADMIN') ON CONFLICT DO NOTHING;

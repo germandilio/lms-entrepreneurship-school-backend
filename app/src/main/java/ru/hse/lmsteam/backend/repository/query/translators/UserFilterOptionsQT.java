@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,6 +10,11 @@ import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 
 @Component
 public class UserFilterOptionsQT extends AbstractSimpleQueryTranslator<UserFilterOptions> {
+  private static final ImmutableMap<String, String> FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING =
+      ImmutableMap.of(
+          "name", "users.name",
+          "email", "users.email",
+          "role", "users.role");
 
   @Override
   public String translateToSql(UserFilterOptions queryObject, Pageable pageable) {
@@ -23,7 +29,7 @@ public class UserFilterOptionsQT extends AbstractSimpleQueryTranslator<UserFilte
 
     return selectBase
         + withNonDeleted(withAdminNonRetrievable(getWhere(queryObject)))
-        + getOrder(pageable.getSort())
+        + getOrder(pageable.getSort(), FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING)
         + getLimitAndOffset(pageable);
   }
 
@@ -35,16 +41,6 @@ public class UserFilterOptionsQT extends AbstractSimpleQueryTranslator<UserFilte
 
     var selectBase = "SELECT COUNT(*) FROM users";
     return selectBase + withNonDeleted(withAdminNonRetrievable(getWhere(queryObject)));
-  }
-
-  @Override
-  protected String getWhere(UserFilterOptions queryObject) {
-    var whereClause = buildWhereClause(queryObject);
-    if (whereClause == null || whereClause.isEmpty()) {
-      return "";
-    } else {
-      return " WHERE " + whereClause;
-    }
   }
 
   private String withAdminNonRetrievable(String whereClause) {
@@ -63,7 +59,8 @@ public class UserFilterOptionsQT extends AbstractSimpleQueryTranslator<UserFilte
     }
   }
 
-  private String buildWhereClause(UserFilterOptions queryObject) {
+  @Override
+  protected String buildWhereClause(UserFilterOptions queryObject) {
     var nameCriteria =
         Optional.ofNullable(queryObject.namePattern())
             .map(name -> "users.name ILIKE '%" + name + "%'");

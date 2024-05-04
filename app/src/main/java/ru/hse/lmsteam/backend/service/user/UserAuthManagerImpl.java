@@ -57,7 +57,7 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
   public Mono<? extends AuthorizationResult> authorize(String token) {
     return tokenManager
         .getUserId(token)
-        .map(id -> userAuthRepository.findById(id, false))
+        .map(id -> userAuthRepository.findByUserId(id, false))
         .orElse(Mono.empty())
         .map(
             userAuth -> {
@@ -75,7 +75,7 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
   public Mono<? extends AuthorizationResult> tryRetrieveUser(String token) {
     return tokenManager
         .getUserId(token)
-        .map(id -> userAuthRepository.findById(id, false))
+        .map(id -> userAuthRepository.findByUserId(id, false))
         .orElse(Mono.empty())
         .map(
             userAuth -> {
@@ -209,7 +209,7 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
   @Override
   public Mono<UserAuth> onUserChanged(User user) {
     return userAuthRepository
-        .findById(user.id(), true)
+        .findByUserId(user.id(), true)
         .flatMap(dbAuth -> doAuthUpdate(user, dbAuth))
         .switchIfEmpty(register(user))
         .onErrorResume(

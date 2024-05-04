@@ -29,8 +29,6 @@ public class TokenManagerImpl implements TokenManager {
     this.parser = Jwts.parser().verifyWith(getSignInKey()).build();
   }
 
-  // todo plan to avoid using Date class
-
   @Override
   public String createToken(UUID userid) {
     return Jwts.builder()

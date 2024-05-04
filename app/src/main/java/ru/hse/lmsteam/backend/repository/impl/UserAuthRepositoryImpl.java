@@ -36,7 +36,7 @@ public class UserAuthRepositoryImpl implements UserAuthRepository {
   }
 
   @Override
-  public Mono<UserAuth> findById(UUID userId, boolean operateOnMaster) {
+  public Mono<UserAuth> findByUserId(UUID userId, boolean operateOnMaster) {
     if (userId == null) {
       throw new IllegalArgumentException("UserId is null!");
     }

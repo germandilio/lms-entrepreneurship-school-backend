@@ -1,12 +1,23 @@
 package ru.hse.lmsteam.backend.repository.query.translators;
 
+import com.google.common.collect.ImmutableMap;
 import java.time.Instant;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 
 public abstract class AbstractSimpleQueryTranslator<T> implements PlainSQLQueryTranslator<T> {
-  protected abstract String getWhere(T queryObject);
+  protected abstract String buildWhereClause(T queryObject);
+
+  protected String getWhere(T queryObject) {
+    var whereClause = buildWhereClause(queryObject);
+    if (whereClause == null || whereClause.isEmpty()) {
+      return "";
+    } else {
+      return " WHERE " + whereClause;
+    }
+  }
 
   /**
    * Util method to get sql order clause.
@@ -14,18 +25,25 @@ public abstract class AbstractSimpleQueryTranslator<T> implements PlainSQLQueryT
    * @param sort Spring sort default object
    * @return order clause string
    */
-  protected String getOrder(Sort sort) {
+  protected String getOrder(
+      Sort sort, ImmutableMap<String, String> filterPropertyToDbColumnsMapping) {
     if (sort == null || sort.isEmpty()) {
       return "";
     }
     var orderClause = new StringBuilder(" ORDER BY ");
     sort.forEach(
         order -> {
-          orderClause
-              .append(order.getProperty())
-              .append(" ")
-              .append(order.getDirection())
-              .append(", ");
+          var dbColumn = filterPropertyToDbColumnsMapping.get(order.getProperty());
+          if (dbColumn == null) {
+            throw new BusinessLogicExpectationFailedException(
+                "Unknown sort property: " + order.getProperty());
+          } else {
+            orderClause
+                .append(order.getProperty())
+                .append(" ")
+                .append(order.getDirection())
+                .append(", ");
+          }
         });
     // clear last comma
     orderClause.delete(orderClause.length() - 2, orderClause.length());

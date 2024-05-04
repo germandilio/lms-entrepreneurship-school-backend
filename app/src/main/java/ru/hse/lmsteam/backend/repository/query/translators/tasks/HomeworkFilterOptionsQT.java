@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators.tasks;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,12 @@ import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 
 @Component
 public class HomeworkFilterOptionsQT extends AbstractSimpleQueryTranslator<HomeworkFilterOptions> {
+  private static final ImmutableMap<String, String> FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING =
+      ImmutableMap.of(
+          "title", "homeworks.title",
+          "publishDate", "homeworks.publish_date",
+          "deadlineDate", "homeworks.deadline_date",
+          "isGroupWork", "homeworks.is_group");
 
   @Override
   public String translateToSql(HomeworkFilterOptions queryObject, Pageable pageable) {
@@ -21,7 +28,7 @@ public class HomeworkFilterOptionsQT extends AbstractSimpleQueryTranslator<Homew
 
     return "SELECT * FROM homeworks"
         + getWhere(queryObject)
-        + getOrder(pageable.getSort())
+        + getOrder(pageable.getSort(), FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING)
         + getLimitAndOffset(pageable);
   }
 
@@ -34,7 +41,7 @@ public class HomeworkFilterOptionsQT extends AbstractSimpleQueryTranslator<Homew
   }
 
   @Override
-  protected String getWhere(HomeworkFilterOptions queryObject) {
+  protected String buildWhereClause(HomeworkFilterOptions queryObject) {
     var titleCriteria =
         Optional.ofNullable(queryObject.title()).map(title -> " title ILIKE '%" + title + "%'");
     var lessonIdCriteria =
@@ -53,8 +60,6 @@ public class HomeworkFilterOptionsQT extends AbstractSimpleQueryTranslator<Homew
     return Stream.of(
             titleCriteria, lessonIdCriteria, publishDateCriteria, deadlineCriteria, isGroupCriteria)
         .flatMap(Optional::stream)
-        .reduce((a, b) -> a + " AND " + b)
-        .map(s -> " WHERE " + s)
-        .orElse("");
+        .collect(java.util.stream.Collectors.joining(" AND "));
   }
 }

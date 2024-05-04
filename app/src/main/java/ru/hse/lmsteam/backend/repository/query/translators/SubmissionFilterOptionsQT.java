@@ -32,7 +32,7 @@ public class SubmissionFilterOptionsQT
   }
 
   @Override
-  protected String getWhere(SubmissionFilterOptions queryObject) {
+  protected String buildWhereClause(SubmissionFilterOptions queryObject) {
     var ownerCriteria =
         Optional.ofNullable(queryObject.ownerId()).map(ownerId -> "owner_id = '" + ownerId + "'");
 
@@ -42,8 +42,8 @@ public class SubmissionFilterOptionsQT
     var teamCriteria =
         Optional.ofNullable(queryObject.teamId()).map(teamId -> "team_id = '" + teamId + "'");
 
-    var criterias =
-        Stream.of(ownerCriteria, taskCriteria, teamCriteria).flatMap(Optional::stream).toList();
-    return " WHERE " + String.join(" AND ", criterias);
+    return Stream.of(ownerCriteria, taskCriteria, teamCriteria)
+        .flatMap(Optional::stream)
+        .collect(java.util.stream.Collectors.joining(" AND "));
   }
 }
