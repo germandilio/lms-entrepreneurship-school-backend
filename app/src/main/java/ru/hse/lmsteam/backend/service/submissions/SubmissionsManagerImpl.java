@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ import ru.hse.lmsteam.backend.service.teams.TeamManager;
 import ru.hse.lmsteam.backend.service.user.UserManager;
 import ru.hse.lmsteam.schema.api.submissions.SubmissionPayload;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubmissionsManagerImpl implements SubmissionsManager {
@@ -124,7 +126,8 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         .map(
             tuple ->
                 buildSubmission(
-                    tuple.getT1(), tuple.getT2(), tuple.getT3(), tuple.getT4(), submissionDb));
+                    tuple.getT1(), tuple.getT2(), tuple.getT3(), tuple.getT4(), submissionDb))
+        .switchIfEmpty(Mono.error(new IllegalStateException("Failed to build submission")));
   }
 
   private Mono<List<Submission>> buildSubmissions(Collection<SubmissionDB> submissionsDb) {
@@ -153,7 +156,8 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
                         return buildSubmission(owner, homework, group, publisher, submissionDb);
                       })
                   .toList();
-            });
+            })
+        .switchIfEmpty(Mono.error(new IllegalStateException("Failed to build submissions")));
   }
 
   private Submission buildSubmission(
@@ -185,6 +189,10 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       User publisher,
       Instant submissionDate,
       SubmissionPayload payload) {
+    log.info(
+        "Starting upsert submissions for homework {}, publishing by user {}",
+        hw.id(),
+        publisher.id());
     if (!hw.isGroup()) {
       return upsertIndividualSubmission(
           hw, existingSubmissionOpt, publisher, submissionDate, payload);
@@ -192,6 +200,9 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
 
     return teamManager
         .findTeammates(publisher.id())
+        .switchIfEmpty(
+            Mono.error(
+                new IllegalStateException("Failed to find teammates (0 found including self)")))
         .collectList()
         .flatMap(
             unfilteredTeammates -> {
@@ -216,6 +227,10 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       User publisher,
       Instant submissionDate,
       SubmissionPayload payload) {
+    log.info(
+        "Starting upsert individual submission for homework {}, publishing by user {}",
+        hw.id(),
+        publisher.id());
     if (existingSubmissionOpt.isPresent()) {
       var submission = existingSubmissionOpt.get();
       if (!submission.ownerId().equals(publisher.id()) || !submission.taskId().equals(hw.id())) {
@@ -265,6 +280,12 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
                 return Mono.error(new IllegalStateException("Learner is not in exactly one team"));
               }
               var team = teams.getFirst();
+              log.info(
+                  "Starting upsert group submission for homework {}, group {}, publishing by user {}",
+                  hw.id(),
+                  team.id(),
+                  publisher.id());
+
               return doUpsertGroupSubmission(
                       team,
                       unfilteredTeammates,

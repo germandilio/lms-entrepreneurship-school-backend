@@ -15,6 +15,7 @@ import ru.hse.lmsteam.backend.api.v1.schema.SubmissionsControllerDocSchema;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicAccessDeniedException;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicUnauthorizedException;
 import ru.hse.lmsteam.backend.service.model.auth.InternalAuthorizationResult;
 import ru.hse.lmsteam.backend.service.model.submissions.SubmissionFilterOptions;
@@ -44,6 +45,8 @@ public class SubmissionsController implements SubmissionsControllerDocSchema {
             user ->
                 submissionsManager
                     .findById(id)
+                    .switchIfEmpty(
+                        Mono.error(new BusinessLogicNotFoundException("Submission not found.")))
                     .flatMap(submissionsApiProtoBuilder::buildGetSubmissionResponse));
   }
 
@@ -64,6 +67,8 @@ public class SubmissionsController implements SubmissionsControllerDocSchema {
               }
               return submissionsManager
                   .findByTaskAndOwner(taskId, ownerId)
+                  .switchIfEmpty(
+                      Mono.error(new BusinessLogicNotFoundException("Submission not found.")))
                   .flatMap(submissionsApiProtoBuilder::buildGetSubmissionResponse);
             });
   }

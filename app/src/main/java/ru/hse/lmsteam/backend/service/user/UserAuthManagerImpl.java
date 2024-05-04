@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
@@ -248,7 +247,6 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
     } else {
       return userAuthRepository
           .update(updatedUserAuth)
-          .publishOn(Schedulers.boundedElastic())
           .flatMap(
               auth -> {
                 log.info("User auth updated for userId = {}", auth.userId());
