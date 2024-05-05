@@ -56,7 +56,7 @@ public class TeamRepositoryImpl implements TeamRepository {
     if (ids == null) {
       throw new IllegalArgumentException("Id is null!");
     }
-    var idsClause = ids.stream().map(String::valueOf).collect(joining(", ", "(", ")"));
+    var idsClause = ids.stream().map(id -> "'" + id + "'").collect(joining(", ", "(", ")"));
     var sql =
         "SELECT * FROM teams WHERE is_deleted = false AND id IN "
             + idsClause

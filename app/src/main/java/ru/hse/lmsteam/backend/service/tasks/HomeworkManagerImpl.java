@@ -1,6 +1,7 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Homework;
+import ru.hse.lmsteam.backend.repository.SubmissionRepository;
 import ru.hse.lmsteam.backend.repository.impl.tasks.HomeworkRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
@@ -21,6 +23,7 @@ import ru.hse.lmsteam.backend.service.model.tasks.HomeworkFilterOptions;
 @RequiredArgsConstructor
 public class HomeworkManagerImpl implements HomeworkManager {
   private final HomeworkRepository homeworkRepository;
+  private final SubmissionRepository submissionRepository;
   private final LessonManager lessonManager;
 
   @Transactional(readOnly = true)
@@ -104,7 +107,9 @@ public class HomeworkManagerImpl implements HomeworkManager {
     if (assignmentId == null) {
       return Mono.just(0L);
     }
-    return homeworkRepository.delete(assignmentId);
+    return submissionRepository
+        .deleteAllByTaskIds(List.of(assignmentId))
+        .then(homeworkRepository.delete(assignmentId));
   }
 
   @Transactional(readOnly = true)

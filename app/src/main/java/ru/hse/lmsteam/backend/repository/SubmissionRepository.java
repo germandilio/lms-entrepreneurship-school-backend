@@ -16,6 +16,8 @@ public interface SubmissionRepository {
 
   Mono<SubmissionDB> findByTaskAndOwner(UUID taskId, UUID ownerId);
 
+  Flux<SubmissionDB> findAllByTaskIds(Collection<UUID> taskId);
+
   Mono<Page<SubmissionDB>> findAll(SubmissionFilterOptions filterOptions, Pageable pageable);
 
   Mono<SubmissionDB> upsert(SubmissionDB submission);
@@ -23,4 +25,6 @@ public interface SubmissionRepository {
   Flux<SubmissionDB> batchUpsert(Collection<SubmissionDB> submissions);
 
   Mono<Long> deleteAllGroupSubmissions(UUID taskId, UUID groupId);
+
+  Mono<Long> deleteAllByTaskIds(Collection<UUID> taskIds);
 }

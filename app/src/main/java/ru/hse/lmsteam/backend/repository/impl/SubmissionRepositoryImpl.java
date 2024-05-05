@@ -55,6 +55,15 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
   }
 
   @Override
+  public Flux<SubmissionDB> findAllByTaskIds(Collection<UUID> taskIds) {
+    if (taskIds == null) {
+      throw new IllegalArgumentException("Task id is null!");
+    }
+
+    return this.db.slave.select(query(where("task_id").in(taskIds)), SubmissionDB.class);
+  }
+
+  @Override
   public Mono<Page<SubmissionDB>> findAll(
       SubmissionFilterOptions filterOptions, Pageable pageable) {
     if (filterOptions == null) {
@@ -105,7 +114,7 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
     var preparedSubmissions =
         submissions.stream().map(s -> s.id() == null ? s.withId(UUID.randomUUID()) : s).toList();
 
-    return db.slave
+    return db.master
         .getDatabaseClient()
         .sql(buildBatchUpsertQuery(preparedSubmissions))
         .bindValues(buildParameters(preparedSubmissions))
@@ -127,6 +136,15 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
         query(where("task_id").is(taskId).and("team_id").is(groupId)), SubmissionDB.class);
   }
 
+  @Override
+  public Mono<Long> deleteAllByTaskIds(Collection<UUID> taskIds) {
+    if (taskIds == null) {
+      throw new IllegalArgumentException("Task id is null!");
+    }
+
+    return this.db.master.delete(query(where("task_id").in(taskIds)), SubmissionDB.class);
+  }
+
   private String buildBatchUpsertQuery(Collection<SubmissionDB> submissions) {
     var SqlTemplateNames =
         "(id, task_id, owner_id, publisher_id, team_id, submission_date, payload)";
@@ -139,7 +157,7 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
         + getSqlTemplates(submissions.size())
         + " ON CONFLICT (id) DO UPDATE SET "
         + doSetUpdateClause
-        + " RETURNING *";
+        + " RETURNING submissions.*";
   }
 
   private String getSqlTemplates(int valuesCount) {
@@ -170,20 +188,20 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
       throw new IllegalArgumentException("Submissions are null!");
     }
 
-    var parameters = new HashMap<String, Parameter>(submissions.size());
+    var parameters = new HashMap<String, Parameter>(submissions.size() * 9);
     var index = 0;
     for (var submission : submissions) {
-      parameters.put(":submission" + index, Parameters.in(submission.id()));
-      parameters.put(":task" + index, Parameters.in(submission.taskId()));
-      parameters.put(":owner" + index, Parameters.in(submission.ownerId()));
-      parameters.put(":publisher" + index, Parameters.in(submission.publisherId()));
+      parameters.put("submission" + index, Parameters.in(submission.id()));
+      parameters.put("task" + index, Parameters.in(submission.taskId()));
+      parameters.put("owner" + index, Parameters.in(submission.ownerId()));
+      parameters.put("publisher" + index, Parameters.in(submission.publisherId()));
       if (submission.teamId() == null) {
-        parameters.put(":team" + index, Parameters.in(UUID.class));
+        parameters.put("team" + index, Parameters.in(UUID.class));
       } else {
-        parameters.put(":team" + index, Parameters.in(submission.teamId()));
+        parameters.put("team" + index, Parameters.in(submission.teamId()));
       }
-      parameters.put(":submissionDate" + index, Parameters.in(submission.submissionDate()));
-      parameters.put(":payload" + index, Parameters.in(submission.payload()));
+      parameters.put("submissionDate" + index, Parameters.in(submission.submissionDate()));
+      parameters.put("payload" + index, Parameters.in(submission.payload()));
       index++;
     }
     return parameters;

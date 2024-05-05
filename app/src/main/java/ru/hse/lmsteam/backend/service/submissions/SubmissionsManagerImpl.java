@@ -314,6 +314,10 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
             });
   }
 
+  // TODO подумать а нужно ли автоматически привязывать group submission для человека, который
+  // перешел в другую группу до дедлайна задания. (тогда + чистка старого сабмишена в рамках прошлой
+  // команды)
+
   private Flux<SubmissionDB> doUpsertGroupSubmission(
       Team team,
       List<User> unfilteredTeammates,

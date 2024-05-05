@@ -9,15 +9,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple3;
 import ru.hse.lmsteam.backend.domain.Lesson;
 import ru.hse.lmsteam.backend.repository.LessonRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;
+import ru.hse.lmsteam.backend.service.tasks.HomeworkDeleteManager;
+import ru.hse.lmsteam.backend.service.tasks.TestDeleteManager;
 
 @Service
 @RequiredArgsConstructor
 public class LessonManagerImpl implements LessonManager {
+  private final HomeworkDeleteManager homeworkManager;
+  private final TestDeleteManager testManager;
   private final LessonRepository lessonRepository;
 
   @Transactional(readOnly = true)
@@ -78,7 +83,12 @@ public class LessonManagerImpl implements LessonManager {
     if (lessonId == null) {
       return Mono.just(0L);
     }
-    return lessonRepository.delete(lessonId);
+
+    return Mono.zip(
+            homeworkManager.deleteAllByLessonId(lessonId),
+            testManager.deleteAllByLessonId(lessonId),
+            lessonRepository.delete(lessonId))
+        .map(Tuple3::getT3);
   }
 
   @Transactional(readOnly = true)

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.tasks.Test;
 import ru.hse.lmsteam.backend.repository.query.translators.PlainSQLQueryTranslator;
@@ -26,5 +27,13 @@ public class TestRepository extends AbstractTasksRepository<Test, UUID, TestFilt
     }
 
     return db.slave.select(query(where("lesson_id").is(lessonId)), Test.class);
+  }
+
+  public Mono<Long> deleteAllByLessonId(UUID lessonId) {
+    if (lessonId == null) {
+      return Mono.just(0L);
+    }
+
+    return db.master.delete(query(where("lesson_id").is(lessonId)), Test.class);
   }
 }

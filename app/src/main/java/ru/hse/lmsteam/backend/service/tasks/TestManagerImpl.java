@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Test;
+import ru.hse.lmsteam.backend.repository.SubmissionRepository;
 import ru.hse.lmsteam.backend.repository.impl.tasks.TestRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
@@ -18,6 +20,7 @@ import ru.hse.lmsteam.backend.service.model.tasks.TestFilterOptions;
 @Service
 @RequiredArgsConstructor
 public class TestManagerImpl implements TestManager {
+  private final SubmissionRepository submissionRepository;
   private final TestRepository testRepository;
   private final LessonManager lessonManager;
 
@@ -92,7 +95,9 @@ public class TestManagerImpl implements TestManager {
     if (assignmentId == null) {
       return Mono.just(0L);
     }
-    return testRepository.delete(assignmentId);
+    return submissionRepository
+        .deleteAllByTaskIds(List.of(assignmentId))
+        .then(testRepository.delete(assignmentId));
   }
 
   @Transactional(readOnly = true)
