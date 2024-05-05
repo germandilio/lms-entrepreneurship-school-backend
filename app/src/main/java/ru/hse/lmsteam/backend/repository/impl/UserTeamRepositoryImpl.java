@@ -48,6 +48,21 @@ public class UserTeamRepositoryImpl implements UserTeamRepository {
   }
 
   @Override
+  public Flux<User> getTeammates(UUID memberId) {
+    if (memberId == null) {
+      throw new IllegalArgumentException("MemberId is null!");
+    }
+
+    return db.slave
+        .getDatabaseClient()
+        .sql(
+            "SELECT DISTINCT ON (users.id) users.* FROM users_teams LEFT JOIN users ON users.id = users_teams.user_id WHERE team_id IN (SELECT team_id FROM users_teams WHERE user_id = :memberId)")
+        .bind("memberId", memberId)
+        .mapProperties(User.class)
+        .all();
+  }
+
+  @Override
   public Flux<UUID> setUserTeamMemberships(UUID teamId, ImmutableSet<UUID> userIds) {
     if (teamId == null) {
       throw new IllegalArgumentException("GroupId is null!");

@@ -53,8 +53,6 @@ public class UsersController implements UsersControllerDocSchema {
     return usersManager.create(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
   }
 
-  // TODO починить update на юзере
-
   /**
    * If user entity provided without ID, or if there is no entity with provided ID method will fall
    * back to createUser logic.
@@ -77,8 +75,6 @@ public class UsersController implements UsersControllerDocSchema {
         .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("User not found.")))
         .map(usersApiProtoBuilder::buildDeleteUserResponse);
   }
-
-  // TODO protection over inconsistent properties and sql injections
 
   @GetMapping("/list")
   @Override

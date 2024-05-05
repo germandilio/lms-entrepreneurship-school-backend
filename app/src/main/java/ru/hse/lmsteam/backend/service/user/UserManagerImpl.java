@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -50,6 +47,16 @@ public class UserManagerImpl implements UserManager {
       return Mono.empty();
     }
     return userRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, User>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return userRepository.findByIds(ids).collectMap(User::id);
   }
 
   @Transactional(readOnly = true)
@@ -96,7 +103,19 @@ public class UserManagerImpl implements UserManager {
         .doOnNext(userValidator::validateForSave)
         .flatMap(userRepository::upsert)
         .flatMap(id -> userRepository.findById(id, false))
-        .flatMap(user -> userAuthManager.onUserChanged(user).thenReturn(user));
+        .flatMap(user -> userAuthManager.onUserChanged(user).thenReturn(user))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "User with login"
+                            + userUpsertModel.email()
+                            + " already exists. Cannot update user."));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional

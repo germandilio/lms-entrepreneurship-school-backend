@@ -1,13 +1,15 @@
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <include file="tables/users/users.sql" relativeToChangelogFile="true" />
-    <include file="tables/users_auth/users_auth.sql" relativeToChangelogFile="true" />
-    <include file="tables/teams/teams.sql" relativeToChangelogFile="true" />
-    <include file="tables/users_teams/users_teams.sql" relativeToChangelogFile="true" />
-    <include file="tables/lessons/lessons.sql" relativeToChangelogFile="true" />
-    <include file="tables/homeworks/homeworks.sql" relativeToChangelogFile="true" />
-    <include file="tables/tests/tests.sql" relativeToChangelogFile="true" />
-    <include file="tables/exams/exams.sql" relativeToChangelogFile="true" />
-    <include file="tables/competitions/competitions.sql" relativeToChangelogFile="true" />
-    <include file="tables/users_auth/add_token_index.sql" relativeToChangelogFile="true" />
+    <include file="tables/users/users.sql" relativeToChangelogFile="true"/>
+    <include file="tables/users_auth/users_auth.sql" relativeToChangelogFile="true"/>
+    <include file="tables/teams/teams.sql" relativeToChangelogFile="true"/>
+    <include file="tables/users_teams/users_teams.sql" relativeToChangelogFile="true"/>
+    <include file="tables/lessons/lessons.sql" relativeToChangelogFile="true"/>
+    <include file="tables/homeworks/homeworks.sql" relativeToChangelogFile="true"/>
+    <include file="tables/tests/tests.sql" relativeToChangelogFile="true"/>
+    <include file="tables/exams/exams.sql" relativeToChangelogFile="true"/>
+    <include file="tables/competitions/competitions.sql" relativeToChangelogFile="true"/>
+    <include file="tables/users_auth/add_token_index.sql" relativeToChangelogFile="true"/>
+    <include file="tables/submissions/submissions.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>

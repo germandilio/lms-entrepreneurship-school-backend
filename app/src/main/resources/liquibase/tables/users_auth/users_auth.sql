@@ -12,4 +12,4 @@ create table "users_auth"
     is_deleted           boolean default false
 );
 
-INSERT INTO users_auth (user_id, login, password, role) VALUES ('bb7a1698-f64c-4ded-b544-3a9803d74ac1', 'glmikhaylov@edu.hse.ru', '$2a$10$5Mp6R8wN5J8t/TF9iZEEZeBb9wfpCG/tOYKk7UyYPVbHhKAcymac2', 'ADMIN') ON CONFLICT DO NOTHING;
+INSERT INTO users_auth (user_id, login, password, role) VALUES ('bb7a1698-f64c-4ded-b544-3a9803d74ac1', 'admin', '$2a$10$5Mp6R8wN5J8t/TF9iZEEZeBb9wfpCG/tOYKk7UyYPVbHhKAcymac2', 'ADMIN') ON CONFLICT DO NOTHING;

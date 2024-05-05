@@ -5,7 +5,7 @@ plugins {
 
 protobuf {
 	protoc {
-		artifact = 'com.google.protobuf:protoc:3.25.3'
+		artifact = 'com.google.protobuf:protoc:4.26.1'
 	}
 }
 
@@ -13,5 +13,5 @@ spotlessJava.enabled = false
 spotlessJavaCheck.enabled = false
 
 dependencies {
-	api 'com.google.protobuf:protobuf-java:3.25.3'
+	api 'com.google.protobuf:protobuf-java:4.26.1'
 }

@@ -5,6 +5,7 @@ import static org.springframework.data.relational.core.query.Query.query;
 
 import com.google.common.collect.ImmutableSet;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
     return db.slave.selectOne(
         query(where("id").is(id).and(where("is_deleted").isFalse())), User.class);
+  }
+
+  @Override
+  public Flux<User> findByIds(Collection<UUID> ids) {
+    if (ids == null) {
+      throw new IllegalArgumentException("Ids is null!");
+    }
+    return db.slave.select(
+        query(where("id").in(ids).and(where("is_deleted").isFalse())), User.class);
   }
 
   @Override

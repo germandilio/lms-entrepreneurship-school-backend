@@ -59,7 +59,9 @@ public class UserAuthController {
   }
 
   @GetMapping("/check-token")
-  public Mono<Boolean> checkToken(@RequestParam String token) {
+  public Mono<Boolean> checkToken(@RequestHeader("Authorization") String rawToken) {
+    // remove "Bearer " prefix
+    var token = rawToken.substring(7);
     return userAuthManager.authorize(token).map(AuthorizationResult::isAuthorized);
   }
 }

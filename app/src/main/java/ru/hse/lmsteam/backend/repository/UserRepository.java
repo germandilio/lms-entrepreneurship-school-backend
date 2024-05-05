@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.repository;
 
 import com.google.common.collect.ImmutableSet;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,8 @@ import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 
 public interface UserRepository {
   Mono<User> findById(UUID id);
+
+  Flux<User> findByIds(Collection<UUID> ids);
 
   Mono<BigDecimal> getUserBalance(UUID id);
 

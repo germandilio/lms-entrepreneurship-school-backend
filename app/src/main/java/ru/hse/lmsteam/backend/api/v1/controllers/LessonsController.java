@@ -1,6 +1,6 @@
 package ru.hse.lmsteam.backend.api.v1.controllers;
 
-import java.time.LocalDate;
+import java.time.*;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -30,7 +30,7 @@ public class LessonsController implements LessonsControllerDocSchema {
     return lessonManager
         .findById(id)
         .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Lesson not found.")))
-        .map(lessonsApiProtoConverter::buildGetLessonResponse);
+        .flatMap(lessonsApiProtoConverter::buildGetLessonResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -39,26 +39,21 @@ public class LessonsController implements LessonsControllerDocSchema {
       @RequestBody CreateOrUpdateLesson.Request request) {
     return lessonManager
         .create(lessonsApiProtoConverter.retrieveCreateModel(request))
-        .map(
-            lesson ->
-                CreateOrUpdateLesson.Response.newBuilder()
-                    .setLesson(lessonsApiProtoConverter.map(lesson))
-                    .build());
+        .flatMap(lessonsApiProtoConverter::map)
+        .map(l -> CreateOrUpdateLesson.Response.newBuilder().setLesson(l).build());
   }
 
   @PutMapping(
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE},
       path = "/{id}")
   @Override
-  public Mono<UpdateLesson.Response> updateLesson(
-      @PathVariable UUID id, @RequestBody UpdateLesson.Request request) {
+  public Mono<CreateOrUpdateLesson.Response> updateLesson(
+      @PathVariable UUID id, @RequestBody CreateOrUpdateLesson.Request request) {
+    var lesson = lessonsApiProtoConverter.retrieveCreateModel(request).withId(id);
     return lessonManager
-        .update(lessonsApiProtoConverter.map(id, request.getLesson()))
-        .map(
-            lesson ->
-                UpdateLesson.Response.newBuilder()
-                    .setLesson(lessonsApiProtoConverter.map(lesson))
-                    .build());
+        .update(lesson)
+        .flatMap(lessonsApiProtoConverter::map)
+        .map(l -> CreateOrUpdateLesson.Response.newBuilder().setLesson(l).build());
   }
 
   @DeleteMapping("/{id}")
@@ -76,13 +71,15 @@ public class LessonsController implements LessonsControllerDocSchema {
   public Mono<GetLessons.Response> getLessons(
       @RequestParam(required = false) Integer lessonNumber,
       @RequestParam(required = false) String title,
-      @RequestParam(required = false) LocalDate publishDate,
+      @RequestParam(required = false) Instant publishDateFrom,
+      @RequestParam(required = false) Instant publishDateTo,
       Pageable pageable) {
     var filterOptions =
         LessonsFilterOptions.builder()
             .lessonNumber(lessonNumber)
             .title(title)
-            .publishDate(publishDate)
+            .publishDateFrom(publishDateFrom)
+            .publishDateTimeTo(publishDateTo)
             .build();
     return lessonManager
         .findAll(filterOptions, pageable)

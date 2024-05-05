@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators.tasks;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,11 @@ import ru.hse.lmsteam.backend.service.model.tasks.ExamFilterOptions;
 
 @Component
 public class ExamFilterOptionsQT extends AbstractSimpleQueryTranslator<ExamFilterOptions> {
+  private static final ImmutableMap<String, String> FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING =
+      ImmutableMap.of(
+          "title", "exams.title",
+          "publishDate", "exams.publish_date",
+          "deadlineDate", "exams.deadline_date");
 
   @Override
   public String translateToSql(ExamFilterOptions queryObject, Pageable pageable) {
@@ -21,7 +27,7 @@ public class ExamFilterOptionsQT extends AbstractSimpleQueryTranslator<ExamFilte
 
     return "SELECT * FROM exams"
         + getWhere(queryObject)
-        + getOrder(pageable.getSort())
+        + getOrder(pageable.getSort(), FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING)
         + getLimitAndOffset(pageable);
   }
 
@@ -34,7 +40,7 @@ public class ExamFilterOptionsQT extends AbstractSimpleQueryTranslator<ExamFilte
   }
 
   @Override
-  protected String getWhere(ExamFilterOptions queryObject) {
+  protected String buildWhereClause(ExamFilterOptions queryObject) {
     var titleCriteria =
         Optional.ofNullable(queryObject.title()).map(title -> " title ILIKE '%" + title + "%'");
 
@@ -47,8 +53,6 @@ public class ExamFilterOptionsQT extends AbstractSimpleQueryTranslator<ExamFilte
 
     return Stream.of(titleCriteria, publishDateCriteria, deadlineCriteria)
         .flatMap(Optional::stream)
-        .reduce((a, b) -> a + " AND " + b)
-        .map(s -> " WHERE " + s)
-        .orElse("");
+        .collect(java.util.stream.Collectors.joining(" AND "));
   }
 }

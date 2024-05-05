@@ -2,6 +2,8 @@ package ru.hse.lmsteam.backend.service.teams;
 
 import com.google.common.collect.ImmutableSet;
 import jakarta.validation.ValidationException;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -39,13 +41,42 @@ public class TeamManagerImpl implements TeamManager {
     return teamRepository.findById(id);
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Team>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return teamRepository.findByIds(ImmutableSet.copyOf(ids), false).collectMap(Team::id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Team> findByMember(UUID memberId) {
+    if (memberId == null) {
+      throw new IllegalArgumentException("MemberId cannot be null.");
+    }
+
+    return userTeamRepository.getUserTeams(memberId);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<User> findTeammates(UUID memberId) {
+    if (memberId == null) {
+      throw new IllegalArgumentException("MemberId cannot be null.");
+    }
+
+    return userTeamRepository.getTeammates(memberId);
+  }
+
   @Transactional
   @Override
   public Mono<Tuple2<Team, SetUserTeamMembershipResponse>> update(
       final Team team, final ImmutableSet<UUID> memberIds) {
     if (team == null) {
-      throw new IllegalArgumentException(
-          "Group object is mandatory for update / create operations.");
+      throw new IllegalArgumentException("Team is mandatory for update / create operations.");
     }
     teamValidator.validateForSave(team);
     return teamRepository

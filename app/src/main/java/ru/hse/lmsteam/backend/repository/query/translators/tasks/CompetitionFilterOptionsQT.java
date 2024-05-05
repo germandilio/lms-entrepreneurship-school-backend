@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators.tasks;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,12 @@ import ru.hse.lmsteam.backend.service.model.tasks.CompetitionFilterOptions;
 @Component
 public class CompetitionFilterOptionsQT
     extends AbstractSimpleQueryTranslator<CompetitionFilterOptions> {
+  private final ImmutableMap<String, String> FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING =
+      ImmutableMap.of(
+          "title", "competitions.title",
+          "publishDate", "competitions.publish_date",
+          "deadlineDate", "competitions.deadline_date");
+
   @Override
   public String translateToSql(CompetitionFilterOptions queryObject, Pageable pageable) {
     if (queryObject == null) {
@@ -21,7 +28,7 @@ public class CompetitionFilterOptionsQT
 
     return "SELECT * FROM competitions"
         + getWhere(queryObject)
-        + getOrder(pageable.getSort())
+        + getOrder(pageable.getSort(), FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING)
         + getLimitAndOffset(pageable);
   }
 
@@ -34,7 +41,7 @@ public class CompetitionFilterOptionsQT
   }
 
   @Override
-  protected String getWhere(CompetitionFilterOptions queryObject) {
+  protected String buildWhereClause(CompetitionFilterOptions queryObject) {
     var titleCriteria =
         Optional.ofNullable(queryObject.title()).map(title -> " title ILIKE '%" + title + "%'");
 
@@ -47,8 +54,6 @@ public class CompetitionFilterOptionsQT
 
     return Stream.of(titleCriteria, publishDateCriteria, deadlineCriteria)
         .flatMap(Optional::stream)
-        .reduce((a, b) -> a + " AND " + b)
-        .map(s -> " WHERE " + s)
-        .orElse("");
+        .collect(java.util.stream.Collectors.joining(" AND "));
   }
 }

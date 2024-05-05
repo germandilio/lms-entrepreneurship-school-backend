@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,6 +10,12 @@ import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;
 
 @Component
 public class LessonsFilterOptionsQT extends AbstractSimpleQueryTranslator<LessonsFilterOptions> {
+  private static final ImmutableMap<String, String> FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING =
+      ImmutableMap.of(
+          "title", "lessons.title",
+          "lessonNumber", "lessons.lesson_number",
+          "publishDate", "lessons.publish_date");
+
   @Override
   public String translateToSql(LessonsFilterOptions queryObject, Pageable pageable) {
     if (queryObject == null) {
@@ -21,7 +28,7 @@ public class LessonsFilterOptionsQT extends AbstractSimpleQueryTranslator<Lesson
     var selectBase = "SELECT lessons.* FROM lessons";
     return selectBase
         + getWhere(queryObject)
-        + getOrder(pageable.getSort())
+        + getOrder(pageable.getSort(), FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING)
         + getLimitAndOffset(pageable);
   }
 
@@ -35,25 +42,15 @@ public class LessonsFilterOptionsQT extends AbstractSimpleQueryTranslator<Lesson
   }
 
   @Override
-  protected String getWhere(LessonsFilterOptions queryObject) {
-    var whereClause = buildWhereClause(queryObject);
-    if (whereClause == null || whereClause.isEmpty()) {
-      return "";
-    } else {
-      return " WHERE " + whereClause;
-    }
-  }
-
-  private String buildWhereClause(LessonsFilterOptions options) {
+  protected String buildWhereClause(LessonsFilterOptions options) {
     var titleCriteria =
-        Optional.ofNullable(options.title())
-            .map(title -> "lessons.projectTheme ILIKE '%" + title + "%'");
+        Optional.ofNullable(options.title()).map(title -> "lessons.title ILIKE '%" + title + "%'");
     var numberCriteria =
         Optional.ofNullable(options.lessonNumber())
             .map(number -> "lessons.lesson_number = " + number);
     var publishDateCriteria =
-        Optional.ofNullable(options.publishDate())
-            .map(date -> "lessons.publish_date = '" + date + "'");
+        getTimestampRangeClause(
+            options.publishDateFrom(), options.publishDateTimeTo(), "lessons.publish_date");
 
     return Stream.of(titleCriteria, numberCriteria, publishDateCriteria)
         .flatMap(Optional::stream)

@@ -1,6 +1,8 @@
 package ru.hse.lmsteam.backend.service.teams;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,20 @@ import ru.hse.lmsteam.backend.service.model.teams.TeamsFilterOptions;
 
 public interface TeamManager {
   Mono<Team> findById(UUID id);
+
+  Mono<Map<UUID, Team>> findByIds(Collection<UUID> id);
+
+  Flux<Team> findByMember(UUID memberId);
+
+  /**
+   * Find teammates of all groups that he is a member including himself.
+   *
+   * @param memberId member id
+   * @return If member role is LEARNER, return all teammates for the group (including trackers). If
+   *     member role is TRACKER, return all team members of all the groups that he tracks (including
+   *     himself and other trackers). If member is ADMIN - no team members are returned.
+   */
+  Flux<User> findTeammates(UUID memberId);
 
   Mono<Tuple2<Team, SetUserTeamMembershipResponse>> update(Team team, ImmutableSet<UUID> memberIds);
 

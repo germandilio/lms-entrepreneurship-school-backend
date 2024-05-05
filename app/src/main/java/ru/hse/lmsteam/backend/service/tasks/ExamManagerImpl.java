@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.service.tasks;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Exam;
 import ru.hse.lmsteam.backend.repository.impl.tasks.ExamRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.model.tasks.ExamFilterOptions;
 
 @RequiredArgsConstructor
@@ -32,7 +34,18 @@ public class ExamManagerImpl implements ExamManager {
       return Mono.empty();
     }
 
-    return examRepository.create(assignment);
+    return examRepository
+        .create(assignment)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Exam with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional
@@ -42,7 +55,18 @@ public class ExamManagerImpl implements ExamManager {
       return Mono.empty();
     }
 
-    return examRepository.update(assignment);
+    return examRepository
+        .update(assignment)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Exam with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional

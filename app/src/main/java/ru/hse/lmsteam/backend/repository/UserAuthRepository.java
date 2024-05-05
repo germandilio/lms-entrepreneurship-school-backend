@@ -9,7 +9,7 @@ public interface UserAuthRepository {
 
   Mono<UserAuth> findByLogin(String login, boolean operateOnMaster, boolean shouldIncludeDeleted);
 
-  Mono<UserAuth> findById(UUID userId, boolean operateOnMaster);
+  Mono<UserAuth> findByUserId(UUID userId, boolean operateOnMaster);
 
   Mono<UserAuth> findByToken(UUID token);
 

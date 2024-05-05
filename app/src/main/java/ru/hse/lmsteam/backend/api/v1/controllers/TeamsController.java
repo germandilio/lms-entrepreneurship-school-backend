@@ -43,7 +43,7 @@ public class TeamsController implements TeamsControllerDocSchema {
         .flatMap(t -> teamsApiProtoBuilder.buildGetTeamResponse(t, true));
   }
 
-  @PostMapping
+  @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
   public Mono<CreateOrUpdateTeam.Response> createTeam(
       @RequestBody CreateOrUpdateTeam.Request request) {
@@ -59,7 +59,9 @@ public class TeamsController implements TeamsControllerDocSchema {
                 teamsApiProtoBuilder.buildCreateOrUpdateTeamResponse(tuple.getT1(), tuple.getT2()));
   }
 
-  @PatchMapping("/{id}")
+  @PatchMapping(
+      path = "/{id}",
+      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
   @Override
   public Mono<CreateOrUpdateTeam.Response> updateTeam(
       @PathVariable UUID id, @RequestBody CreateOrUpdateTeam.Request request) {

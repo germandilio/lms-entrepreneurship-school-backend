@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
-import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
-import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
-import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicUnauthorizedException;
+import ru.hse.lmsteam.backend.service.exceptions.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -25,10 +22,21 @@ public class CommonExceptionsControllersHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
   }
 
-  @ExceptionHandler({BusinessLogicExpectationFailedException.class, IllegalArgumentException.class})
+  @ExceptionHandler(BusinessLogicAccessDeniedException.class)
+  public ResponseEntity<?> handleAccessDeniedException(BusinessLogicAccessDeniedException e) {
+    log.info("Access denied exception");
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+  }
+
+  @ExceptionHandler(BusinessLogicExpectationFailedException.class)
   public ResponseEntity<?> handleExpectationFailedException(
       BusinessLogicExpectationFailedException e) {
     log.info("Expectations failed exception");
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
   }
 

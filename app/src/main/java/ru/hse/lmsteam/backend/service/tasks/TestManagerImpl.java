@@ -1,20 +1,26 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Test;
+import ru.hse.lmsteam.backend.repository.SubmissionRepository;
 import ru.hse.lmsteam.backend.repository.impl.tasks.TestRepository;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.backend.service.model.tasks.TestFilterOptions;
 
 @Service
 @RequiredArgsConstructor
 public class TestManagerImpl implements TestManager {
+  private final SubmissionRepository submissionRepository;
   private final TestRepository testRepository;
   private final LessonManager lessonManager;
 
@@ -27,6 +33,16 @@ public class TestManagerImpl implements TestManager {
     return testRepository.findById(id);
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Test> findTestsByLesson(UUID lessonId) {
+    if (lessonId == null) {
+      return Flux.empty();
+    }
+
+    return testRepository.findTasksByLesson(lessonId);
+  }
+
   @Transactional
   @Override
   public Mono<Test> create(Test assignment) {
@@ -37,7 +53,17 @@ public class TestManagerImpl implements TestManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(testRepository.create(assignment));
+        .then(testRepository.create(assignment))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Test with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional
@@ -50,7 +76,17 @@ public class TestManagerImpl implements TestManager {
     return lessonManager
         .findById(assignment.lessonId())
         .switchIfEmpty(Mono.error(new IllegalArgumentException("Lesson not found!")))
-        .then(testRepository.update(assignment));
+        .then(testRepository.update(assignment))
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "Test with the title" + assignment.title() + " already exists"));
+              } else {
+                return Mono.error(exc);
+              }
+            });
   }
 
   @Transactional
@@ -59,7 +95,9 @@ public class TestManagerImpl implements TestManager {
     if (assignmentId == null) {
       return Mono.just(0L);
     }
-    return testRepository.delete(assignmentId);
+    return submissionRepository
+        .deleteAllByTaskIds(List.of(assignmentId))
+        .then(testRepository.delete(assignmentId));
   }
 
   @Transactional(readOnly = true)

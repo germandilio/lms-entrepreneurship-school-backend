@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
@@ -57,7 +56,7 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
   public Mono<? extends AuthorizationResult> authorize(String token) {
     return tokenManager
         .getUserId(token)
-        .map(id -> userAuthRepository.findById(id, false))
+        .map(id -> userAuthRepository.findByUserId(id, false))
         .orElse(Mono.empty())
         .map(
             userAuth -> {
@@ -75,7 +74,7 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
   public Mono<? extends AuthorizationResult> tryRetrieveUser(String token) {
     return tokenManager
         .getUserId(token)
-        .map(id -> userAuthRepository.findById(id, false))
+        .map(id -> userAuthRepository.findByUserId(id, false))
         .orElse(Mono.empty())
         .map(
             userAuth -> {
@@ -188,6 +187,16 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
 
     return userAuthRepository
         .insert(userAuth)
+        .onErrorResume(
+            exc -> {
+              if (exc instanceof DuplicateKeyException) {
+                return Mono.error(
+                    new BusinessLogicConflictException(
+                        "UserAuth with the same login already exists!"));
+              }
+
+              return Mono.error(exc);
+            })
         .map(
             auth -> {
               log.info("User auth created for userId = {}", auth.userId());
@@ -199,7 +208,7 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
   @Override
   public Mono<UserAuth> onUserChanged(User user) {
     return userAuthRepository
-        .findById(user.id(), true)
+        .findByUserId(user.id(), true)
         .flatMap(dbAuth -> doAuthUpdate(user, dbAuth))
         .switchIfEmpty(register(user))
         .onErrorResume(
@@ -238,7 +247,6 @@ public class UserAuthManagerImpl implements UserAuthManager, UserAuthInternal {
     } else {
       return userAuthRepository
           .update(updatedUserAuth)
-          .publishOn(Schedulers.boundedElastic())
           .flatMap(
               auth -> {
                 log.info("User auth updated for userId = {}", auth.userId());
