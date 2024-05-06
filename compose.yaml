@@ -6,14 +6,14 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - JWT_SECRET_KEY=sadklfhasl2389462klsdhfls23947230skalhfaksj290472390askdhfklsh2093742sklhflkasdh20947230sdkahfklahs20394729salkhdfkla239047230klsdahfkls2390472klsdhfl23904723kladshf239047klsdhjf
+      - JWT_SECRET_KEY=
       - JWT_EXPIRATION=86400
-      - SMTP_PASSWORD=jspflaqyuwtlfhfm
-      - SMTP_USERNAME=glmikhaylov@edu.hse.ru
+      - SMTP_PASSWORD=
+      - SMTP_USERNAME=
       - MAIL_SENDING_ENABLED=true
       - SERVER_PORT=3000
-      - MASTER_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@pg-0:5432/lms_db
-      - SLAVE_URL=r2dbc:postgresql://lms_dev_backend:lms_backend_dev_password@pg-1:5432/lms_db?readOnly=true
+      - MASTER_URL=r2dbc:pool:postgresql://lms_dev_backend:lms_backend_dev_password@pg-0:5432/lms_db
+      - SLAVE_URL=r2dbc:pool:postgresql://lms_dev_backend:lms_backend_dev_password@pg-1:5432/lms_db?readOnly=true
       - POSTGRESQL_PASSWORD=lms_backend_dev_password
       - POSTGRESQL_USERNAME=lms_dev_backend
       - R2DBC_LIQUIBASE_URL=r2dbc:postgresql://pg-0:5432/lms_db
@@ -69,6 +69,53 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  tempo:
+    image: grafana/tempo
+    extra_hosts: [ '172.17.0.1:host-gateway' ]
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - /usr/local/docker/tempo/tempo-local.yaml:/etc/tempo.yaml:ro
+    ports:
+      - "14268"  # jaeger ingest
+      - "9411:9411" # zipkin
+
+  loki:
+    image: grafana/loki
+    extra_hosts: [ '172.17.0.1:host-gateway' ]
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
+    ports:
+      - "3100:3100"                                   # loki needs to be exposed so it receives logs
+    environment:
+      - JAEGER_AGENT_HOST=tempo
+      - JAEGER_ENDPOINT=http://tempo:14268/api/traces # send traces to Tempo
+      - JAEGER_SAMPLER_TYPE=const
+      - JAEGER_SAMPLER_PARAM=1
+
+  prometheus:
+    image: prom/prometheus
+    extra_hosts: [ '172.17.0.1:host-gateway' ]
+    command:
+      - --enable-feature=exemplar-storage
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - /usr/local/docker/prometheus:/etc/prometheus:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    extra_hosts: [ '172.17.0.1:host-gateway' ]
+    volumes:
+      - /usr/local/docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - /usr/local/docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3005:3000"
+
 
 volumes:
   pg_0_data:
