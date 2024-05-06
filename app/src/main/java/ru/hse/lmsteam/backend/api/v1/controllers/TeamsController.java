@@ -108,7 +108,7 @@ public class TeamsController implements TeamsControllerDocSchema {
     return teamManager
         .getTeamMembers(id)
         .collectList()
-        .map(teamsApiProtoBuilder::buildGetTeamMembersResponse);
+        .flatMap(teamsApiProtoBuilder::buildGetTeamMembersResponse);
   }
 
   @PutMapping("{id}/members")

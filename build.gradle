@@ -1,0 +1,8 @@
+plugins {
+    id 'nebula.lint' version '19.0.2'
+}
+
+allprojects {
+    apply plugin: 'nebula.lint'
+    gradleLint.rules = ['unused-dependency']
+}

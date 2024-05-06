@@ -1,14 +1,12 @@
 package ru.hse.lmsteam.backend.config.persistence;
 
 import com.google.common.collect.ImmutableList;
-import io.r2dbc.pool.ConnectionPool;
-import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import java.util.Collection;
 import java.util.ServiceLoader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.r2dbc.ConnectionFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -81,9 +79,11 @@ public class MasterSlaveDatabaseConfiguration {
         .collect(ImmutableList.toImmutableList());
   }
 
-  private ConnectionPool getConnectionPool(final String url) {
-    var connectionFactory = ConnectionFactoryBuilder.withUrl(url).build();
-    var configuration = ConnectionPoolConfiguration.builder(connectionFactory).build();
-    return new ConnectionPool(configuration);
+  private ConnectionFactory getConnectionPool(final String url) {
+    //    var connectionFactory = ConnectionFactoryBuilder.withUrl(url).build();
+    //    var configuration =
+    // ConnectionPoolConfiguration.builder(connectionFactory).initialSize(10).maxSize(20).build();
+    //    return new ConnectionPool(configuration);
+    return ConnectionFactories.get(url);
   }
 }

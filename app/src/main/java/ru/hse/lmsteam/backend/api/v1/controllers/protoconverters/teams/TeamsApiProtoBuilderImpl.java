@@ -12,11 +12,13 @@ import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.teams.Success;
+import ru.hse.lmsteam.backend.service.teams.UserTeamManager;
 import ru.hse.lmsteam.schema.api.teams.*;
 
 @Component
 @RequiredArgsConstructor
 public class TeamsApiProtoBuilderImpl implements TeamsApiProtoBuilder {
+  private final UserTeamManager userTeamManager;
   private final TeamProtoConverter teamProtoConverter;
   private final TeamSnippetConverter teamSnippetConverter;
   private final UserProtoConverter userProtoConverter;
@@ -66,10 +68,17 @@ public class TeamsApiProtoBuilderImpl implements TeamsApiProtoBuilder {
   }
 
   @Override
-  public GetTeamMembers.Response buildGetTeamMembersResponse(Collection<User> users) {
-    return GetTeamMembers.Response.newBuilder()
-        .addAllUsers(users.stream().map(userProtoConverter::map).toList())
-        .build();
+  public Mono<GetTeamMembers.Response> buildGetTeamMembersResponse(Collection<User> users) {
+    return userTeamManager
+        .getUserGroups(users)
+        .map(
+            userGroups ->
+                GetTeamMembers.Response.newBuilder()
+                    .addAllUsers(
+                        users.stream()
+                            .map(u -> userProtoConverter.map(u, userGroups.get(u)))
+                            .toList())
+                    .build());
   }
 
   @Override

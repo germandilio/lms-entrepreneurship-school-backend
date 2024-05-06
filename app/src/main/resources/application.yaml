@@ -12,7 +12,9 @@ spring:
     username: ${POSTGRESQL_USERNAME}
     password: ${POSTGRESQL_PASSWORD}
     pool:
-      enabled: false
+      enabled: true
+      initial-size: 10
+      max-size: 20
 
   liquibase:
     change-log: classpath:liquibase/changelog.xml
@@ -21,6 +23,17 @@ spring:
   docker:
     compose:
       enabled: false
+
+  pageable:
+    default-page: 0
+    default-page-size: 20
+    max-page-size: 100
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
 application:
   auth:
@@ -47,8 +60,8 @@ mail:
 
 logging:
   level:
-    org.springframework.r2dbc: TRACE
-    ru.hse.lmsteam: DEBUG
+    org.*: TRACE
+    ru.hse.lmsteam: TRACE
 
 server:
   port: ${SERVER_PORT}

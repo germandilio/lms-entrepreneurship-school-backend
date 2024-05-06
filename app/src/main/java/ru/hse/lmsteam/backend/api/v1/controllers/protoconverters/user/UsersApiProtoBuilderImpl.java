@@ -7,23 +7,32 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
+import ru.hse.lmsteam.backend.service.teams.TeamManager;
+import ru.hse.lmsteam.backend.service.teams.UserTeamManager;
 import ru.hse.lmsteam.schema.api.users.*;
 
 @RequiredArgsConstructor
 @Component
 public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
-  private final UserProtoConverterImpl userProtoConverter;
+  private final UserTeamManager userTeamManager;
+  private final TeamManager teamManager;
+  private final UserProtoConverter userProtoConverter;
 
   @Override
-  public GetUser.Response buildGetUserResponse(User user) {
-    var builder = GetUser.Response.newBuilder();
-    if (user != null) {
-      builder.setUser(userProtoConverter.map(user));
-    }
-    return builder.build();
+  public Mono<GetUser.Response> buildGetUserResponse(User user) {
+    return teamManager
+        .findByMember(user.id())
+        .collectList()
+        .map(
+            userTeams -> {
+              var builder = GetUser.Response.newBuilder();
+              builder.setUser(userProtoConverter.map(user, userTeams));
+              return builder.build();
+            });
   }
 
   @Override
@@ -36,12 +45,16 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
   }
 
   @Override
-  public CreateOrUpdateUser.Response buildUpdateUserResponse(User user) {
-    var builder = CreateOrUpdateUser.Response.newBuilder();
-    if (user != null) {
-      builder.setUser(userProtoConverter.map(user));
-    }
-    return builder.build();
+  public Mono<CreateOrUpdateUser.Response> buildCreateOrUpdateUserResponse(User user) {
+    return teamManager
+        .findByMember(user.id())
+        .collectList()
+        .map(
+            userTeams -> {
+              var builder = CreateOrUpdateUser.Response.newBuilder();
+              builder.setUser(userProtoConverter.map(user, userTeams));
+              return builder.build();
+            });
   }
 
   @Override
@@ -50,15 +63,23 @@ public class UsersApiProtoBuilderImpl implements UsersApiProtoBuilder {
   }
 
   @Override
-  public GetUsers.Response buildGetUsersResponse(Page<User> users) {
-    return GetUsers.Response.newBuilder()
-        .setPage(
-            ru.hse.lmsteam.schema.api.common.Page.newBuilder()
-                .setTotalPages(users.getTotalPages())
-                .setTotalElements(users.getTotalElements())
-                .build())
-        .addAllUsers(users.stream().map(userProtoConverter::map).toList())
-        .build();
+  public Mono<GetUsers.Response> buildGetUsersResponse(Page<User> users) {
+    return userTeamManager
+        .getUserGroups(users.getContent())
+        .map(
+            userGroups -> {
+              var page =
+                  ru.hse.lmsteam.schema.api.common.Page.newBuilder()
+                      .setTotalPages(users.getTotalPages())
+                      .setTotalElements(users.getTotalElements())
+                      .build();
+
+              var protoUsers =
+                  users.getContent().stream()
+                      .map(u -> userProtoConverter.map(u, userGroups.get(u)))
+                      .toList();
+              return GetUsers.Response.newBuilder().setPage(page).addAllUsers(protoUsers).build();
+            });
   }
 
   @Override
