@@ -1,6 +1,7 @@
 package ru.hse.lmsteam.backend.repository.impl;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.repository.UserTeamRepository;
+import ru.hse.lmsteam.backend.service.model.teams.UserTeam;
 
 @Repository
 @RequiredArgsConstructor
@@ -44,6 +46,36 @@ public class UserTeamRepositoryImpl implements UserTeamRepository {
             "SELECT teams.* FROM users_teams RIGHT JOIN teams ON users_teams.team_id = teams.id WHERE users_teams.user_id = :userId AND teams.is_deleted = false")
         .bind("userId", userId)
         .mapProperties(Team.class)
+        .all();
+  }
+
+  @Override
+  public Flux<UserTeam> getUsersTeams(Collection<UUID> userId) {
+    if (userId == null) {
+      throw new IllegalArgumentException("UserId is null!");
+    }
+
+    var userIdsClause = userId.stream().map(id -> "'" + id + "'").reduce((a, b) -> a + ", " + b);
+    var sqlIdsClause = userIdsClause.map(s -> " users_teams.user_id IN (" + s + ")").orElse("1=1");
+
+    return db.slave
+        .getDatabaseClient()
+        .sql(
+            "SELECT users_teams.user_id, teams.* FROM users_teams LEFT JOIN teams ON users_teams.team_id = teams.id WHERE "
+                + sqlIdsClause
+                + " AND teams.is_deleted = false")
+        .map(
+            (row, rowMetadata) -> {
+              var team =
+                  Team.builder()
+                      .id(row.get("id", UUID.class))
+                      .number(row.get("number", Integer.class))
+                      .projectTheme(row.get("projectTheme", String.class))
+                      .description(row.get("description", String.class))
+                      .isDeleted(row.get("isDeleted", Boolean.class))
+                      .build();
+              return new UserTeam(row.get("user_id", UUID.class), team);
+            })
         .all();
   }
 

@@ -19,7 +19,7 @@ public interface TeamsApiProtoBuilder {
 
   GetTeams.Response buildGetTeamsResponse(Page<Team> Teams);
 
-  GetTeamMembers.Response buildGetTeamMembersResponse(Collection<User> users);
+  Mono<GetTeamMembers.Response> buildGetTeamMembersResponse(Collection<User> users);
 
   UpdateTeamMembers.Response buildUpdateTeamMembersResponse(SetUserTeamMembershipResponse response);
 

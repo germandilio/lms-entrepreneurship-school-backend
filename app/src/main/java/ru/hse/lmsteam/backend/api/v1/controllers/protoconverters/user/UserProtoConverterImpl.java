@@ -2,7 +2,7 @@ package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.user;
 
 import com.google.protobuf.StringValue;
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,6 @@ import ru.hse.lmsteam.backend.domain.Sex;
 import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
-import ru.hse.lmsteam.backend.repository.UserTeamRepository;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.CreateOrUpdateUser;
 import ru.hse.lmsteam.schema.api.users.UserRoleNamespace;
@@ -20,16 +19,16 @@ import ru.hse.lmsteam.schema.api.users.UserSnippet;
 @Component
 @RequiredArgsConstructor
 public class UserProtoConverterImpl implements UserProtoConverter {
-  private final UserTeamRepository userTeamRepository;
   private final TeamSnippetConverter teamSnippetConverter;
 
   @Override
-  public ru.hse.lmsteam.schema.api.users.User map(User user) {
-    return map(user, false);
+  public ru.hse.lmsteam.schema.api.users.User map(User user, Collection<Team> userTeams) {
+    return map(user, userTeams, false);
   }
 
   @Override
-  public ru.hse.lmsteam.schema.api.users.User map(User user, boolean forPublicUser) {
+  public ru.hse.lmsteam.schema.api.users.User map(
+      User user, Collection<Team> userTeams, boolean forPublicUser) {
     var userBuilder = ru.hse.lmsteam.schema.api.users.User.newBuilder();
     if (user.id() != null) {
       userBuilder.setId(user.id().toString());
@@ -64,15 +63,9 @@ public class UserProtoConverterImpl implements UserProtoConverter {
         userBuilder.setBalance(user.balance().toString());
       }
 
-      List<Team> teams = null;
-      try {
-        teams = userTeamRepository.getUserTeams(user.id()).collectList().toFuture().get();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-      if (!teams.isEmpty()) {
+      if (userTeams != null && !userTeams.isEmpty()) {
         userBuilder.addAllMemberOfTeams(
-            teams.stream().map(teamSnippetConverter::toSnippet).toList());
+            userTeams.stream().map(teamSnippetConverter::toSnippet).toList());
       }
     }
     return userBuilder.build();

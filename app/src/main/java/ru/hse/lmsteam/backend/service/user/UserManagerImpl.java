@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Team;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.repository.UserRepository;
@@ -28,6 +27,7 @@ import ru.hse.lmsteam.backend.service.model.teams.ValidationErrors;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
 import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
+import ru.hse.lmsteam.backend.service.teams.UserTeamManager;
 import ru.hse.lmsteam.backend.service.validation.UserValidator;
 
 @Slf4j
@@ -36,6 +36,7 @@ import ru.hse.lmsteam.backend.service.validation.UserValidator;
 public class UserManagerImpl implements UserManager {
   private final UserRepository userRepository;
   private final UserTeamRepository userTeamRepository;
+  private final UserTeamManager userTeamManager;
   private final UserValidator userValidator;
 
   private final UserAuthManager userAuthManager;
@@ -154,6 +155,7 @@ public class UserManagerImpl implements UserManager {
     return userRepository.allUserSnippets();
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Mono<BigDecimal> getUserBalance(UUID id) {
     if (id == null) {
@@ -200,13 +202,10 @@ public class UserManagerImpl implements UserManager {
         .findAllById(userIds)
         .collectList()
         .flatMap(
-            foundUsers -> {
-              Mono<ValidationErrors> validationErrors =
-                  getValidationErrorsMono(userIds, foundUsers, ImmutableSet.copyOf(foundUsers));
-              if (validationErrors != null) return validationErrors;
-
-              return Mono.just(new Success());
-            });
+            foundUsers ->
+                getValidationErrorsMono(userIds, foundUsers, ImmutableSet.copyOf(foundUsers))
+                    .map(error -> (SetUserTeamMembershipResponse) error)
+                    .switchIfEmpty(Mono.just(new Success())));
   }
 
   private Mono<ValidationErrors> getValidationErrorsMono(
@@ -236,53 +235,27 @@ public class UserManagerImpl implements UserManager {
               Optional.empty()));
     }
 
-    var occupiedStudentsGroups =
-        getUserGroups(
+    var occupiedStudentsGroupsF =
+        userTeamManager.getUserGroups(
             foundUsers.stream()
                 .filter(u -> UserRole.LEARNER.equals(u.role()))
                 .collect(ImmutableList.toImmutableList()));
 
-    if (!occupiedStudentsGroups.isEmpty()) {
-      // convert to validation errors
-      return Mono.just(
-          new ValidationErrors(
-              Optional.empty(),
-              Optional.of(
-                  occupiedStudentsGroups.entrySet().stream()
-                      .collect(
-                          ImmutableMap.toImmutableMap(
-                              entry -> entry.getKey(),
-                              entry -> ImmutableList.copyOf(entry.getValue()))))));
-    }
-    return null;
-  }
+    return occupiedStudentsGroupsF.mapNotNull(
+        occupiedStudentsGroups -> {
+          if (!occupiedStudentsGroups.isEmpty()) {
+            // convert to validation errors
+            return new ValidationErrors(
+                Optional.empty(),
+                Optional.of(
+                    occupiedStudentsGroups.entrySet().stream()
+                        .collect(
+                            ImmutableMap.toImmutableMap(
+                                Map.Entry::getKey,
+                                entry -> ImmutableList.copyOf(entry.getValue())))));
+          }
 
-  /**
-   * Get all user groups connections for each user, Relations is one to many.
-   *
-   * @param users list of users to search for
-   * @return map <user, list<group>> for only users already in groups, if user is not in any group
-   *     it will be omitted.
-   */
-  private ImmutableMap<User, List<Team>> getUserGroups(List<User> users) {
-    return users.stream()
-        .map(
-            user -> {
-              try {
-                var groups =
-                    Optional.ofNullable(
-                            userTeamRepository
-                                .getUserTeams(user.id())
-                                .collectList()
-                                .toFuture()
-                                .get())
-                        .orElse(List.of());
-                return Map.entry(user, groups);
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-            })
-        .filter(entry -> !entry.getValue().isEmpty())
-        .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+          return null;
+        });
   }
 }

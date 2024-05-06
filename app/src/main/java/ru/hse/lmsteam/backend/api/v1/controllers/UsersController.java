@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +32,7 @@ public class UsersController implements UsersControllerDocSchema {
     return usersManager
         .findById(id)
         .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("User not found.")))
-        .map(usersApiProtoBuilder::buildGetUserResponse);
+        .flatMap(usersApiProtoBuilder::buildGetUserResponse);
   }
 
   @GetMapping("/{id}/balance")
@@ -50,7 +49,9 @@ public class UsersController implements UsersControllerDocSchema {
   public Mono<CreateOrUpdateUser.Response> createUser(
       @RequestBody CreateOrUpdateUser.Request request) {
     var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(request);
-    return usersManager.create(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
+    return usersManager
+        .create(userUpsertModel)
+        .flatMap(usersApiProtoBuilder::buildCreateOrUpdateUserResponse);
   }
 
   /**
@@ -64,7 +65,9 @@ public class UsersController implements UsersControllerDocSchema {
   public Mono<CreateOrUpdateUser.Response> updateUser(
       @PathVariable UUID userId, @RequestBody CreateOrUpdateUser.Request request) {
     var userUpsertModel = usersApiProtoBuilder.retrieveUserUpsertModel(userId, request);
-    return usersManager.update(userUpsertModel).map(usersApiProtoBuilder::buildUpdateUserResponse);
+    return usersManager
+        .update(userUpsertModel)
+        .flatMap(usersApiProtoBuilder::buildCreateOrUpdateUserResponse);
   }
 
   @DeleteMapping("/{id}")
@@ -78,7 +81,6 @@ public class UsersController implements UsersControllerDocSchema {
 
   @GetMapping("/list")
   @Override
-  @PageableAsQueryParam
   public Mono<GetUsers.Response> getUsers(
       @RequestParam(required = false) String namePattern,
       @RequestParam(required = false) String emailPattern,
@@ -100,7 +102,7 @@ public class UsersController implements UsersControllerDocSchema {
             .build();
     return usersManager
         .findAll(filterOptions, pageable)
-        .map(usersApiProtoBuilder::buildGetUsersResponse);
+        .flatMap(usersApiProtoBuilder::buildGetUsersResponse);
   }
 
   @GetMapping("/snippets")

@@ -4,21 +4,22 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
+import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.User;
 import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;
 
 public interface UsersApiProtoBuilder {
-  GetUser.Response buildGetUserResponse(User user);
+  Mono<GetUser.Response> buildGetUserResponse(User user);
 
   GetUserBalance.Response buildGetUserBalanceResponse(BigDecimal balance);
 
-  CreateOrUpdateUser.Response buildUpdateUserResponse(User user);
+  Mono<CreateOrUpdateUser.Response> buildCreateOrUpdateUserResponse(User user);
 
   DeleteUser.Response buildDeleteUserResponse(long itemsDeleted);
 
-  GetUsers.Response buildGetUsersResponse(Page<User> users);
+  Mono<GetUsers.Response> buildGetUsersResponse(Page<User> users);
 
   GetUserNameList.Response buildGetUserNameListResponse(Collection<UserSnippet> names);
 
