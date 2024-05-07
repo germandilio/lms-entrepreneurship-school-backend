@@ -196,19 +196,22 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         "Starting upsert submissions for homework {}, publishing by user {}",
         hw.id(),
         publisher.id());
+    if (hw.deadlineDate().isBefore(submissionDate)) {
+      return Mono.error(new BusinessLogicExpectationFailedException("SUBMISSION_AFTER_DEADLINE"));
+    }
     if (!hw.isGroup()) {
       return upsertIndividualSubmission(
           hw, existingSubmissionOpt, publisher, submissionDate, payload);
     }
-
     return teamManager
         .findTeammates(publisher.id())
-        .switchIfEmpty(
-            Mono.error(
-                new IllegalStateException("Failed to find teammates (0 found including self)")))
         .collectList()
         .flatMap(
             unfilteredTeammates -> {
+              log.info(
+                  "Found "
+                      + unfilteredTeammates.size()
+                      + "teammates (including publisher itself + trackers)");
               if (unfilteredTeammates.isEmpty()) {
                 return upsertIndividualSubmission(
                     hw, existingSubmissionOpt, publisher, submissionDate, payload);
@@ -326,6 +329,7 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       User publisher,
       Instant submissionDate,
       SubmissionPayload payload) {
+    // including submission owner
     var filteredTeammates =
         unfilteredTeammates.stream().filter(user -> UserRole.LEARNER.equals(user.role())).toList();
 

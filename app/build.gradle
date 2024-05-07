@@ -21,12 +21,15 @@ dependencies {
 	implementation 'com.sun.mail:jakarta.mail:2.0.1'
 	implementation 'org.hibernate:hibernate-validator:8.0.1.Final'
 
+	implementation 'io.projectreactor:reactor-core-micrometer:1.1.5'
+	implementation 'io.micrometer:context-propagation:1.1.1'
 	implementation 'io.micrometer:micrometer-registry-prometheus:1.12.5'
 	implementation 'io.micrometer:micrometer-tracing-bridge-otel:1.2.5'
 	implementation 'io.micrometer:micrometer-tracing:1.2.5'
 	implementation 'io.micrometer:micrometer-observation:1.12.5'
 	implementation 'com.github.loki4j:loki-logback-appender:1.5.1'
 	implementation 'org.springframework.boot:spring-boot-actuator:3.2.5'
+	implementation 'io.github.mweirauch:micrometer-jvm-extras:0.2.2'
 
 	implementation 'com.google.guava:guava:33.0.0-jre'
 	implementation 'com.google.protobuf:protobuf-java-util:4.26.1'
@@ -35,11 +38,8 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.12.5'
-	// TODO remove in production
-//	implementation 'org.springframework.boot:spring-boot-starter-web'
+
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-
-
 	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 

@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: reactive
   application:
     name: lms-entrepreneurship-school-backend-app
   database:
@@ -59,13 +61,17 @@ mail:
 
 
 logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
   level:
-    org.*: TRACE
-    ru.hse.lmsteam: TRACE
+    org.springframework.r2dbc: TRACE
+    ru.hse.lmsteam: DEBUG
 
 server:
   port: ${SERVER_PORT}
   compression:
+    enabled: true
+  http2:
     enabled: true
 springdoc:
   show-actuator: true

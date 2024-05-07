@@ -5,6 +5,7 @@ import com.google.protobuf.util.Timestamps;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.schema.api.competitions.Competition;
 import ru.hse.lmsteam.schema.api.competitions.CompetitionSnippet;
 import ru.hse.lmsteam.schema.api.competitions.CreateOrUpdateCompetition;
@@ -43,6 +44,8 @@ public class CompetitionProtoConverterImpl implements CompetitionProtoConverter 
     }
     if (task.hasDeadlineDate()) {
       builder.deadlineDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getDeadlineDate())));
+    } else {
+      throw new BusinessLogicExpectationFailedException("NO_DEADLINE_DATE");
     }
     builder.payload(task.toByteArray());
     return builder.build();

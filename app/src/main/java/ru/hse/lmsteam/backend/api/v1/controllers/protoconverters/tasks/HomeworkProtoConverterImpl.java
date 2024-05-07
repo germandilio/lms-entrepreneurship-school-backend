@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoBuilder;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.schema.api.homeworks.CreateOrUpdateHomework;
 import ru.hse.lmsteam.schema.api.homeworks.Homework;
@@ -64,6 +65,8 @@ public class HomeworkProtoConverterImpl implements HomeworkProtoConverter {
 
     if (task.hasDeadlineDate()) {
       b.deadlineDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getDeadlineDate())));
+    } else {
+      throw new BusinessLogicExpectationFailedException("NO_DEADLINE_DATE");
     }
     if (task.hasPublishDate()) {
       b.publishDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getPublishDate())));

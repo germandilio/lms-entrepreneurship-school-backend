@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoBuilder;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.schema.api.lessons.LessonSnippet;
 import ru.hse.lmsteam.schema.api.tests.CreateOrUpdateTest;
@@ -63,6 +64,8 @@ public class TestProtoConverterImpl implements TestProtoConverter {
     }
     if (task.hasDeadlineDate()) {
       builder.deadlineDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getDeadlineDate())));
+    } else {
+      throw new BusinessLogicExpectationFailedException("NO_DEADLINE_DATE");
     }
     builder.title(task.getTitle());
     builder.payload(task.toByteArray());
