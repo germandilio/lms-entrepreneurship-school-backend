@@ -102,12 +102,7 @@ public class SubmissionsController implements SubmissionsControllerDocSchema {
     return grantAccess(rawToken, allowedRoles)
         .flatMap(
             user -> {
-              var publicationDate =
-                  request.hasPublishedAt()
-                      ? Instant.ofEpochSecond(
-                          request.getPublishedAt().getSeconds(),
-                          request.getPublishedAt().getNanos())
-                      : Instant.now();
+              var publicationDate = Instant.now();
               return submissionsManager.upsertSubmission(
                   user.userId(),
                   UUID.fromString(request.getHomeworkId()),

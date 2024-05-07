@@ -193,12 +193,10 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       Instant submissionDate,
       SubmissionPayload payload) {
     log.info(
-        "Starting upsert submissions for homework {}, publishing by user {}",
+        "Starting upsert submissions for homework {}, publishing by user {}, submitted at {} (server UTC time)",
         hw.id(),
-        publisher.id());
-    if (hw.deadlineDate().isBefore(submissionDate)) {
-      return Mono.error(new BusinessLogicExpectationFailedException("SUBMISSION_AFTER_DEADLINE"));
-    }
+        publisher.id(),
+        submissionDate);
     if (!hw.isGroup()) {
       return upsertIndividualSubmission(
           hw, existingSubmissionOpt, publisher, submissionDate, payload);
