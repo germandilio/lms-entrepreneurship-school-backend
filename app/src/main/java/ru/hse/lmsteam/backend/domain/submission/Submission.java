@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
 import org.jetbrains.annotations.Nullable;
-import ru.hse.lmsteam.backend.domain.Team;
-import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.user_teams.Team;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
 import ru.hse.lmsteam.backend.domain.tasks.Homework;
 import ru.hse.lmsteam.schema.api.submissions.SubmissionPayload;
 

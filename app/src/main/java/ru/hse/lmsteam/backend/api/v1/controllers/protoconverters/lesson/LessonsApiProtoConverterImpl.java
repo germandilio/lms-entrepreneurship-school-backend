@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 import ru.hse.lmsteam.schema.api.lessons.CreateOrUpdateLesson;
 import ru.hse.lmsteam.schema.api.lessons.GetLesson;
 import ru.hse.lmsteam.schema.api.lessons.GetLessons;

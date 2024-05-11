@@ -2,8 +2,8 @@ package ru.hse.lmsteam.backend.service.user;
 
 import java.util.UUID;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.domain.UserAuth;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserAuth;
 import ru.hse.lmsteam.backend.service.AuthorizationManager;
 import ru.hse.lmsteam.backend.service.model.auth.AuthResult;
 

@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.With;
-import ru.hse.lmsteam.backend.domain.Sex;
-import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.domain.user_teams.Sex;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 
 @Builder
 public record UserUpsertModel(

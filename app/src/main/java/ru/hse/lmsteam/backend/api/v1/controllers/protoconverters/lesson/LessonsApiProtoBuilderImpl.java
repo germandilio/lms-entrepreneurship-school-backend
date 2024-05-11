@@ -7,7 +7,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 import ru.hse.lmsteam.backend.service.tasks.HomeworkManager;
 import ru.hse.lmsteam.backend.service.tasks.TestManager;
 import ru.hse.lmsteam.schema.api.lessons.LessonSnippet;

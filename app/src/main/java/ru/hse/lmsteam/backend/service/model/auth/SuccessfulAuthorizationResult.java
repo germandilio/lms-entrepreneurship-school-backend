@@ -1,7 +1,7 @@
 package ru.hse.lmsteam.backend.service.model.auth;
 
 import java.util.UUID;
-import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 
 public record SuccessfulAuthorizationResult(UUID userId, UserRole role)
     implements AuthorizationResult {

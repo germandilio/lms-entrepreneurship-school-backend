@@ -1,7 +1,7 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson;
 
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 
 public interface LessonsApiProtoBuilder {
   Lesson toDomain(ru.hse.lmsteam.schema.api.lessons.Lesson lesson);

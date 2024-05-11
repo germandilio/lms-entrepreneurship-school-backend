@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
-import ru.hse.lmsteam.backend.domain.UserAuth;
+import ru.hse.lmsteam.backend.domain.user_teams.UserAuth;
 import ru.hse.lmsteam.backend.repository.UserAuthRepository;
 
 @Service

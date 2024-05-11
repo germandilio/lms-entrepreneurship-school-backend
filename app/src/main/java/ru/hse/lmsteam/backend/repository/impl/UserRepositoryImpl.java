@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
-import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.PlainSQLQueryTranslator;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;

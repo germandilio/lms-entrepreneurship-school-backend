@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Team;
+import ru.hse.lmsteam.backend.domain.user_teams.Team;
 import ru.hse.lmsteam.backend.service.model.teams.TeamsFilterOptions;
 
 public interface TeamRepository {

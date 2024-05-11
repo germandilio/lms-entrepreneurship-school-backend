@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
-import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 import ru.hse.lmsteam.backend.repository.LessonRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.LessonsFilterOptionsQT;
 import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;

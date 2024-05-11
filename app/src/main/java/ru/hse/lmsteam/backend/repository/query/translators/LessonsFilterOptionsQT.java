@@ -49,7 +49,7 @@ public class LessonsFilterOptionsQT extends AbstractSimpleQueryTranslator<Lesson
         Optional.ofNullable(options.lessonNumber())
             .map(number -> "lessons.lesson_number = " + number);
     var publishDateCriteria =
-        getTimestampRangeClause(
+        getRangeClause(
             options.publishDateFrom(), options.publishDateTimeTo(), "lessons.publish_date");
 
     return Stream.of(titleCriteria, numberCriteria, publishDateCriteria)

@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
 import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.*;

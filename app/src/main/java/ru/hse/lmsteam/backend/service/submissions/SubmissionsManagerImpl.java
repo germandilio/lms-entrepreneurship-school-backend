@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Team;
-import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.domain.user_teams.Team;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.domain.submission.Submission;
 import ru.hse.lmsteam.backend.domain.submission.SubmissionDB;
 import ru.hse.lmsteam.backend.domain.tasks.Homework;
@@ -113,7 +113,10 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         homeworkF.flatMap(
             homework -> {
               if (homework.isGroup()) {
-                return teamManager.findById(submissionDb.teamId()).map(Optional::of);
+                return teamManager
+                    .findById(submissionDb.teamId())
+                    .map(Optional::of)
+                    .switchIfEmpty(Mono.just(Optional.empty()));
               } else return Mono.just(Optional.<Team>empty());
             });
 
@@ -332,10 +335,8 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         unfilteredTeammates.stream().filter(user -> UserRole.LEARNER.equals(user.role())).toList();
 
     // delete existing group submission (task_id, team_id):
-    // this will remove dangling submission for person who left switch the group, and now
-    // somebody
-    // in his new group submitting the same task. (For deduplication reasons, but doing it
-    // only on
+    // this will remove dangling submission for person who switch the group, and now
+    // somebody in his new group submitting the same task. (doing it only on
     // new submission not to occasionally clear previous tasks)
     Mono<Long> removeDanglingSubmissions;
     if (existingSubmissionOpt.isPresent()) {

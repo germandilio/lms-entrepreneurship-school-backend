@@ -2,7 +2,7 @@ package ru.hse.lmsteam.backend.repository;
 
 import java.util.UUID;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.UserAuth;
+import ru.hse.lmsteam.backend.domain.user_teams.UserAuth;
 
 public interface UserAuthRepository {
   Mono<UserAuth> findByLogin(String login, boolean operateOnMaster);

@@ -1,4 +1,4 @@
-package ru.hse.lmsteam.backend.domain;
+package ru.hse.lmsteam.backend.domain.lesson;
 
 import java.time.Instant;
 import java.util.UUID;

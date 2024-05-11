@@ -46,10 +46,10 @@ public class CompetitionFilterOptionsQT
         Optional.ofNullable(queryObject.title()).map(title -> " title ILIKE '%" + title + "%'");
 
     var publishDateCriteria =
-        getTimestampRangeClause(
+        getRangeClause(
             queryObject.publishDateFrom(), queryObject.publishDateTo(), "publish_date");
     var deadlineCriteria =
-        getTimestampRangeClause(
+        getRangeClause(
             queryObject.deadlineFrom(), queryObject.deadlineTo(), "deadline_date");
 
     return Stream.of(titleCriteria, publishDateCriteria, deadlineCriteria)
