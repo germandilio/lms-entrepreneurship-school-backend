@@ -49,11 +49,9 @@ public class HomeworkFilterOptionsQT extends AbstractSimpleQueryTranslator<Homew
             .map(lessonId -> " lesson_id = '" + lessonId + "'");
 
     var publishDateCriteria =
-        getRangeClause(
-            queryObject.publishDateFrom(), queryObject.publishDateTo(), "publish_date");
+        getRangeClause(queryObject.publishDateFrom(), queryObject.publishDateTo(), "publish_date");
     var deadlineCriteria =
-        getRangeClause(
-            queryObject.deadlineFrom(), queryObject.deadlineTo(), "deadline_date");
+        getRangeClause(queryObject.deadlineFrom(), queryObject.deadlineTo(), "deadline_date");
     var isGroupCriteria =
         Optional.ofNullable(queryObject.isGroup()).map(isGroup -> " is_group = " + isGroup);
 

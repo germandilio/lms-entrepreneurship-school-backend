@@ -14,5 +14,5 @@ create table grades
 
 -- changeset germandilio:create_grades_indexes
 create index grades_owner_id_idx on grades (owner_id);
-create index grades_owner_id_idx on grades (task_id);
-create index grades_owner_id_idx on grades (submission_id);
+create index grades_task_id_idx on grades (task_id);
+create index grades_submission_id_idx on grades (submission_id);

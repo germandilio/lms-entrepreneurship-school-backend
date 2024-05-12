@@ -16,4 +16,5 @@ public record Homework(
     Instant publishDate,
     Instant deadlineDate,
     Boolean isGroup,
-    byte[] payload) implements Task {}
+    byte[] payload)
+    implements Task {}

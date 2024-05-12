@@ -7,7 +7,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoBuilder;
+import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsProtoConverter;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.schema.api.homeworks.CreateOrUpdateHomework;
@@ -19,7 +20,7 @@ import ru.hse.lmsteam.schema.api.lessons.LessonSnippet;
 @Component
 public class HomeworkProtoConverterImpl implements HomeworkProtoConverter {
   private final LessonManager lessonManager;
-  private final LessonsApiProtoBuilder lessonsApiProtoBuilder;
+  private final LessonsProtoConverter lessonsProtoConverter;
 
   @Override
   public Mono<Homework> map(ru.hse.lmsteam.backend.domain.tasks.Homework task) {
@@ -45,7 +46,7 @@ public class HomeworkProtoConverterImpl implements HomeworkProtoConverter {
                 builder.setDeadlineDate(Timestamps.fromMillis(task.deadlineDate().toEpochMilli()));
               }
               lessonOpt.ifPresent(
-                  lesson -> builder.setLesson(lessonsApiProtoBuilder.toSnippet(lesson)));
+                  lesson -> builder.setLesson(lessonsProtoConverter.toSnippet(lesson)));
               sink.next(builder.build());
             });
   }
@@ -77,23 +78,18 @@ public class HomeworkProtoConverterImpl implements HomeworkProtoConverter {
   }
 
   @Override
-  public Mono<HomeworkSnippet> toSnippet(
-      ru.hse.lmsteam.backend.domain.tasks.Homework homeAssignment) {
-    return lessonManager
-        .findById(homeAssignment.lessonId())
-        .singleOptional()
-        .map(
-            lessonOpt -> {
-              var b = HomeworkSnippet.newBuilder();
-              b.setId(homeAssignment.id().toString());
-              b.setTitle(homeAssignment.title());
-              if (homeAssignment.deadlineDate() != null) {
-                b.setDeadlineDate(
-                    Timestamps.fromMillis(homeAssignment.deadlineDate().toEpochMilli()));
-              }
-              lessonOpt.ifPresent(lesson -> b.setLesson(lessonsApiProtoBuilder.toSnippet(lesson)));
-              return b.build();
-            });
+  public HomeworkSnippet toSnippet(
+      ru.hse.lmsteam.backend.domain.tasks.Homework homeAssignment, Lesson lesson) {
+    var b = HomeworkSnippet.newBuilder();
+    b.setId(homeAssignment.id().toString());
+    b.setTitle(homeAssignment.title());
+    if (homeAssignment.deadlineDate() != null) {
+      b.setDeadlineDate(Timestamps.fromMillis(homeAssignment.deadlineDate().toEpochMilli()));
+    }
+    if (lesson != null) {
+      b.setLesson(lessonsProtoConverter.toSnippet(lesson));
+    }
+    return b.build();
   }
 
   @Override

@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,6 +10,8 @@ import ru.hse.lmsteam.backend.service.model.grades.GradesFilterOptions;
 
 @Component
 public class GradesFilterOptionsQT extends AbstractSimpleQueryTranslator<GradesFilterOptions> {
+  private static final ImmutableMap<String, String> sortMappings =
+      ImmutableMap.of("grade", "grades.admin_grade");
 
   @Override
   protected String buildWhereClause(GradesFilterOptions queryObject) {
@@ -40,7 +43,7 @@ public class GradesFilterOptionsQT extends AbstractSimpleQueryTranslator<GradesF
     return "SELECT grades.* FROM grades LEFT JOIN trackers_grades ON grades.id = tracker_grades.grade_id"
         + getWhere(queryObject)
         + " GROUP BY grades.id"
-        + getOrder(pageable.getSort(), null)
+        + getOrder(pageable.getSort(), sortMappings)
         + getLimitAndOffset(pageable);
   }
 

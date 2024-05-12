@@ -1,6 +1,5 @@
 package ru.hse.lmsteam.backend.api.v1.controllers;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Optional;
@@ -89,17 +88,7 @@ public class UsersController implements UsersControllerDocSchema {
       @RequestParam(required = false) Boolean isDeleted,
       Pageable pageable) {
     var filterOptions =
-        UserFilterOptions.builder()
-            .namePattern(namePattern)
-            .emailPattern(emailPattern)
-            .groupNumbers(ImmutableSet.copyOf(Optional.ofNullable(groupNumbers).orElse(List.of())))
-            .roles(
-                Optional.ofNullable(roles).orElse(List.of()).stream()
-                    .map(String::toUpperCase)
-                    .filter(s -> !s.isBlank() && !"ADMIN".equals(s))
-                    .collect(ImmutableSet.toImmutableSet()))
-            .isDeleted(isDeleted)
-            .build();
+        getUserFilterOptions(namePattern, emailPattern, groupNumbers, roles, isDeleted);
     return usersManager
         .findAll(filterOptions, pageable)
         .flatMap(usersApiProtoBuilder::buildGetUsersResponse);
@@ -107,10 +96,36 @@ public class UsersController implements UsersControllerDocSchema {
 
   @GetMapping("/snippets")
   @Override
-  public Mono<GetUserNameList.Response> getUserNameList() {
+  public Mono<GetUserNameList.Response> getUserSnippets(
+      @RequestParam(required = false) String namePattern,
+      @RequestParam(required = false) String emailPattern,
+      @RequestParam(required = false) List<Integer> groupNumbers,
+      @RequestParam(required = false) List<String> roles,
+      @RequestParam(required = false) Boolean isDeleted,
+      Pageable pageable) {
+    var filterOptions =
+        getUserFilterOptions(namePattern, emailPattern, groupNumbers, roles, isDeleted);
     return usersManager
-        .getUserSnippets()
-        .collect(ImmutableList.toImmutableList())
+        .findAll(filterOptions, pageable)
         .map(usersApiProtoBuilder::buildGetUserNameListResponse);
+  }
+
+  private UserFilterOptions getUserFilterOptions(
+      String namePattern,
+      String emailPattern,
+      List<Integer> groupNumbers,
+      List<String> roles,
+      Boolean isDeleted) {
+    return UserFilterOptions.builder()
+        .namePattern(namePattern)
+        .emailPattern(emailPattern)
+        .groupNumbers(ImmutableSet.copyOf(Optional.ofNullable(groupNumbers).orElse(List.of())))
+        .roles(
+            Optional.ofNullable(roles).orElse(List.of()).stream()
+                .map(String::toUpperCase)
+                .filter(s -> !s.isBlank() && !"ADMIN".equals(s))
+                .collect(ImmutableSet.toImmutableSet()))
+        .isDeleted(isDeleted)
+        .build();
   }
 }

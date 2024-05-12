@@ -56,7 +56,7 @@ message Grade {
 }
 
 message TrackerGrade {
-  string id = 1;
+  reserved 1;
   ru.hse.lmsteam.proto.users.UserSnippet tracker = 2;
   google.protobuf.Int32Value grade = 3;
   google.protobuf.StringValue comment = 4;

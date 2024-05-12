@@ -6,7 +6,6 @@ import static org.springframework.data.relational.core.query.Query.query;
 import com.google.common.collect.ImmutableSet;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,19 +18,18 @@ import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
 import ru.hse.lmsteam.backend.domain.user_teams.User;
 import ru.hse.lmsteam.backend.repository.UserRepository;
-import ru.hse.lmsteam.backend.repository.query.translators.PlainSQLQueryTranslator;
+import ru.hse.lmsteam.backend.repository.query.translators.UserFilterOptionsQT;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 
 @Slf4j
 @Repository
 public class UserRepositoryImpl implements UserRepository {
   private final MasterSlaveDbOperations db;
-  private final PlainSQLQueryTranslator<UserFilterOptions> userFiltersQTranslator;
+  private final UserFilterOptionsQT userFiltersQTranslator;
 
   public UserRepositoryImpl(
       MasterSlaveDbOperations db,
-      @Qualifier("userFilterOptionsQT") PlainSQLQueryTranslator<UserFilterOptions> userFiltersQTranslator) {
+      @Qualifier("userFilterOptionsQT") UserFilterOptionsQT userFiltersQTranslator) {
     this.db = db;
     this.userFiltersQTranslator = userFiltersQTranslator;
   }
@@ -132,20 +130,5 @@ public class UserRepositoryImpl implements UserRepository {
                 .mapValue(Long.class)
                 .one())
         .map(p -> new PageImpl<>(p.getT1(), pageable, p.getT2()));
-  }
-
-  @Override
-  public Flux<UserSnippet> allUserSnippets() {
-    return db.slave
-        .getDatabaseClient()
-        .sql("SELECT id, name, surname, patronymic FROM users WHERE is_deleted = false")
-        .map(
-            row ->
-                new UserSnippet(
-                    row.get("id", UUID.class),
-                    row.get("name", String.class),
-                    row.get("surname", String.class),
-                    Optional.ofNullable(row.get("patronymic", String.class))))
-        .all();
   }
 }

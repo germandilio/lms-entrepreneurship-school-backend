@@ -7,12 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Builder
-@Table("grades")
-public record GradeDB(
-    @Id UUID id,
-    UUID ownerId,
-    UUID taskId,
-    TaskType taskType,
-    @Nullable UUID submissionId,
-    @Nullable Integer adminGrade,
-    String adminComment) {}
+@Table("tracker_grades")
+public record TrackerGradeDb(
+    @Id UUID gradeId, UUID trackerId, @Nullable Integer grade, @Nullable String comment) {}

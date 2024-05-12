@@ -1,5 +1,7 @@
 package ru.hse.lmsteam.backend.service.lesson;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,6 +34,15 @@ public class LessonManagerImpl implements LessonManager {
       return Mono.empty();
     }
     return lessonRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Lesson>> findByIds(Collection<UUID> ids) {
+    if (ids == null) {
+      return Mono.just(Map.of());
+    }
+    return lessonRepository.findByIds(ids).collectMap(Lesson::id);
   }
 
   @Transactional

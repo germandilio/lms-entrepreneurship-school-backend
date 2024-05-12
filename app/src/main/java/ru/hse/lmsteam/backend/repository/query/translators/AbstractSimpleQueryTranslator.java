@@ -1,7 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators;
 
 import com.google.common.collect.ImmutableMap;
-
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -57,7 +56,8 @@ public abstract class AbstractSimpleQueryTranslator<T> implements PlainSQLQueryT
   }
 
   /**
-   * Util method to get sql timestamp range clause. Uses Object.toString() method to convert 'from' and 'to' to actual SQL representation.
+   * Util method to get sql timestamp range clause. Uses Object.toString() method to convert 'from'
+   * and 'to' to actual SQL representation.
    *
    * @param from lowerBound of time range (exclusive). Pass null if unbounded from bottom.
    * @param to upperBound of time range (exclusive) Pass null if unbounded from above.

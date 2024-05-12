@@ -18,6 +18,5 @@ public interface GradesControllerDocSchema {
       Integer gradeTo,
       UUID taskId,
       UUID ownerId,
-      UUID trackerId,
       Pageable pageable);
 }

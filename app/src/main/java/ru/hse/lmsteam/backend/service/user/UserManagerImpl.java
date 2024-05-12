@@ -25,7 +25,6 @@ import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.teams.Success;
 import ru.hse.lmsteam.backend.service.model.teams.ValidationErrors;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.backend.service.teams.UserTeamManager;
 import ru.hse.lmsteam.backend.service.validation.UserValidator;
@@ -147,12 +146,6 @@ public class UserManagerImpl implements UserManager {
     }
     var emptyOptions = new UserFilterOptions(null, null, null, null, null);
     return userRepository.findAll(filterOptions == null ? emptyOptions : filterOptions, pageable);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public Flux<UserSnippet> getUserSnippets() {
-    return userRepository.allUserSnippets();
   }
 
   @Transactional(readOnly = true)

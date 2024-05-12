@@ -4,6 +4,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,12 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.user_teams.Team;
-import ru.hse.lmsteam.backend.domain.user_teams.User;
-import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.domain.submission.Submission;
 import ru.hse.lmsteam.backend.domain.submission.SubmissionDB;
 import ru.hse.lmsteam.backend.domain.tasks.Homework;
+import ru.hse.lmsteam.backend.domain.user_teams.Team;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.repository.SubmissionRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
@@ -45,6 +47,23 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
     }
 
     return submissionRepository.findById(submissionId).flatMap(this::buildSubmission);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Submission>> findByIds(Collection<UUID> submissionIds) {
+    if (submissionIds == null) {
+      return Mono.just(Map.of());
+    }
+
+    return submissionRepository
+        .findAllByIds(submissionIds)
+        .collectList()
+        .flatMap(this::buildSubmissions)
+        .map(
+            submissions ->
+                submissions.stream()
+                    .collect(Collectors.toMap(Submission::id, Function.identity())));
   }
 
   @Transactional(readOnly = true)

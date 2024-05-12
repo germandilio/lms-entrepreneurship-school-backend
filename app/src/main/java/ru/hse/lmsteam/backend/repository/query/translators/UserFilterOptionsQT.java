@@ -28,9 +28,29 @@ public class UserFilterOptionsQT extends AbstractSimpleQueryTranslator<UserFilte
     var selectBase = "SELECT users.* FROM users";
 
     return selectBase
-        + withNonDeleted(withAdminNonRetrievable(getWhere(queryObject)))
+        + withNonDeleted(withoutNonRetrievableRoles(getWhere(queryObject)))
         + getOrder(pageable.getSort(), FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING)
         + getLimitAndOffset(pageable);
+  }
+
+  public String translateToSql(
+      UserFilterOptions queryObject, Pageable pageable, boolean retrieveSnippets) {
+    if (!retrieveSnippets) return translateToSql(queryObject, pageable);
+    else {
+      if (queryObject == null) {
+        throw new IllegalArgumentException("Cannot translate null queryObject to sql!");
+      }
+      if (pageable == null) {
+        throw new IllegalArgumentException(
+            "Cannot translate queryObject to sql with null pageable!");
+      }
+
+      var selectBase = "SELECT users.id, users.name, users.surname, users.patronymic FROM users";
+      return selectBase
+          + withNonDeleted(withoutNonRetrievableRoles(getWhere(queryObject)))
+          + getOrder(pageable.getSort(), FILTER_SORT_PROPERTY_TO_DB_COLUMNS_MAPPING)
+          + getLimitAndOffset(pageable);
+    }
   }
 
   @Override
@@ -40,14 +60,14 @@ public class UserFilterOptionsQT extends AbstractSimpleQueryTranslator<UserFilte
     }
 
     var selectBase = "SELECT COUNT(*) FROM users";
-    return selectBase + withNonDeleted(withAdminNonRetrievable(getWhere(queryObject)));
+    return selectBase + withNonDeleted(withoutNonRetrievableRoles(getWhere(queryObject)));
   }
 
-  private String withAdminNonRetrievable(String whereClause) {
+  private String withoutNonRetrievableRoles(String whereClause) {
     if (whereClause == null || whereClause.isEmpty()) {
-      return " WHERE users.role != 'ADMIN'";
+      return " WHERE users.role != 'ADMIN' AND users.role != 'EXTERNAL_TEACHER'";
     } else {
-      return whereClause + " AND users.role != 'ADMIN'";
+      return whereClause + " AND users.role != 'ADMIN' AND users.role != 'EXTERNAL_TEACHER'";
     }
   }
 

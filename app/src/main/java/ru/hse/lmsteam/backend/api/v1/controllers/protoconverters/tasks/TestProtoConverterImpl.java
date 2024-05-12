@@ -5,8 +5,8 @@ import com.google.protobuf.util.Timestamps;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoBuilder;
+import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsProtoConverter;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.schema.api.lessons.LessonSnippet;
@@ -18,34 +18,26 @@ import ru.hse.lmsteam.schema.api.tests.TestSnippet;
 @Component
 public class TestProtoConverterImpl implements TestProtoConverter {
   private final LessonManager lessonManager;
-  private final LessonsApiProtoBuilder lessonsApiProtoBuilder;
+  private final LessonsProtoConverter lessonsProtoConverter;
 
   @Override
-  public Mono<Test> map(ru.hse.lmsteam.backend.domain.tasks.Test task) {
-    return lessonManager
-        .findById(task.lessonId())
-        .singleOptional()
-        .handle(
-            (lessonOpt, sink) -> {
-              Test.Builder builder;
-              try {
-                builder = Test.parseFrom(task.payload()).toBuilder();
-              } catch (InvalidProtocolBufferException e) {
-                sink.error(new RuntimeException(e));
-                return;
-              }
-              builder.setId(task.id().toString());
-              builder.setTitle(task.title());
-              if (task.publishDate() != null) {
-                builder.setPublishDate(Timestamps.fromMillis(task.publishDate().toEpochMilli()));
-              }
-              if (task.deadlineDate() != null) {
-                builder.setDeadlineDate(Timestamps.fromMillis(task.deadlineDate().toEpochMilli()));
-              }
-              lessonOpt.ifPresent(
-                  lesson -> builder.setLesson(lessonsApiProtoBuilder.toSnippet(lesson)));
-              sink.next(builder.build());
-            });
+  public Test map(ru.hse.lmsteam.backend.domain.tasks.Test task, Lesson lesson) {
+    Test.Builder builder;
+    try {
+      builder = Test.parseFrom(task.payload()).toBuilder();
+    } catch (InvalidProtocolBufferException e) {
+      throw new RuntimeException(e);
+    }
+    builder.setId(task.id().toString());
+    builder.setTitle(task.title());
+    if (task.publishDate() != null) {
+      builder.setPublishDate(Timestamps.fromMillis(task.publishDate().toEpochMilli()));
+    }
+    if (task.deadlineDate() != null) {
+      builder.setDeadlineDate(Timestamps.fromMillis(task.deadlineDate().toEpochMilli()));
+    }
+    builder.setLesson(lessonsProtoConverter.toSnippet(lesson));
+    return builder.build();
   }
 
   @Override
@@ -73,19 +65,13 @@ public class TestProtoConverterImpl implements TestProtoConverter {
   }
 
   @Override
-  public Mono<TestSnippet> toSnippet(ru.hse.lmsteam.backend.domain.tasks.Test test) {
-    return lessonManager
-        .findById(test.lessonId())
-        .singleOptional()
-        .map(
-            lessonOpt -> {
-              var b = TestSnippet.newBuilder();
-              b.setId(test.id().toString());
-              b.setTitle(test.title());
-              lessonOpt.ifPresent(lesson -> b.setLesson(lessonsApiProtoBuilder.toSnippet(lesson)));
-              b.setDeadlineDate(Timestamps.fromMillis(test.deadlineDate().toEpochMilli()));
-              return b.build();
-            });
+  public TestSnippet toSnippet(ru.hse.lmsteam.backend.domain.tasks.Test test, Lesson lesson) {
+    var b = TestSnippet.newBuilder();
+    b.setId(test.id().toString());
+    b.setTitle(test.title());
+    b.setLesson(lessonsProtoConverter.toSnippet(lesson));
+    b.setDeadlineDate(Timestamps.fromMillis(test.deadlineDate().toEpochMilli()));
+    return b.build();
   }
 
   @Override

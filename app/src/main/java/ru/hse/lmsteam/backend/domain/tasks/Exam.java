@@ -10,4 +10,5 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @Table("exams")
 public record Exam(
-    @With @Id UUID id, String title, Instant publishDate, Instant deadlineDate, byte[] payload) implements Task {}
+    @With @Id UUID id, String title, Instant publishDate, Instant deadlineDate, byte[] payload)
+    implements Task {}

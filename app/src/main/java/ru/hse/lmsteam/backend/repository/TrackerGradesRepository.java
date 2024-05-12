@@ -3,14 +3,17 @@ package ru.hse.lmsteam.backend.repository;
 import java.util.Collection;
 import java.util.UUID;
 import reactor.core.publisher.Flux;
-import ru.hse.lmsteam.backend.domain.grades.TrackerGrade;
+import reactor.core.publisher.Mono;
+import ru.hse.lmsteam.backend.domain.grades.TrackerGradeDb;
 
 public interface TrackerGradesRepository {
-  Flux<TrackerGrade> findByGradeId(UUID gradeId);
+  Flux<TrackerGradeDb> findByGradeId(UUID gradeId);
 
-  Flux<TrackerGrade> findByGradeId(UUID gradeId, boolean operateOnMaster);
+  Flux<TrackerGradeDb> findByGradeId(UUID gradeId, boolean operateOnMaster);
 
-  Flux<TrackerGrade> findByGradeIds(Collection<UUID> gradeId);
+  Flux<TrackerGradeDb> findByGradeIds(Collection<UUID> gradeIds);
 
-  Flux<TrackerGrade> findByTrackerId(UUID trackerId);
+  Flux<TrackerGradeDb> findByTrackerId(UUID trackerId);
+
+  Mono<TrackerGradeDb> upsert(TrackerGradeDb trackerGradeDb);
 }

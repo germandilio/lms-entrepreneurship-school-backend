@@ -48,11 +48,9 @@ public class TestFilterOptionsQT extends AbstractSimpleQueryTranslator<TestFilte
             .map(lessonId -> " lesson_id = '" + lessonId + "'");
 
     var publishDateCriteria =
-        getRangeClause(
-            queryObject.publishDateFrom(), queryObject.publishDateTo(), "publish_date");
+        getRangeClause(queryObject.publishDateFrom(), queryObject.publishDateTo(), "publish_date");
     var deadlineCriteria =
-        getRangeClause(
-            queryObject.deadlineFrom(), queryObject.deadlineTo(), "deadline_date");
+        getRangeClause(queryObject.deadlineFrom(), queryObject.deadlineTo(), "deadline_date");
 
     return Stream.of(titleCriteria, lessonIdCriteria, publishDateCriteria, deadlineCriteria)
         .flatMap(Optional::stream)

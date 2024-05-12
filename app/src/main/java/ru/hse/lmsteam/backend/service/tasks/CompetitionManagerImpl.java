@@ -1,5 +1,7 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -25,6 +27,16 @@ public class CompetitionManagerImpl implements CompetitionManager {
       return Mono.empty();
     }
     return competitionRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Competition>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return competitionRepository.findByIds(ids).collectMap(Competition::id);
   }
 
   @Transactional
