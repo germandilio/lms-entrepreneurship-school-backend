@@ -1,3 +1,7 @@
 package ru.hse.lmsteam.backend.domain.tasks;
 
-public interface Task {}
+import java.util.UUID;
+
+public interface Task {
+  UUID id();
+}

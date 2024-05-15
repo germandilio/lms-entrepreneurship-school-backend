@@ -49,7 +49,7 @@ public class TrackerGradesRepositoryImpl implements TrackerGradesRepository {
   @Override
   public Flux<TrackerGradeDb> findByTrackerId(UUID trackerId) {
     if (trackerId == null) {
-      throw new IllegalArgumentException("trackerId is null");
+      throw new IllegalArgumentException("GradedByTrackerId is null");
     }
 
     return db.slave.select(query(where("tracker_id").is(trackerId)), TrackerGradeDb.class);

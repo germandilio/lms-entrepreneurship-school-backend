@@ -78,7 +78,7 @@ public class TeamManagerImpl implements TeamManager {
     }
     teamValidator.validateForSave(team);
     return teamRepository
-        .findById(team.id(), true)
+        .findById(team.id(), false)
         .map(dbGroup -> team.mergeWith(dbGroup, false))
         .flatMap(teamRepository::upsert)
         .flatMap(id -> teamRepository.findById(id, false))

@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -24,4 +25,6 @@ public interface TestManager {
   Mono<Long> delete(UUID assignmentId);
 
   Mono<Page<Test>> findAll(TestFilterOptions filterOptions, Pageable pageable);
+
+  Flux<Test> getAllPastTests(Instant time);
 }

@@ -17,6 +17,11 @@ import ru.hse.lmsteam.backend.service.user.UserAuthInternal;
 public class GrantAccessUtils {
   private final UserAuthInternal authorizationManager;
 
+  public static final Set<UserRole> ALL_INTERNALS =
+      Set.of(UserRole.ADMIN, UserRole.TRACKER, UserRole.LEARNER);
+  public static final Set<UserRole> ALL =
+      Set.of(UserRole.ADMIN, UserRole.TRACKER, UserRole.LEARNER, UserRole.EXTERNAL_TEACHER);
+
   public Mono<UserAuth> grantAccess(String rawToken, Set<UserRole> allowedRoles) {
     var token = rawToken.startsWith("Bearer ") ? rawToken.substring(7) : rawToken;
     return authorizationManager

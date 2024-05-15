@@ -70,9 +70,9 @@ public class UserTeamRepositoryImpl implements UserTeamRepository {
                   Team.builder()
                       .id(row.get("id", UUID.class))
                       .number(row.get("number", Integer.class))
-                      .projectTheme(row.get("projectTheme", String.class))
+                      .projectTheme(row.get("project_theme", String.class))
                       .description(row.get("description", String.class))
-                      .isDeleted(row.get("isDeleted", Boolean.class))
+                      .isDeleted(row.get("is_deleted", Boolean.class))
                       .build();
               return new UserTeam(row.get("user_id", UUID.class), team);
             })
@@ -113,6 +113,9 @@ public class UserTeamRepositoryImpl implements UserTeamRepository {
   }
 
   private Flux<UUID> batchInsertUserTeamMemberships(UUID teamId, ImmutableSet<UUID> userIds) {
+    if (userIds.isEmpty()) {
+      return Flux.empty();
+    }
     var userIdsClause =
         userIds.stream().map(id -> "'" + id.toString() + "'").reduce((a, b) -> a + ", " + b);
 

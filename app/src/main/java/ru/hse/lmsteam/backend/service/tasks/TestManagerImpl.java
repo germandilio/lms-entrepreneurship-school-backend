@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -119,5 +120,11 @@ public class TestManagerImpl implements TestManager {
       return Mono.empty();
     }
     return testRepository.findAll(filterOptions, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Test> getAllPastTests(Instant time) {
+    return testRepository.getAllWithDeadlineBefore(time);
   }
 }

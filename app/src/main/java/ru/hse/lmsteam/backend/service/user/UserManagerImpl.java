@@ -95,7 +95,7 @@ public class UserManagerImpl implements UserManager {
   public Mono<User> update(final UserUpsertModel userUpsertModel) {
     log.info("Updating user with id: {}", userUpsertModel.id());
     return userRepository
-        .findById(userUpsertModel.id(), true)
+        .findById(userUpsertModel.id(), false)
         .singleOptional()
         // stub User for saving new entity with empty id
         .map(userOpt -> userOpt.orElse(User.builder().build()))
@@ -169,18 +169,24 @@ public class UserManagerImpl implements UserManager {
         .findAllById(userIds)
         .collectList()
         .flatMap(
-            foundUsers -> {
-              Mono<ValidationErrors> validationErrors =
-                  getValidationErrorsMono(userIds, foundUsers, ImmutableSet.copyOf(foundUsers));
-              if (validationErrors != null) return validationErrors;
-
-              return userTeamRepository
-                  .setUserTeamMemberships(
-                      teamId,
-                      foundUsers.stream().map(User::id).collect(ImmutableSet.toImmutableSet()))
-                  .collectList()
-                  .thenReturn(new Success());
-            });
+            foundUsers ->
+                getValidationErrorsMono(
+                        teamId, userIds, foundUsers, ImmutableSet.copyOf(foundUsers))
+                    .flatMap(
+                        validationResult -> {
+                          if (!validationResult.success()) {
+                            return Mono.just(validationResult);
+                          }
+                          // if request is valid
+                          return userTeamRepository
+                              .setUserTeamMemberships(
+                                  teamId,
+                                  foundUsers.stream()
+                                      .map(User::id)
+                                      .collect(ImmutableSet.toImmutableSet()))
+                              .collectList()
+                              .thenReturn(validationResult);
+                        }));
   }
 
   @Transactional(readOnly = true)
@@ -196,13 +202,12 @@ public class UserManagerImpl implements UserManager {
         .collectList()
         .flatMap(
             foundUsers ->
-                getValidationErrorsMono(userIds, foundUsers, ImmutableSet.copyOf(foundUsers))
-                    .map(error -> (SetUserTeamMembershipResponse) error)
-                    .switchIfEmpty(Mono.just(new Success())));
+                getValidationErrorsMono(
+                    teamId, userIds, foundUsers, ImmutableSet.copyOf(foundUsers)));
   }
 
-  private Mono<ValidationErrors> getValidationErrorsMono(
-      ImmutableSet<UUID> userIds, List<User> foundUsers, ImmutableSet<User> dbUsers) {
+  private Mono<SetUserTeamMembershipResponse> getValidationErrorsMono(
+      UUID teamId, ImmutableSet<UUID> userIds, List<User> foundUsers, ImmutableSet<User> dbUsers) {
     if (dbUsers.size() != userIds.size()) {
       return Mono.just(
           new ValidationErrors(
@@ -234,9 +239,11 @@ public class UserManagerImpl implements UserManager {
                 .filter(u -> UserRole.LEARNER.equals(u.role()))
                 .collect(ImmutableList.toImmutableList()));
 
-    return occupiedStudentsGroupsF.mapNotNull(
+    return occupiedStudentsGroupsF.map(
         occupiedStudentsGroups -> {
-          if (!occupiedStudentsGroups.isEmpty()) {
+          if (occupiedStudentsGroups.values().stream()
+              .flatMap(List::stream)
+              .anyMatch(t -> !t.id().equals(teamId))) {
             // convert to validation errors
             return new ValidationErrors(
                 Optional.empty(),
@@ -248,7 +255,7 @@ public class UserManagerImpl implements UserManager {
                                 entry -> ImmutableList.copyOf(entry.getValue())))));
           }
 
-          return null;
+          return new Success();
         });
   }
 }

@@ -13,10 +13,11 @@ public interface GradesControllerDocSchema {
   Mono<UpdateGrade.Response> updateGrade(String token, UUID id, UpdateGrade.Request request);
 
   Mono<GetGrades.Response> getGrades(
-      String token,
+      String rawToken,
       Integer gradeFrom,
       Integer gradeTo,
       UUID taskId,
-      UUID ownerId,
+      UUID learnerId,
+      Boolean isGradedByPerformer,
       Pageable pageable);
 }

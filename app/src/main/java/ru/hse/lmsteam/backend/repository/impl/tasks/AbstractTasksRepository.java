@@ -4,6 +4,7 @@ import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
 import com.google.common.reflect.TypeToken;
+import java.time.Instant;
 import java.util.Collection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -84,5 +85,9 @@ public abstract class AbstractTasksRepository<TaskType, Id, FOptionsType>
                 .mapValue(Long.class)
                 .one())
         .map(p -> new PageImpl<>(p.getT1(), pageable, p.getT2()));
+  }
+
+  public Flux<TaskType> getAllWithDeadlineBefore(Instant time) {
+    return db.slave.select(query(where("deadline_date").lessThanOrEquals(time)), taskTypeClass);
   }
 }

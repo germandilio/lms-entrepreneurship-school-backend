@@ -1,5 +1,6 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Competition;
 import ru.hse.lmsteam.backend.repository.impl.tasks.CompetitionRepository;
@@ -98,5 +100,11 @@ public class CompetitionManagerImpl implements CompetitionManager {
       return Mono.empty();
     }
     return competitionRepository.findAll(filterOptions, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Competition> getAllPastCompetitions(Instant time) {
+    return competitionRepository.getAllWithDeadlineBefore(time);
   }
 }

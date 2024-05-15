@@ -35,7 +35,7 @@ public class GradesApiProtoBuilderImpl implements GradesApiProtoBuilder {
   }
 
   @Override
-  public Mono<GetGrades.Response> buildGetGradeResponse(Page<Grade> grades) {
+  public Mono<GetGrades.Response> buildGetGradesResponse(Page<Grade> grades) {
     return getLessonsCache(grades.stream().map(Grade::task).toList())
         .map(
             lessonsCache -> {

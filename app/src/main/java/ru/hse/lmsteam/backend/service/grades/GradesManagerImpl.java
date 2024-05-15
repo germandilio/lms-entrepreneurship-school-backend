@@ -1,5 +1,7 @@
 package ru.hse.lmsteam.backend.service.grades;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.grades.*;
 import ru.hse.lmsteam.backend.domain.submission.Submission;
@@ -21,12 +24,14 @@ import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.repository.GradeRepository;
 import ru.hse.lmsteam.backend.repository.TrackerGradesRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicAccessDeniedException;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.model.grades.GradesFilterOptions;
 import ru.hse.lmsteam.backend.service.submissions.SubmissionsManager;
 import ru.hse.lmsteam.backend.service.tasks.CompetitionManager;
 import ru.hse.lmsteam.backend.service.tasks.ExamManager;
 import ru.hse.lmsteam.backend.service.tasks.HomeworkManager;
 import ru.hse.lmsteam.backend.service.tasks.TestManager;
+import ru.hse.lmsteam.backend.service.teams.TeamManager;
 import ru.hse.lmsteam.backend.service.user.UserManager;
 
 @Service
@@ -40,6 +45,7 @@ public class GradesManagerImpl implements GradesManager {
   private final ExamManager examManager;
   private final UserManager userManager;
   private final SubmissionsManager submissionsManager;
+  private final TeamManager teamManager;
 
   @Transactional(readOnly = true)
   @Override
@@ -65,43 +71,13 @@ public class GradesManagerImpl implements GradesManager {
   @Override
   public Mono<Grade> updateGrade(UUID id, UserAuth performer, Integer grade, String comment) {
     if (performer == null || performer.userId() == null) {
-      throw new IllegalArgumentException("Illegal performer params");
+      return Mono.error(new IllegalArgumentException("Illegal performer params"));
     }
 
-    if (UserRole.ADMIN.equals(performer.role())) {
-      return gradeRepository
-          .findById(id, true)
-          .flatMap(
-              gradeFromDb -> {
-                var updatedGrade =
-                    GradeDB.builder()
-                        .id(gradeFromDb.id())
-                        .taskId(gradeFromDb.taskId())
-                        .submissionId(gradeFromDb.submissionId())
-                        .ownerId(gradeFromDb.ownerId())
-                        .taskType(gradeFromDb.taskType())
-                        .adminGrade(grade)
-                        .adminComment(comment)
-                        .build();
-                return gradeRepository.upsert(updatedGrade);
-              })
-          .flatMap(this::buildGrade);
-    } else if (UserRole.TRACKER.equals(performer.role())) {
-      var updatedTrackerGrade =
-          TrackerGradeDb.builder()
-              .trackerId(performer.userId())
-              .gradeId(id)
-              .grade(grade)
-              .comment(comment)
-              .build();
-
-      return trackerGradesRepository
-          .upsert(updatedTrackerGrade)
-          .flatMap(trackerGrade -> gradeRepository.findById(trackerGrade.gradeId()))
-          .flatMap(this::buildGrade);
-    } else {
-      return Mono.error(new BusinessLogicAccessDeniedException("Illegal performer role"));
-    }
+    return gradeRepository
+        .findById(id, true)
+        .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Grade not found.")))
+        .flatMap(gradeFromDb -> doUpdateGrade(gradeFromDb, performer, grade, comment));
   }
 
   @Transactional(readOnly = true)
@@ -119,6 +95,114 @@ public class GradesManagerImpl implements GradesManager {
                     .map(
                         (grades) ->
                             new PageImpl<>(grades, page.getPageable(), page.getTotalElements())));
+  }
+
+  @Override
+  public Mono<GradesFilterOptions> buildGradesFilterOptions(
+      UserAuth performer,
+      UUID taskId,
+      UUID learnerId,
+      Boolean IsGradedByPerformer,
+      Integer gradeFrom,
+      Integer gradeTo) {
+    return getOwnerIdsClause(performer, learnerId)
+        .handle(
+            (ownersIds, sink) -> {
+              var queryBuilder = GradesFilterOptions.builder();
+              queryBuilder.ownersId(ownersIds);
+
+              queryBuilder.gradeFrom(gradeFrom);
+              queryBuilder.gradeTo(gradeTo);
+              queryBuilder.taskId(taskId);
+
+              if (IsGradedByPerformer != null) {
+                if (!Set.of(UserRole.TRACKER, UserRole.ADMIN).contains(performer.role())) {
+                  sink.error(new BusinessLogicAccessDeniedException("Illegal performer role"));
+                  return;
+                }
+
+                if (UserRole.ADMIN.equals(performer.role())) {
+                  queryBuilder.gradedByAdmin(IsGradedByPerformer);
+                }
+                if (UserRole.TRACKER.equals(performer.role())) {
+                  queryBuilder.gradedByTrackerId(performer.userId());
+                }
+              }
+
+              if (UserRole.TRACKER.equals(performer.role())) {
+                queryBuilder.taskType(TaskType.HOMEWORK);
+              }
+
+              sink.next(queryBuilder.build());
+            });
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<GradeDB> findByTaskType(TaskType taskType) {
+    return gradeRepository.findByTaskType(taskType);
+  }
+
+  @Transactional
+  @Override
+  public Mono<Long> saveAll(Collection<GradeDB> grades) {
+    if (grades.isEmpty()) {
+      return Mono.just(0L);
+    }
+    return gradeRepository.saveAll(grades).switchIfEmpty(Mono.just(0L));
+  }
+
+  private Mono<Collection<UUID>> getOwnerIdsClause(UserAuth performer, UUID learnerId) {
+    if (UserRole.LEARNER.equals(performer.role())) {
+      // restrict access for only own grades for learner
+      return Mono.just(Sets.intersection(Set.of(performer.userId()), Set.of(learnerId)));
+    }
+
+    if (UserRole.ADMIN.equals(performer.role())) {
+      return Mono.just(Collections.singleton(learnerId));
+    }
+
+    if (UserRole.TRACKER.equals(performer.role())) {
+      return teamManager
+          .findTeammates(performer.userId())
+          .filter(user -> UserRole.LEARNER.equals(user.role()))
+          .map(User::id)
+          .collect(ImmutableSet.toImmutableSet());
+    }
+
+    return Mono.just(Collections.emptySet());
+  }
+
+  private Mono<Grade> doUpdateGrade(
+      GradeDB gradeFromDb, UserAuth performer, Integer grade, String comment) {
+    if (UserRole.ADMIN.equals(performer.role())) {
+      var updatedGrade =
+          GradeDB.builder()
+              .id(gradeFromDb.id())
+              .taskId(gradeFromDb.taskId())
+              .submissionId(gradeFromDb.submissionId())
+              .ownerId(gradeFromDb.ownerId())
+              .taskType(gradeFromDb.taskType())
+              .adminGrade(grade)
+              .adminComment(comment)
+              .build();
+      return gradeRepository.upsert(updatedGrade).flatMap(this::buildGrade);
+    } else if (UserRole.TRACKER.equals(performer.role())) {
+      var updatedTrackerGrade =
+          TrackerGradeDb.builder()
+              .trackerId(performer.userId())
+              .gradeId(gradeFromDb.id())
+              .grade(grade)
+              .comment(comment)
+              .build();
+
+      return trackerGradesRepository
+          .upsert(updatedTrackerGrade)
+          .flatMap(trackerGrade -> gradeRepository.findById(trackerGrade.gradeId()))
+          .flatMap(this::buildGrade);
+    } else {
+      return Mono.error(new BusinessLogicAccessDeniedException("Illegal performer role"));
+    }
   }
 
   /**
@@ -199,7 +283,8 @@ public class GradesManagerImpl implements GradesManager {
             });
   }
 
-  @NotNull private Function<GradeDB, Grade> buildGradesFun(
+  @NotNull
+  private Function<GradeDB, Grade> buildGradesFun(
       Function<GradeDB, Optional<Task>> tasksCache,
       Map<UUID, Collection<TrackerGradeDb>> trackerGrades,
       Map<UUID, User> trackers,

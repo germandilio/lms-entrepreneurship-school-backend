@@ -20,13 +20,41 @@ public class GradesFilterOptionsQT extends AbstractSimpleQueryTranslator<GradesF
 
     var taskClause =
         Optional.ofNullable(queryObject.taskId()).map(id -> "grades.task_id = '" + id + "'");
-    var ownerClause =
-        Optional.ofNullable(queryObject.ownerId()).map(id -> "grades.owner_id = '" + id + "'");
     var trackerClause =
-        Optional.ofNullable(queryObject.trackerId())
+        Optional.ofNullable(queryObject.gradedByTrackerId())
             .map(id -> "tracker_grades.tracker_id = '" + id + "'");
+    var gradedByAdminClause =
+        Optional.ofNullable(queryObject.gradedByAdmin())
+            .map(
+                gradedByAdmin -> {
+                  if (gradedByAdmin) {
+                    return "grades.grade != NULL";
+                  } else {
+                    return "grades.grade = NULL";
+                  }
+                });
 
-    return Stream.of(gradeClause, taskClause, ownerClause, trackerClause)
+    var ownersCriteria =
+        Optional.ofNullable(queryObject.ownersId())
+            .filter(owners -> !owners.isEmpty())
+            .map(
+                owners ->
+                    "grades.owner_id IN ("
+                        + owners.stream()
+                            .map(id -> "'" + id + "'")
+                            .collect(Collectors.joining(", "))
+                        + ")");
+    var taskTypeClause =
+        Optional.ofNullable(queryObject.taskType())
+            .map(taskType -> "grades.task_type = '" + taskType + "'");
+
+    return Stream.of(
+            taskClause,
+            ownersCriteria,
+            gradedByAdminClause,
+            gradeClause,
+            trackerClause,
+            taskTypeClause)
         .flatMap(Optional::stream)
         .collect(Collectors.joining(" AND "));
   }

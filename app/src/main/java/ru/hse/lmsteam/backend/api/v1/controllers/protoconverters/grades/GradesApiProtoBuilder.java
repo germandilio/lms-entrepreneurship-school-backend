@@ -10,7 +10,7 @@ import ru.hse.lmsteam.schema.api.grades.UpdateGrade;
 public interface GradesApiProtoBuilder {
   Mono<GetGrade.Response> buildGetGradeResponse(Grade grade);
 
-  Mono<GetGrades.Response> buildGetGradeResponse(Page<Grade> grades);
+  Mono<GetGrades.Response> buildGetGradesResponse(Page<Grade> grades);
 
   Mono<UpdateGrade.Response> buildUpdateGradeResponse(Grade grade);
 }
