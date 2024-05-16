@@ -41,7 +41,7 @@ public class AutoCreateGradesTask {
   private final TestManager testManager;
   private final CompetitionManager competitionManager;
 
-  @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
+//  @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
   public void upsertGradesTask() {
     upsertGrades().subscribeOn(Schedulers.immediate()).subscribe();
   }
