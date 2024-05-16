@@ -7,10 +7,10 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.teams.TeamSnippetConverter;
-import ru.hse.lmsteam.backend.domain.Sex;
-import ru.hse.lmsteam.backend.domain.Team;
-import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.domain.user_teams.Sex;
+import ru.hse.lmsteam.backend.domain.user_teams.Team;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.schema.api.users.CreateOrUpdateUser;
 import ru.hse.lmsteam.schema.api.users.UserRoleNamespace;
@@ -77,9 +77,14 @@ public class UserProtoConverterImpl implements UserProtoConverter {
         UserSnippet.newBuilder()
             .setId(user.id().toString())
             .setName(user.name())
-            .setSurname(user.surname());
+            .setSurname(user.surname())
+            .setEmail(user.email());
+
     if (user.patronymic() != null) {
       b.setPatronymic(StringValue.of(user.patronymic()));
+    }
+    if (convertUserRole(user.role()) != null) {
+      b.setRole(convertUserRole(user.role()));
     }
     return b.build();
   }
@@ -154,22 +159,23 @@ public class UserProtoConverterImpl implements UserProtoConverter {
     };
   }
 
-  private UserRoleNamespace.Role convertUserRole(UserRole role) {
+  public static UserRoleNamespace.Role convertUserRole(UserRole role) {
     if (role == null) return null;
     return switch (role) {
       case ADMIN -> UserRoleNamespace.Role.ADMIN;
       case LEARNER -> UserRoleNamespace.Role.LEARNER;
       case TRACKER -> UserRoleNamespace.Role.TRACKER;
+      case EXTERNAL_TEACHER -> UserRoleNamespace.Role.EXTERNAL_TEACHER;
     };
   }
 
-  private UserRole convertUserRole(UserRoleNamespace.Role role) {
+  public static UserRole convertUserRole(UserRoleNamespace.Role role) {
     return switch (role) {
       case UserRoleNamespace.Role.ADMIN -> UserRole.ADMIN;
       case UserRoleNamespace.Role.LEARNER -> UserRole.LEARNER;
       case UserRoleNamespace.Role.TRACKER -> UserRole.TRACKER;
-      case NOT_INITIALISED -> null;
-      case UNRECOGNIZED -> null;
+      case UserRoleNamespace.Role.EXTERNAL_TEACHER -> UserRole.EXTERNAL_TEACHER;
+      case NOT_INITIALISED, UNRECOGNIZED -> null;
     };
   }
 }

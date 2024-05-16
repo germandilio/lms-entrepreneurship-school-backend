@@ -3,15 +3,17 @@ package ru.hse.lmsteam.backend.repository.impl;
 import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
+import java.util.Collection;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.config.persistence.MasterSlaveDbOperations;
-import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 import ru.hse.lmsteam.backend.repository.LessonRepository;
 import ru.hse.lmsteam.backend.repository.query.translators.LessonsFilterOptionsQT;
 import ru.hse.lmsteam.backend.service.model.lessons.LessonsFilterOptions;
@@ -28,6 +30,14 @@ public class LessonRepositoryImpl implements LessonRepository {
       throw new IllegalArgumentException("Id is null!");
     }
     return db.slave.selectOne(query(where("id").is(id)), Lesson.class);
+  }
+
+  @Override
+  public Flux<Lesson> findByIds(Collection<UUID> ids) {
+    if (ids == null) {
+      throw new IllegalArgumentException("Id is null!");
+    }
+    return db.slave.select(query(where("id").in(ids)), Lesson.class);
   }
 
   @Override

@@ -1,5 +1,8 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -7,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Competition;
 import ru.hse.lmsteam.backend.repository.impl.tasks.CompetitionRepository;
@@ -25,6 +29,16 @@ public class CompetitionManagerImpl implements CompetitionManager {
       return Mono.empty();
     }
     return competitionRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Competition>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return competitionRepository.findByIds(ids).collectMap(Competition::id);
   }
 
   @Transactional
@@ -86,5 +100,11 @@ public class CompetitionManagerImpl implements CompetitionManager {
       return Mono.empty();
     }
     return competitionRepository.findAll(filterOptions, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Competition> getAllPastCompetitions(Instant time) {
+    return competitionRepository.getAllWithDeadlineBefore(time);
   }
 }

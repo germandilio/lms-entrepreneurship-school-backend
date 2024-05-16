@@ -12,4 +12,6 @@
     <include file="tables/competitions/competitions.sql" relativeToChangelogFile="true"/>
     <include file="tables/users_auth/add_token_index.sql" relativeToChangelogFile="true"/>
     <include file="tables/submissions/submissions.sql" relativeToChangelogFile="true"/>
+    <include file="tables/grades/grades.sql" relativeToChangelogFile="true"/>
+    <include file="tables/tracker_grades/tracker_grades.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>

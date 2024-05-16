@@ -1,5 +1,8 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -7,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Exam;
 import ru.hse.lmsteam.backend.repository.impl.tasks.ExamRepository;
@@ -25,6 +29,16 @@ public class ExamManagerImpl implements ExamManager {
       return Mono.empty();
     }
     return examRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Exam>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return examRepository.findByIds(ids).collectMap(Exam::id);
   }
 
   @Transactional
@@ -85,5 +99,11 @@ public class ExamManagerImpl implements ExamManager {
       return Mono.empty();
     }
     return examRepository.findAll(filterOptions, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Exam> getAllPastExams(Instant time) {
+    return examRepository.getAllWithDeadlineBefore(time);
   }
 }

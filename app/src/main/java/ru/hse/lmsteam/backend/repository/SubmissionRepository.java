@@ -16,6 +16,8 @@ public interface SubmissionRepository {
 
   Mono<SubmissionDB> findByTaskAndOwner(UUID taskId, UUID ownerId);
 
+  Flux<SubmissionDB> findAllByIds(Collection<UUID> ids);
+
   Flux<SubmissionDB> findAllByTaskIds(Collection<UUID> taskId);
 
   Mono<Page<SubmissionDB>> findAll(SubmissionFilterOptions filterOptions, Pageable pageable);

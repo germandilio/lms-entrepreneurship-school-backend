@@ -45,11 +45,9 @@ public class ExamFilterOptionsQT extends AbstractSimpleQueryTranslator<ExamFilte
         Optional.ofNullable(queryObject.title()).map(title -> " title ILIKE '%" + title + "%'");
 
     var publishDateCriteria =
-        getTimestampRangeClause(
-            queryObject.publishDateFrom(), queryObject.publishDateTo(), "publish_date");
+        getRangeClause(queryObject.publishDateFrom(), queryObject.publishDateTo(), "publish_date");
     var deadlineCriteria =
-        getTimestampRangeClause(
-            queryObject.deadlineFrom(), queryObject.deadlineTo(), "deadline_date");
+        getRangeClause(queryObject.deadlineFrom(), queryObject.deadlineTo(), "deadline_date");
 
     return Stream.of(titleCriteria, publishDateCriteria, deadlineCriteria)
         .flatMap(Optional::stream)

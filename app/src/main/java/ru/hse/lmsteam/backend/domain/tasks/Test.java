@@ -15,4 +15,5 @@ public record Test(
     String title,
     Instant publishDate,
     Instant deadlineDate,
-    byte[] payload) {}
+    byte[] payload)
+    implements Task {}

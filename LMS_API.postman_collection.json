@@ -1,0 +1,2664 @@
+{
+	"info": {
+		"_postman_id": "10d2de86-82f3-4f85-bc0a-6a3cd069ad5c",
+		"name": "LMS_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22403424",
+		"_collection_link": "https://restless-shuttle-228498.postman.co/workspace/LMS-API~85fca95c-b980-4ce4-8917-4c9970223142/collection/22403424-10d2de86-82f3-4f85-bc0a-6a3cd069ad5c?action=share&source=collection_link&creator=22403424"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "/api/v1/users/ GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYzhlNGFlNi1jZmJjLTQ2OWMtOTA5ZC0yYmViMjIyNDMzMjgiLCJpYXQiOjE3MTI0Mzk3NTMsImV4cCI6MTcxMjUyNjE1M30.7khEQkbbCNRPnjVbLenPAkpORharQ5y_IUK72rWPSpDCASAERlxtBgvMDqxVHQLdCxfktknEjh6M5wJbUcXZ_A",
+								"uuid": "72275722-1961-485b-a568-f0efbbb783cb"
+							},
+							{
+								"key": "Accept",
+								"value": "application/x-protobuf",
+								"uuid": "3c9332d0-c98f-47c4-aa4c-c4cdd3613526"
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/users/bb7a1698-f64c-4ded-b544-3a9803d74ac1",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"bb7a1698-f64c-4ded-b544-3a9803d74ac1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users/uid/balance GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYzhlNGFlNi1jZmJjLTQ2OWMtOTA5ZC0yYmViMjIyNDMzMjgiLCJpYXQiOjE3MTI0MzE0NDMsImV4cCI6MTcxMjUxNzg0M30.Yudj05mG1o7Jxfstel8R5GVHsO9_u84tKolH6318Qqw1QV3DEbQ-Gr7SHiswIjNXSts-G3NwZJMmUiyEN_7F7w",
+								"type": "text",
+								"uuid": "b55fbbb3-fd0d-4c99-8377-513390e2fd64"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"uuid": "481b580a-77b8-4b79-8651-63e3782e7777"
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/users/98d550a6-c445-48cc-9916-37c3e428a1d0/balance",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"98d550a6-c445-48cc-9916-37c3e428a1d0",
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users/names GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"uuid": "457948f5-df29-4ec4-93c3-42da007a31f3",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/users/snippets?page=0&size=10&sort=name,asc",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"snippets"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "name,asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"uuid": "f14f6f6b-b2a5-4237-b0c0-697a26143a38"
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/users/list?page=0&size=100&namePattern=ffff",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "100"
+								},
+								{
+									"key": "sort",
+									"value": "name,asc",
+									"disabled": true
+								},
+								{
+									"key": "namePattern",
+									"value": "ffff"
+								},
+								{
+									"key": "roles",
+									"value": "admin",
+									"disabled": true
+								},
+								{
+									"key": "emailPattern",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "groupNumbers",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users/ DEL",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "eded7ebc-31c0-4eb0-ad81-f39f3fd09675",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/users/2c8e4ae6-cfbc-469c-909d-2beb22243328",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"2c8e4ae6-cfbc-469c-909d-2beb22243328"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "0352a90d-257f-4053-b8da-d8bb6ff28bb3",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"group_user_1\",\n    \"surname\": \"group_user_2\",\n    \"sex\": \"MALE\",\n    \"email\": \"group_user_2\",\n    \"role\": \"LEARNER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/users",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users PATCH",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "6b55f45f-65ad-45b6-b418-1cf78cfe7a05",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"name\": \"Big ffboss\",\n        \"surname\": \"GERfffffMAfffffNDILIO\",\n        \"sex\": \"MALE\",\n        \"email\": \"fffffffffffffffff@edu.hse.ru\",\n        \"role\": \"TRACKER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/users/0977075c-c0a5-4a3a-b351-d0bc7b572e1c",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"0977075c-c0a5-4a3a-b351-d0bc7b572e1c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users GET (login)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "f4faffed-4dd0-45d8-a189-152db44ce280",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/auth/login?login=admin&password=password",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							],
+							"query": [
+								{
+									"key": "login",
+									"value": "admin"
+								},
+								{
+									"key": "password",
+									"value": "password"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users POST (set password)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "6767a9b0-3f0c-407d-9003-fea6b11a0bc5",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"2261b9fe-da09-4296-8efd-3e4e86afeedd\",\n    \"new_password\": \"11111111\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/auth/set-password",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"set-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users POST (change password)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "9398eb77-9a64-44b6-946e-7ce391192dc5",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"germanmixajlov@gmail.com\",\n    \"old_password\": \"11111111\",\n    \"new_password\": \"99999999\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/auth/change-password",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/users PATCH (check-token)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzY2EyMmE2Mi00OTRhLTQzYjYtOTcwOS02MmM4ZTdlNjIyYjkiLCJpYXQiOjE3MTQ4NDgzMzIsImV4cCI6MTcxNDkzNDczMn0.zckXBuHaVKgyzLV0BpvwbKdRwCaR9kGF7srYHMQSe4tDQBKi3fs3wPGGg7NoMowu042TV8j69G2xOiWMCjchaA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "96f63ac9-a4a4-4283-96a5-b25485d1e4f6",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/auth/check-token",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"check-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "teams",
+			"item": [
+				{
+					"name": "/api/v1/teams GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "6e1a0c7a-1a79-4472-96df-8ffe7c67a703",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams/list?page=0&size=10&sort=number,desc",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "number,desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/teams POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "27e5dbfb-c822-4d65-ac5b-374435719d72",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"number\": 1111,\n    \"project_theme\": \"first homework group\",\n    \"description\": \"-\",\n    \"user_ids\": [\"12f52816-4328-4883-b900-63022740fa03\", \"d72bb90f-aca9-4a94-9ccd-a68927cfe611\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/teams PUT",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "9dfdadfc-84e4-4ef1-9f27-7c0ea5e3ba44",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"number\": 121,\n    \"project_theme\": \"ffhf\",\n    \"description\": \"fff\",\n    \"user_ids\": [\"c9080d60-d6a9-44fb-ae96-18bdf4e22972\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams/d547a375-0860-44e0-aea9-5fa81b25267d",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams",
+								"d547a375-0860-44e0-aea9-5fa81b25267d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/teams GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "311db5c0-3168-402e-9588-7cbf6495e0a6",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams/78260601-f901-4a62-9490-c81d360fabb7",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams",
+								"78260601-f901-4a62-9490-c81d360fabb7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/teams GET public",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "64681038-73f2-412f-b3c8-3aec32e3382d",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams/78260601-f901-4a62-9490-c81d360fabb7/public",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams",
+								"78260601-f901-4a62-9490-c81d360fabb7",
+								"public"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/teams/members GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "b172d20f-3e23-43ea-ba6a-0e1ee1dd9842",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams/c65f89d2-37d8-41a5-998c-163ff53e8144/members?page=0&size=100&sort=name,asc",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams",
+								"c65f89d2-37d8-41a5-998c-163ff53e8144",
+								"members"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "100"
+								},
+								{
+									"key": "sort",
+									"value": "name,asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/teams/members POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "1f1563ae-a9b6-43d9-b835-e274bdf75d73",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_ids\": [\"92085c51-1a96-4682-b187-f6f49d6e7604\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams/78260601-f901-4a62-9490-c81d360fabb7/members",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams",
+								"78260601-f901-4a62-9490-c81d360fabb7",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/teams DEL",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "1f3caf00-59ef-488d-bac3-76416c1c2b8b",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/teams/623179a9-c325-4587-b31e-b75635186b12",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"teams",
+								"623179a9-c325-4587-b31e-b75635186b12"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "lessons",
+			"item": [
+				{
+					"name": "/api/v1/lessons GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/x-protobuf",
+								"type": "text",
+								"uuid": "84565271-77c2-48c0-86b3-92fe446f277b",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/lessons/933f7886-3b1c-4213-8678-f17983bdd864",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"lessons",
+								"933f7886-3b1c-4213-8678-f17983bdd864"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/lessons GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "05ca664f-15aa-469e-b931-0dcac77d7eee",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/lessons/list?page=0&size=10&sort=lessonNumber,desc",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"lessons",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "lessonNumber,desc"
+								},
+								{
+									"key": "title",
+									"value": "title",
+									"disabled": true
+								},
+								{
+									"key": "lessonNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "publishDateFrom",
+									"value": "2024-04-13T00:00:00Z",
+									"disabled": true
+								},
+								{
+									"key": "publishDateTo",
+									"value": "2024-04-13T00:00:00Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/lessons POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "134ec90c-c68c-4ddf-a199-009b81273eb0",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"lesson title\",\n    \"lesson_number\": 33,\n    \"publish_date\": \"2024-04-13T00:00:00Z\",\n    \"description\": \"description\",\n    \"video_urls\": [\"video_url\"],\n    \"presentation_urls\": [\"presentation_url\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/lessons",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"lessons"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/groups PUT",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lesson\": {\n        \"title\": \"lesson title\",\n        \"lesson_number\": 10,\n        \"publish_date\": \"2024-04-13T00:00:00Z\",\n        \"description\": \"description\",\n        \"video_urls\": [\"video_url\"],\n        \"presentation_urls\": [\"presentation_url\"]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/lessons/07edce63-80c5-4ee3-bbbf-3796d583cf43",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"lessons",
+								"07edce63-80c5-4ee3-bbbf-3796d583cf43"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/groups/ DEL",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/lessons/07edce63-80c5-4ee3-bbbf-3796d583cf43",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"lessons",
+								"07edce63-80c5-4ee3-bbbf-3796d583cf43"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "homeworks",
+			"item": [
+				{
+					"name": "/api/v1/homeworks GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"uuid": "463ecf68-0545-4cdc-b440-8454df453cf3"
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/homeworks/1eb63fe2-a1ec-4554-9605-360a20b0c584",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"homeworks",
+								"1eb63fe2-a1ec-4554-9605-360a20b0c584"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/homeworks GET (filters)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/x-protobuf\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.equal(\"application/x-protobuf\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"pm.test(\"Content type is application/x-protobuf\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.equal(\"application/x-protobuf\");",
+									"});",
+									"",
+									"pm.test(\"Response body is not empty\", function () {",
+									"    pm.expect(pm.response.text()).to.not.be.empty;",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "fc2d599f-1679-420d-ad8c-b0fa98d16d38",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/homeworks/list?page=0&size=10",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"homeworks",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "title,desc",
+									"disabled": true
+								},
+								{
+									"key": "title",
+									"value": "title",
+									"disabled": true
+								},
+								{
+									"key": "lessonId",
+									"value": "696903a3-b044-46fa-8929-490f8a52260b",
+									"disabled": true
+								},
+								{
+									"key": "isGroup",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "deadlineFrom",
+									"value": "2024-03-21T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "deadlineTo",
+									"value": "2024-03-22T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "publishFrom",
+									"value": "2024-05-02T15:30:14Z",
+									"disabled": true
+								},
+								{
+									"key": "publishTo",
+									"value": "2024-05-02T15:30:16Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/homeworks POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "f80211a5-27fb-4442-8db0-99bcdec2b1a8",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lesson_id\": \"e18d868e-5309-41d6-8779-60587889ca0a\",\n    \"title\": \"tihsdddhtjle\",\n    \"is_group_work\": true,\n    \"description\": \"group hometask\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/homeworks",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"homeworks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/homeworks PUT",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "b357cdff-9579-4970-a392-52945637758c",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lessonId\": \"696903a3-b044-46fa-8929-490f8a52260b\",\n    \"publishDate\": \"2024-04-21T08:31:28.557Z\",\n    \"deadlineDate\": \"2024-04-25T00:00:000Z\",\n    \"isGroupWork\": true,\n    \"description\": \"bla bla bla bla\",\n    \"gradingCriteria\": \"10 in every home! Make China great again!\",\n    \"externalMaterialUrls\": [\"https://www.google.com/\"],\n    \"title\": \"title\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/homeworks/fcb2a995-5169-4cde-96d0-1e8d613456e7",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"homeworks",
+								"fcb2a995-5169-4cde-96d0-1e8d613456e7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/groups/ DEL",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "be24bbd0-e370-4c96-bf0a-3b64ade9c34e",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/lessons/fcb2a995-5169-4cde-96d0-1e8d613456e7",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"lessons",
+								"fcb2a995-5169-4cde-96d0-1e8d613456e7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tests",
+			"item": [
+				{
+					"name": "/api/v1/tests GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "b33e84cf-1220-4960-95b8-f2b38f122148",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/tests/93561cc0-d248-49e1-915f-d7a963a80f23",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tests",
+								"93561cc0-d248-49e1-915f-d7a963a80f23"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/tests GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"uuid": "903831b7-7b64-4673-b620-241d0eac3494"
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/tests/list?page=0&size=10&sort=title,desc&title=title&lessonId=696903a3-b044-46fa-8929-490f8a52260b&isGroup=false",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tests",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "title,desc"
+								},
+								{
+									"key": "title",
+									"value": "title"
+								},
+								{
+									"key": "lessonId",
+									"value": "696903a3-b044-46fa-8929-490f8a52260b"
+								},
+								{
+									"key": "isGroup",
+									"value": "false"
+								},
+								{
+									"key": "deadlineFrom",
+									"value": "2024-03-21T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "deadlineTo",
+									"value": "2024-03-22T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "publishFrom",
+									"value": "2024-03-21T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "publishTo",
+									"value": "2024-03-22T08:31:28.557Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/tests POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "f28133c0-d4fa-4955-af29-8c37e8725f7d",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lesson_id\": \"696903a3-b044-46fa-8929-490f8a52260b\",\n    \"title\": \"titffffffddlffffe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/tests",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/tests PUT",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "dab45f9b-e1fe-49f8-b32e-62a3d82c1c74",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lessonId\": \"696903a3-b044-46fa-8929-490f8a52260b\",\n    \"publishDate\": \"2024-04-21T08:31:28.557Z\",\n    \"deadlineDate\": \"2024-04-25T00:00:000Z\",\n    \"isGroupWork\": true,\n    \"description\": \"bla bla bla bla\",\n    \"gradingCriteria\": \"10 in every home! Make China great again!\",\n    \"externalMaterialUrls\": [\"https://www.google.com/\"],\n    \"title\": \"title\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/tests/fcb2a995-5169-4cde-96d0-1e8d613456e7",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tests",
+								"fcb2a995-5169-4cde-96d0-1e8d613456e7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/tests DEL",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "c8dac74e-ca47-497b-82f2-b9d361e7d947",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/tests/93561cc0-d248-49e1-915f-d7a963a80f23",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tests",
+								"93561cc0-d248-49e1-915f-d7a963a80f23"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "exams",
+			"item": [
+				{
+					"name": "/api/v1/exams GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "2ea8d84a-32eb-43f9-a909-bc27577b190d",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/exams/93561cc0-d248-49e1-915f-d7a963a80f23",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"exams",
+								"93561cc0-d248-49e1-915f-d7a963a80f23"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/exams GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "85fff00c-2cec-4512-ad07-0cb50aefeefc",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/exams/list?page=0&size=10&sort=title,desc&title=title&isGroup=false",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"exams",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "title,desc"
+								},
+								{
+									"key": "title",
+									"value": "title"
+								},
+								{
+									"key": "isGroup",
+									"value": "false"
+								},
+								{
+									"key": "deadlineFrom",
+									"value": "2024-03-21T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "deadlineTo",
+									"value": "2024-03-22T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "publishFrom",
+									"value": "2024-03-21T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "publishTo",
+									"value": "2024-03-22T08:31:28.557Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/exams POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "2fb544ea-671b-4baf-8335-b6d7ddcf310e",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lesson_id\": \"696903a3-b044-46fa-8929-490f8a52260b\",\n    \"title\": \"title\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/exams",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"exams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/exams PUT",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "d4ed4dba-6055-4a46-81bb-826d36672ece",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lessonId\": \"696903a3-b044-46fa-8929-490f8a52260b\",\n    \"publishDate\": \"2024-04-21T08:31:28.557Z\",\n    \"deadlineDate\": \"2024-04-25T00:00:000Z\",\n    \"isGroupWork\": true,\n    \"description\": \"bla bla bla bla\",\n    \"gradingCriteria\": \"10 in every home! Make China great again!\",\n    \"externalMaterialUrls\": [\"https://www.google.com/\"],\n    \"title\": \"title\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/exams/fcb2a995-5169-4cde-96d0-1e8d613456e7",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"exams",
+								"fcb2a995-5169-4cde-96d0-1e8d613456e7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/exams DEL",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "a64d7c83-e68e-462c-b2f7-8b61d286859b",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/exams/93561cc0-d248-49e1-915f-d7a963a80f23",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"exams",
+								"93561cc0-d248-49e1-915f-d7a963a80f23"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "competitions",
+			"item": [
+				{
+					"name": "/api/v1/competitions GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "f0a3d19f-4725-4c77-be6b-863d7f1f442b",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/competitions/93561cc0-d248-49e1-915f-d7a963a80f23",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"competitions",
+								"93561cc0-d248-49e1-915f-d7a963a80f23"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/competitions GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "cfb6270c-9ac1-4f24-b652-3baa00acb45b",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/competitions/list?page=0&size=10&sort=title,desc&title=title&isGroup=false",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"competitions",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "title,desc"
+								},
+								{
+									"key": "title",
+									"value": "title"
+								},
+								{
+									"key": "isGroup",
+									"value": "false"
+								},
+								{
+									"key": "deadlineFrom",
+									"value": "2024-03-21T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "deadlineTo",
+									"value": "2024-03-22T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "publishFrom",
+									"value": "2024-03-21T08:31:28.557Z",
+									"disabled": true
+								},
+								{
+									"key": "publishTo",
+									"value": "2024-03-22T08:31:28.557Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/competitions POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "5edc52b8-cc1e-482e-8108-93274f2bbe2a",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lesson_id\": \"696903a3-b044-46fa-8929-490f8a52260b\",\n    \"title\": \"title\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/competitions",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"competitions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/competitions PUT",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "a247ebe2-4fd4-40f8-9c30-3888f19d20d1",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lessonId\": \"696903a3-b044-46fa-8929-490f8a52260b\",\n    \"publishDate\": \"2024-04-21T08:31:28.557Z\",\n    \"deadlineDate\": \"2024-04-25T00:00:000Z\",\n    \"isGroupWork\": true,\n    \"description\": \"bla bla bla bla\",\n    \"gradingCriteria\": \"10 in every home! Make China great again!\",\n    \"externalMaterialUrls\": [\"https://www.google.com/\"],\n    \"title\": \"title\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/competitions/fcb2a995-5169-4cde-96d0-1e8d613456e7",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"competitions",
+								"fcb2a995-5169-4cde-96d0-1e8d613456e7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/compeititions DEL",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "822352d8-ba41-4372-94ea-881072f7f1d2",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/compeititions/93561cc0-d248-49e1-915f-d7a963a80f23",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"compeititions",
+								"93561cc0-d248-49e1-915f-d7a963a80f23"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "submissions",
+			"item": [
+				{
+					"name": "/api/v1/submissions GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYjdhMTY5OC1mNjRjLTRkZWQtYjU0NC0zYTk4MDNkNzRhYzEiLCJpYXQiOjE3MTQ5Mzc1ODksImV4cCI6MTcxNTAyMzk4OX0.6T3YyAdtLeXk_5fXnf-FuVQ7GCywpp7FF4wWbGN7cwhcGGsvHimQ8uurUsPLdo2Kih0oujIdnrW_1boceV5lIA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "a0d650ae-a875-4fe2-a9b1-cb71c449493c",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/submissions/3c11c665-6060-48cc-a22d-97640e56b042",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"submissions",
+								"3c11c665-6060-48cc-a22d-97640e56b042"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/submissions GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYjdhMTY5OC1mNjRjLTRkZWQtYjU0NC0zYTk4MDNkNzRhYzEiLCJpYXQiOjE3MTQ4NDg3MjUsImV4cCI6MTcxNDkzNTEyNX0.Z7sQa-VesAaPVvjpWo0Gmm4KdHuPMsUDXtQC3dJwbyXFIlIVx_-vP6dcpJ6lT4glHBZRqaVSCgni8OLCwOxsMA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"uuid": "e4a01665-f213-4b10-bfb6-0b7d74c1bd5b"
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/submissions/list?page=0&size=10",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"submissions",
+								"list"
+							],
+							"query": [
+								{
+									"key": "ownerId",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "taskId",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "teamId",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/competitions GET (owner&task)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYjdhMTY5OC1mNjRjLTRkZWQtYjU0NC0zYTk4MDNkNzRhYzEiLCJpYXQiOjE3MTQ5Mzc1ODksImV4cCI6MTcxNTAyMzk4OX0.6T3YyAdtLeXk_5fXnf-FuVQ7GCywpp7FF4wWbGN7cwhcGGsvHimQ8uurUsPLdo2Kih0oujIdnrW_1boceV5lIA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "5f891355-b854-4151-a542-2346b0bee78b",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/submissions?ownerId=d72bb90f-aca9-4a94-9ccd-a68927cfe611&taskId=01140f1b-2c6e-41d8-bd5f-69f97f622663",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"submissions"
+							],
+							"query": [
+								{
+									"key": "ownerId",
+									"value": "d72bb90f-aca9-4a94-9ccd-a68927cfe611"
+								},
+								{
+									"key": "taskId",
+									"value": "01140f1b-2c6e-41d8-bd5f-69f97f622663"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/submissions POST",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMmY1MjgxNi00MzI4LTQ4ODMtYjkwMC02MzAyMjc0MGZhMDMiLCJpYXQiOjE3MTQ5MzUxMzIsImV4cCI6MTcxNTAyMTUzMn0.BnC4hqmXUHxv_LM8RRepEO-1EUOcvruXA7D3LenBtp2gmGNf_4vkUUkQNTQVgWHnHtOW3net1YUkv0eMSCP_vA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "1b449856-be76-4b44-a70e-26c10266aeac",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"homework_id\": \"01140f1b-2c6e-41d8-bd5f-69f97f622663\",\n    \"published_at\": \"2024-05-13T00:00:00Z\",\n    \"payload\": {\n        \"text_answer\": \"new answer\",\n        \"attachment_urls\": [\"https://www.postgresql.org/docs/current/sql-insert.html\"]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/submissions",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"submissions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "grades",
+			"item": [
+				{
+					"name": "/api/v1/submissions/{id}/grade GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYjdhMTY5OC1mNjRjLTRkZWQtYjU0NC0zYTk4MDNkNzRhYzEiLCJpYXQiOjE3MTQ4NDg1MjYsImV4cCI6MTcxNDkzNDkyNn0.ZOXmsaKFKqxnE7HlBUGlM-MQfAi9hTOUXKOGvwJ_Z8i8LnnP8MkgCpoFeLPa5lq13c5fJEDrYTIwwnmz-x7i9Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "a30058cf-0d73-4a92-9cd4-25fc35cdf166",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/submissions/3c11c665-6060-48cc-a22d-97640e56b042/grade",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"submissions",
+								"3c11c665-6060-48cc-a22d-97640e56b042",
+								"grade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/grades GET",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYjdhMTY5OC1mNjRjLTRkZWQtYjU0NC0zYTk4MDNkNzRhYzEiLCJpYXQiOjE3MTQ4NDg1MjYsImV4cCI6MTcxNDkzNDkyNn0.ZOXmsaKFKqxnE7HlBUGlM-MQfAi9hTOUXKOGvwJ_Z8i8LnnP8MkgCpoFeLPa5lq13c5fJEDrYTIwwnmz-x7i9Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "0672cda7-6625-4b17-9130-cb29f2eba8a6",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/grades/3c11c665-6060-48cc-a22d-97640e56b042",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"grades",
+								"3c11c665-6060-48cc-a22d-97640e56b042"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/grades PATCH",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMmY1MjgxNi00MzI4LTQ4ODMtYjkwMC02MzAyMjc0MGZhMDMiLCJpYXQiOjE3MTQ5MzUxMzIsImV4cCI6MTcxNTAyMTUzMn0.BnC4hqmXUHxv_LM8RRepEO-1EUOcvruXA7D3LenBtp2gmGNf_4vkUUkQNTQVgWHnHtOW3net1YUkv0eMSCP_vA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "b3f5fa64-8648-469e-a74e-61f7f4428cbc",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"grade\": 10,\n    \"comment\": \"comment\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/grades/3c11c665-6060-48cc-a22d-97640e56b042",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"grades",
+								"3c11c665-6060-48cc-a22d-97640e56b042"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/v1/grades GET (filters)",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYjdhMTY5OC1mNjRjLTRkZWQtYjU0NC0zYTk4MDNkNzRhYzEiLCJpYXQiOjE3MTQ4NDg1MjYsImV4cCI6MTcxNDkzNDkyNn0.ZOXmsaKFKqxnE7HlBUGlM-MQfAi9hTOUXKOGvwJ_Z8i8LnnP8MkgCpoFeLPa5lq13c5fJEDrYTIwwnmz-x7i9Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"uuid": "926b4fda-c819-4d8b-ad87-8aa1074e8071",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://209.38.188.191:3000/api/v1/grades/list?page=0&size=10&sort=grade,asc",
+							"protocol": "http",
+							"host": [
+								"209",
+								"38",
+								"188",
+								"191"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"grades",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "grade,asc"
+								},
+								{
+									"key": "gradeFrom",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "gradeTo",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "taskId",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "ownerId",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

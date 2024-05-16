@@ -9,10 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
 import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 
 public interface UserManager {
@@ -36,13 +35,6 @@ public interface UserManager {
    * @return users collection
    */
   Mono<Page<User>> findAll(UserFilterOptions filterOptions, Pageable pageable);
-
-  /**
-   * Return list of usernames in the most efficient way.
-   *
-   * @return list of usernames
-   */
-  Flux<UserSnippet> getUserSnippets();
 
   Mono<BigDecimal> getUserBalance(UUID id);
 

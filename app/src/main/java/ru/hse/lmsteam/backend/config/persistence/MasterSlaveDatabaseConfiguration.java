@@ -5,11 +5,9 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import java.util.Collection;
 import java.util.ServiceLoader;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.r2dbc.core.DefaultReactiveDataAccessStrategy;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -28,35 +26,42 @@ public class MasterSlaveDatabaseConfiguration {
   private String slaveDbURL;
 
   @Bean
-  public MasterSlaveDbOperations masterSlaveDbActions(
-      @Qualifier(value = "masterR2dbcEntityTemplate") final R2dbcEntityTemplate masterEntityTemplate,
-      @Qualifier(value = "slaveR2dbcEntityTemplate") final R2dbcEntityTemplate slaveEntityTemplate) {
-    return new MasterSlaveDbOperations(masterEntityTemplate, slaveEntityTemplate);
+  public MasterSlaveDbOperations masterSlaveDbActions(final R2dbcEntityTemplate entityTemplate) {
+    return new MasterSlaveDbOperations(entityTemplate, entityTemplate);
   }
 
-  @Bean(name = "slaveR2dbcEntityTemplate")
-  @Primary
-  public R2dbcEntityTemplate slaveR2dbcEntityTemplate(
-      @Qualifier(value = "slaveConnectionFactory") final ConnectionFactory connectionFactory) {
-    return templateWithCustomConverters(connectionFactory, getCustomConverters());
-  }
-
-  @Bean(name = "masterR2dbcEntityTemplate")
-  public R2dbcEntityTemplate masterR2dbcEntityTemplate(
-      @Qualifier(value = "masterConnectionFactory") final ConnectionFactory connectionFactory) {
-    return templateWithCustomConverters(connectionFactory, getCustomConverters());
-  }
-
-  @Bean(name = "slaveConnectionFactory")
-  public ConnectionFactory slaveConnectionFactory() {
-    return getConnectionPool(slaveDbURL);
-  }
-
-  @Primary
-  @Bean(name = "masterConnectionFactory")
-  public ConnectionFactory masterConnectionFactory() {
-    return getConnectionPool(masterDbURL);
-  }
+  //  @Bean
+  //  public MasterSlaveDbOperations masterSlaveDbActions(
+  //      @Qualifier(value = "masterR2dbcEntityTemplate") final R2dbcEntityTemplate
+  // masterEntityTemplate,
+  //      @Qualifier(value = "slaveR2dbcEntityTemplate") final R2dbcEntityTemplate
+  // slaveEntityTemplate) {
+  //    return new MasterSlaveDbOperations(masterEntityTemplate, slaveEntityTemplate);
+  //  }
+  //
+  //  @Bean(name = "slaveR2dbcEntityTemplate")
+  //  @Primary
+  //  public R2dbcEntityTemplate slaveR2dbcEntityTemplate(
+  //      @Qualifier(value = "slaveConnectionFactory") final ConnectionFactory connectionFactory) {
+  //    return templateWithCustomConverters(connectionFactory, getCustomConverters());
+  //  }
+  //
+  //  @Bean(name = "masterR2dbcEntityTemplate")
+  //  public R2dbcEntityTemplate masterR2dbcEntityTemplate(
+  //      @Qualifier(value = "masterConnectionFactory") final ConnectionFactory connectionFactory) {
+  //    return templateWithCustomConverters(connectionFactory, getCustomConverters());
+  //  }
+  //
+  //  @Bean(name = "slaveConnectionFactory")
+  //  public ConnectionFactory slaveConnectionFactory() {
+  //    return getConnectionPool(slaveDbURL);
+  //  }
+  //
+  //  @Primary
+  //  @Bean(name = "masterConnectionFactory")
+  //  public ConnectionFactory masterConnectionFactory() {
+  //    return getConnectionPool(masterDbURL);
+  //  }
 
   private R2dbcEntityTemplate templateWithCustomConverters(
       final ConnectionFactory connectionFactory, final Collection<?> converters) {

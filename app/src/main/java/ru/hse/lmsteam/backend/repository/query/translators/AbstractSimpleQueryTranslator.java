@@ -1,7 +1,6 @@
 package ru.hse.lmsteam.backend.repository.query.translators;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.Instant;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,11 +37,7 @@ public abstract class AbstractSimpleQueryTranslator<T> implements PlainSQLQueryT
             throw new BusinessLogicExpectationFailedException(
                 "Unknown sort property: " + order.getProperty());
           } else {
-            orderClause
-                .append(order.getProperty())
-                .append(" ")
-                .append(order.getDirection())
-                .append(", ");
+            orderClause.append(dbColumn).append(" ").append(order.getDirection()).append(", ");
           }
         });
     // clear last comma
@@ -61,14 +56,15 @@ public abstract class AbstractSimpleQueryTranslator<T> implements PlainSQLQueryT
   }
 
   /**
-   * Util method to get sql timestamp range clause.
+   * Util method to get sql timestamp range clause. Uses Object.toString() method to convert 'from'
+   * and 'to' to actual SQL representation.
    *
    * @param from lowerBound of time range (exclusive). Pass null if unbounded from bottom.
    * @param to upperBound of time range (exclusive) Pass null if unbounded from above.
    * @param columnName sql column name
    * @return Optional of timestamp range clause, empty if both 'from' and 'to' are empty.
    */
-  protected Optional<String> getTimestampRangeClause(Instant from, Instant to, String columnName) {
+  protected <E> Optional<String> getRangeClause(E from, E to, String columnName) {
     if (columnName == null) {
       throw new IllegalArgumentException("Column name cannot be null to build time range clause!");
     }

@@ -8,9 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 
 public interface UserRepository {
   Mono<User> findById(UUID id);
@@ -35,6 +34,4 @@ public interface UserRepository {
   Mono<Long> delete(UUID id);
 
   Mono<Page<User>> findAll(UserFilterOptions filterOptions, Pageable pageable);
-
-  Flux<UserSnippet> allUserSnippets();
 }

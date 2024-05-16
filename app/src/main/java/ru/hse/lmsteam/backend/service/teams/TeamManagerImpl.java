@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
-import ru.hse.lmsteam.backend.domain.Team;
-import ru.hse.lmsteam.backend.domain.User;
+import ru.hse.lmsteam.backend.domain.user_teams.Team;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
 import ru.hse.lmsteam.backend.repository.TeamRepository;
 import ru.hse.lmsteam.backend.repository.UserTeamRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
@@ -78,7 +78,7 @@ public class TeamManagerImpl implements TeamManager {
     }
     teamValidator.validateForSave(team);
     return teamRepository
-        .findById(team.id(), true)
+        .findById(team.id(), false)
         .map(dbGroup -> team.mergeWith(dbGroup, false))
         .flatMap(teamRepository::upsert)
         .flatMap(id -> teamRepository.findById(id, false))

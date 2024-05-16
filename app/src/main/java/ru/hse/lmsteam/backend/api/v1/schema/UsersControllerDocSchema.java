@@ -26,5 +26,11 @@ public interface UsersControllerDocSchema {
       Boolean isDeleted,
       Pageable pageable);
 
-  Mono<GetUserNameList.Response> getUserNameList();
+  Mono<GetUserNameList.Response> getUserSnippets(
+      String namePattern,
+      String emailPattern,
+      List<Integer> groupNumbers,
+      List<String> roles,
+      Boolean isDeleted,
+      Pageable pageable);
 }

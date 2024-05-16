@@ -1,6 +1,8 @@
 package ru.hse.lmsteam.backend.service.submissions;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,8 @@ import ru.hse.lmsteam.schema.api.submissions.SubmissionPayload;
 
 public interface SubmissionsManager {
   Mono<Submission> findById(UUID submissionId);
+
+  Mono<Map<UUID, Submission>> findByIds(Collection<UUID> submissionIds);
 
   Mono<Submission> findByTaskAndOwner(UUID taskId, UUID ownerId);
 

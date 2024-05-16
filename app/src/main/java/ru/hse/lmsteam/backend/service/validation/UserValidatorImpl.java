@@ -1,8 +1,8 @@
 package ru.hse.lmsteam.backend.service.validation;
 
 import org.springframework.stereotype.Component;
-import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 
 @Component

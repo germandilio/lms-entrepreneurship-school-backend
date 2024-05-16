@@ -1,5 +1,7 @@
 package ru.hse.lmsteam.backend.service.lesson;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple3;
-import ru.hse.lmsteam.backend.domain.Lesson;
+import ru.hse.lmsteam.backend.domain.lesson.Lesson;
 import ru.hse.lmsteam.backend.repository.LessonRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
@@ -32,6 +34,15 @@ public class LessonManagerImpl implements LessonManager {
       return Mono.empty();
     }
     return lessonRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Lesson>> findByIds(Collection<UUID> ids) {
+    if (ids == null) {
+      return Mono.just(Map.of());
+    }
+    return lessonRepository.findByIds(ids).collectMap(Lesson::id);
   }
 
   @Transactional

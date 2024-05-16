@@ -4,6 +4,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.Timestamps;
 import java.time.Instant;
 import org.springframework.stereotype.Component;
+import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.schema.api.exams.CreateOrUpdateExam;
 import ru.hse.lmsteam.schema.api.exams.Exam;
 import ru.hse.lmsteam.schema.api.exams.ExamSnippet;
@@ -40,6 +41,8 @@ public class ExamProtoConverterImpl implements ExamProtoConverter {
 
     if (task.hasDeadlineDate()) {
       b.deadlineDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getDeadlineDate())));
+    } else {
+      throw new BusinessLogicExpectationFailedException("NO_DEADLINE_DATE");
     }
     if (task.hasPublishDate()) {
       b.publishDate(Instant.ofEpochMilli(Timestamps.toMillis(task.getPublishDate())));

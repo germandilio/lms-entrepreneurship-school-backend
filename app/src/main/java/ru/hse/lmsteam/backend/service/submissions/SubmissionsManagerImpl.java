@@ -4,6 +4,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,12 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.Team;
-import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.domain.UserRole;
 import ru.hse.lmsteam.backend.domain.submission.Submission;
 import ru.hse.lmsteam.backend.domain.submission.SubmissionDB;
 import ru.hse.lmsteam.backend.domain.tasks.Homework;
+import ru.hse.lmsteam.backend.domain.user_teams.Team;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.repository.SubmissionRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicExpectationFailedException;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
@@ -45,6 +47,23 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
     }
 
     return submissionRepository.findById(submissionId).flatMap(this::buildSubmission);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Submission>> findByIds(Collection<UUID> submissionIds) {
+    if (submissionIds == null) {
+      return Mono.just(Map.of());
+    }
+
+    return submissionRepository
+        .findAllByIds(submissionIds)
+        .collectList()
+        .flatMap(this::buildSubmissions)
+        .map(
+            submissions ->
+                submissions.stream()
+                    .collect(Collectors.toMap(Submission::id, Function.identity())));
   }
 
   @Transactional(readOnly = true)
@@ -113,7 +132,10 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         homeworkF.flatMap(
             homework -> {
               if (homework.isGroup()) {
-                return teamManager.findById(submissionDb.teamId()).map(Optional::of);
+                return teamManager
+                    .findById(submissionDb.teamId())
+                    .map(Optional::of)
+                    .switchIfEmpty(Mono.just(Optional.empty()));
               } else return Mono.just(Optional.<Team>empty());
             });
 
@@ -193,22 +215,23 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       Instant submissionDate,
       SubmissionPayload payload) {
     log.info(
-        "Starting upsert submissions for homework {}, publishing by user {}",
+        "Starting upsert submissions for homework {}, publishing by user {}, submitted at {} (server UTC time)",
         hw.id(),
-        publisher.id());
+        publisher.id(),
+        submissionDate);
     if (!hw.isGroup()) {
       return upsertIndividualSubmission(
           hw, existingSubmissionOpt, publisher, submissionDate, payload);
     }
-
     return teamManager
         .findTeammates(publisher.id())
-        .switchIfEmpty(
-            Mono.error(
-                new IllegalStateException("Failed to find teammates (0 found including self)")))
         .collectList()
         .flatMap(
             unfilteredTeammates -> {
+              log.info(
+                  "Found "
+                      + unfilteredTeammates.size()
+                      + "teammates (including publisher itself + trackers)");
               if (unfilteredTeammates.isEmpty()) {
                 return upsertIndividualSubmission(
                     hw, existingSubmissionOpt, publisher, submissionDate, payload);
@@ -326,14 +349,13 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
       User publisher,
       Instant submissionDate,
       SubmissionPayload payload) {
+    // including submission owner
     var filteredTeammates =
         unfilteredTeammates.stream().filter(user -> UserRole.LEARNER.equals(user.role())).toList();
 
     // delete existing group submission (task_id, team_id):
-    // this will remove dangling submission for person who left switch the group, and now
-    // somebody
-    // in his new group submitting the same task. (For deduplication reasons, but doing it
-    // only on
+    // this will remove dangling submission for person who switch the group, and now
+    // somebody in his new group submitting the same task. (doing it only on
     // new submission not to occasionally clear previous tasks)
     Mono<Long> removeDanglingSubmissions;
     if (existingSubmissionOpt.isPresent()) {

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.domain.User;
-import ru.hse.lmsteam.backend.domain.UserRole;
+import ru.hse.lmsteam.backend.domain.user_teams.User;
+import ru.hse.lmsteam.backend.domain.user_teams.UserRole;
 import ru.hse.lmsteam.backend.repository.UserRepository;
 import ru.hse.lmsteam.backend.repository.UserTeamRepository;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicConflictException;
@@ -25,7 +25,6 @@ import ru.hse.lmsteam.backend.service.model.teams.SetUserTeamMembershipResponse;
 import ru.hse.lmsteam.backend.service.model.teams.Success;
 import ru.hse.lmsteam.backend.service.model.teams.ValidationErrors;
 import ru.hse.lmsteam.backend.service.model.user.UserFilterOptions;
-import ru.hse.lmsteam.backend.service.model.user.UserSnippet;
 import ru.hse.lmsteam.backend.service.model.user.UserUpsertModel;
 import ru.hse.lmsteam.backend.service.teams.UserTeamManager;
 import ru.hse.lmsteam.backend.service.validation.UserValidator;
@@ -96,7 +95,7 @@ public class UserManagerImpl implements UserManager {
   public Mono<User> update(final UserUpsertModel userUpsertModel) {
     log.info("Updating user with id: {}", userUpsertModel.id());
     return userRepository
-        .findById(userUpsertModel.id(), true)
+        .findById(userUpsertModel.id(), false)
         .singleOptional()
         // stub User for saving new entity with empty id
         .map(userOpt -> userOpt.orElse(User.builder().build()))
@@ -151,12 +150,6 @@ public class UserManagerImpl implements UserManager {
 
   @Transactional(readOnly = true)
   @Override
-  public Flux<UserSnippet> getUserSnippets() {
-    return userRepository.allUserSnippets();
-  }
-
-  @Transactional(readOnly = true)
-  @Override
   public Mono<BigDecimal> getUserBalance(UUID id) {
     if (id == null) {
       return Mono.empty();
@@ -176,18 +169,24 @@ public class UserManagerImpl implements UserManager {
         .findAllById(userIds)
         .collectList()
         .flatMap(
-            foundUsers -> {
-              Mono<ValidationErrors> validationErrors =
-                  getValidationErrorsMono(userIds, foundUsers, ImmutableSet.copyOf(foundUsers));
-              if (validationErrors != null) return validationErrors;
-
-              return userTeamRepository
-                  .setUserTeamMemberships(
-                      teamId,
-                      foundUsers.stream().map(User::id).collect(ImmutableSet.toImmutableSet()))
-                  .collectList()
-                  .thenReturn(new Success());
-            });
+            foundUsers ->
+                getValidationErrorsMono(
+                        teamId, userIds, foundUsers, ImmutableSet.copyOf(foundUsers))
+                    .flatMap(
+                        validationResult -> {
+                          if (!validationResult.success()) {
+                            return Mono.just(validationResult);
+                          }
+                          // if request is valid
+                          return userTeamRepository
+                              .setUserTeamMemberships(
+                                  teamId,
+                                  foundUsers.stream()
+                                      .map(User::id)
+                                      .collect(ImmutableSet.toImmutableSet()))
+                              .collectList()
+                              .thenReturn(validationResult);
+                        }));
   }
 
   @Transactional(readOnly = true)
@@ -203,13 +202,12 @@ public class UserManagerImpl implements UserManager {
         .collectList()
         .flatMap(
             foundUsers ->
-                getValidationErrorsMono(userIds, foundUsers, ImmutableSet.copyOf(foundUsers))
-                    .map(error -> (SetUserTeamMembershipResponse) error)
-                    .switchIfEmpty(Mono.just(new Success())));
+                getValidationErrorsMono(
+                    teamId, userIds, foundUsers, ImmutableSet.copyOf(foundUsers)));
   }
 
-  private Mono<ValidationErrors> getValidationErrorsMono(
-      ImmutableSet<UUID> userIds, List<User> foundUsers, ImmutableSet<User> dbUsers) {
+  private Mono<SetUserTeamMembershipResponse> getValidationErrorsMono(
+      UUID teamId, ImmutableSet<UUID> userIds, List<User> foundUsers, ImmutableSet<User> dbUsers) {
     if (dbUsers.size() != userIds.size()) {
       return Mono.just(
           new ValidationErrors(
@@ -241,9 +239,11 @@ public class UserManagerImpl implements UserManager {
                 .filter(u -> UserRole.LEARNER.equals(u.role()))
                 .collect(ImmutableList.toImmutableList()));
 
-    return occupiedStudentsGroupsF.mapNotNull(
+    return occupiedStudentsGroupsF.map(
         occupiedStudentsGroups -> {
-          if (!occupiedStudentsGroups.isEmpty()) {
+          if (occupiedStudentsGroups.values().stream()
+              .flatMap(List::stream)
+              .anyMatch(t -> !t.id().equals(teamId))) {
             // convert to validation errors
             return new ValidationErrors(
                 Optional.empty(),
@@ -255,7 +255,7 @@ public class UserManagerImpl implements UserManager {
                                 entry -> ImmutableList.copyOf(entry.getValue())))));
           }
 
-          return null;
+          return new Success();
         });
   }
 }

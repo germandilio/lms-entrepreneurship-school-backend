@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoConverter;
+import ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.lesson.LessonsApiProtoBuilder;
 import ru.hse.lmsteam.backend.api.v1.schema.LessonsControllerDocSchema;
 import ru.hse.lmsteam.backend.service.exceptions.BusinessLogicNotFoundException;
 import ru.hse.lmsteam.backend.service.lesson.LessonManager;
@@ -22,7 +22,7 @@ import ru.hse.lmsteam.schema.api.lessons.*;
 @RequiredArgsConstructor
 public class LessonsController implements LessonsControllerDocSchema {
   private final LessonManager lessonManager;
-  private final LessonsApiProtoConverter lessonsApiProtoConverter;
+  private final LessonsApiProtoBuilder lessonsApiProtoBuilder;
 
   @GetMapping("/{id}")
   @Override
@@ -30,7 +30,7 @@ public class LessonsController implements LessonsControllerDocSchema {
     return lessonManager
         .findById(id)
         .switchIfEmpty(Mono.error(new BusinessLogicNotFoundException("Lesson not found.")))
-        .flatMap(lessonsApiProtoConverter::buildGetLessonResponse);
+        .flatMap(lessonsApiProtoBuilder::buildGetLessonResponse);
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROTOBUF_VALUE})
@@ -38,8 +38,8 @@ public class LessonsController implements LessonsControllerDocSchema {
   public Mono<CreateOrUpdateLesson.Response> createLesson(
       @RequestBody CreateOrUpdateLesson.Request request) {
     return lessonManager
-        .create(lessonsApiProtoConverter.retrieveCreateModel(request))
-        .flatMap(lessonsApiProtoConverter::map)
+        .create(lessonsApiProtoBuilder.retrieveCreateModel(request))
+        .flatMap(lessonsApiProtoBuilder::map)
         .map(l -> CreateOrUpdateLesson.Response.newBuilder().setLesson(l).build());
   }
 
@@ -49,10 +49,10 @@ public class LessonsController implements LessonsControllerDocSchema {
   @Override
   public Mono<CreateOrUpdateLesson.Response> updateLesson(
       @PathVariable UUID id, @RequestBody CreateOrUpdateLesson.Request request) {
-    var lesson = lessonsApiProtoConverter.retrieveCreateModel(request).withId(id);
+    var lesson = lessonsApiProtoBuilder.retrieveCreateModel(request).withId(id);
     return lessonManager
         .update(lesson)
-        .flatMap(lessonsApiProtoConverter::map)
+        .flatMap(lessonsApiProtoBuilder::map)
         .map(l -> CreateOrUpdateLesson.Response.newBuilder().setLesson(l).build());
   }
 
@@ -83,6 +83,6 @@ public class LessonsController implements LessonsControllerDocSchema {
             .build();
     return lessonManager
         .findAll(filterOptions, pageable)
-        .map(lessonsApiProtoConverter::buildGetLessonsResponse);
+        .map(lessonsApiProtoBuilder::buildGetLessonsResponse);
   }
 }

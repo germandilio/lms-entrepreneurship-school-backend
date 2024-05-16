@@ -60,6 +60,7 @@ message GetUsers {
 message GetUserNameList {
   message Response {
     repeated UserSnippet items = 1;
+    ru.hse.lmsteam.proto.common.Page page = 2;
   }
 }
 
@@ -86,6 +87,8 @@ message UserSnippet {
   string name = 2;
   string surname = 3;
   google.protobuf.StringValue patronymic = 4;
+  string email = 5;
+  UserRoleNamespace.Role role = 6;
 }
 
 message UserSexNamespace {
@@ -103,5 +106,6 @@ message UserRoleNamespace {
     LEARNER = 1;
     TRACKER = 2;
     ADMIN = 3;
+    EXTERNAL_TEACHER = 4;
   }
 }

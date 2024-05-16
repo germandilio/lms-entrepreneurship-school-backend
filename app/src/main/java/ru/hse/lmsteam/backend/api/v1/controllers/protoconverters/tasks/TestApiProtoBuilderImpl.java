@@ -1,11 +1,12 @@
 package ru.hse.lmsteam.backend.api.v1.controllers.protoconverters.tasks;
 
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.tasks.Test;
+import ru.hse.lmsteam.backend.service.lesson.LessonManager;
 import ru.hse.lmsteam.schema.api.tests.CreateOrUpdateTest;
 import ru.hse.lmsteam.schema.api.tests.DeleteTest;
 import ru.hse.lmsteam.schema.api.tests.GetTest;
@@ -15,29 +16,30 @@ import ru.hse.lmsteam.schema.api.tests.GetTests;
 @RequiredArgsConstructor
 public class TestApiProtoBuilderImpl implements TestApiProtoBuilder {
   private final TestProtoConverter testProtoConverter;
+  private final LessonManager lessonManager;
 
   @Override
   public Mono<GetTest.Response> buildGetTestResponse(Test test) {
-    return testProtoConverter
-        .map(test)
+    return lessonManager
+        .findById(test.lessonId())
         .singleOptional()
         .map(
-            testOpt -> {
+            lessonOpt -> {
               var b = GetTest.Response.newBuilder();
-              testOpt.ifPresent(b::setTest);
+              lessonOpt.ifPresent(l -> b.setTest(testProtoConverter.map(test, l)));
               return b.build();
             });
   }
 
   @Override
   public Mono<CreateOrUpdateTest.Response> buildCreateOrUpdateTestResponse(Test test) {
-    return testProtoConverter
-        .map(test)
+    return lessonManager
+        .findById(test.lessonId())
         .singleOptional()
         .map(
-            testOpt -> {
+            lessonOpt -> {
               var b = CreateOrUpdateTest.Response.newBuilder();
-              testOpt.ifPresent(b::setTest);
+              lessonOpt.ifPresent(l -> b.setTest(testProtoConverter.map(test, l)));
               return b.build();
             });
   }
@@ -49,20 +51,24 @@ public class TestApiProtoBuilderImpl implements TestApiProtoBuilder {
 
   @Override
   public Mono<GetTests.Response> buildGetTestsResponse(Page<Test> tests) {
-    return Flux.fromIterable(tests.toList())
-        .flatMap(testProtoConverter::toSnippet)
-        .collectList()
-        .map(
-            testSnippets -> {
-              var b = GetTests.Response.newBuilder();
-              b.setPage(
+    var lessonF =
+        lessonManager.findByIds(tests.stream().map(Test::lessonId).collect(Collectors.toSet()));
+
+    return lessonF.map(
+        lessons -> {
+          var testSnippets =
+              tests.stream()
+                  .map(hw -> testProtoConverter.toSnippet(hw, lessons.get(hw.lessonId())))
+                  .toList();
+          return GetTests.Response.newBuilder()
+              .setPage(
                   ru.hse.lmsteam.schema.api.common.Page.newBuilder()
                       .setTotalPages(tests.getTotalPages())
                       .setTotalElements(tests.getTotalElements())
-                      .build());
-              b.addAllTests(testSnippets);
-              return b.build();
-            });
+                      .build())
+              .addAllTests(testSnippets)
+              .build();
+        });
   }
 
   @Override

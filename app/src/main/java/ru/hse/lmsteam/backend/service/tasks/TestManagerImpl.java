@@ -1,6 +1,9 @@
 package ru.hse.lmsteam.backend.service.tasks;
 
+import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -31,6 +34,16 @@ public class TestManagerImpl implements TestManager {
       return Mono.empty();
     }
     return testRepository.findById(id);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Mono<Map<UUID, Test>> findByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Mono.just(Map.of());
+    }
+
+    return testRepository.findByIds(ids).collectMap(Test::id);
   }
 
   @Transactional(readOnly = true)
@@ -107,5 +120,11 @@ public class TestManagerImpl implements TestManager {
       return Mono.empty();
     }
     return testRepository.findAll(filterOptions, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<Test> getAllPastTests(Instant time) {
+    return testRepository.getAllWithDeadlineBefore(time);
   }
 }

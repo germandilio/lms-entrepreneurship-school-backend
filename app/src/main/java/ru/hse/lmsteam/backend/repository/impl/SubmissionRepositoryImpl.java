@@ -55,6 +55,15 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
   }
 
   @Override
+  public Flux<SubmissionDB> findAllByIds(Collection<UUID> ids) {
+    if (ids == null) {
+      throw new IllegalArgumentException("Ids is null!");
+    }
+
+    return this.db.slave.select(query(where("task_id").in(ids)), SubmissionDB.class);
+  }
+
+  @Override
   public Flux<SubmissionDB> findAllByTaskIds(Collection<UUID> taskIds) {
     if (taskIds == null) {
       throw new IllegalArgumentException("Task id is null!");
