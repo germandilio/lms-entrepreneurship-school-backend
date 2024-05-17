@@ -1,6 +1,5 @@
 package ru.hse.lmsteam.backend.repository;
 
-import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,5 +22,5 @@ public interface GradeRepository {
 
   Flux<GradeDB> findByTaskType(TaskType taskType);
 
-  Mono<Long> saveAll(Collection<GradeDB> grades);
+  Flux<GradeDB> getAll();
 }
