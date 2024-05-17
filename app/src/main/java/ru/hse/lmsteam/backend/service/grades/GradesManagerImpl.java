@@ -149,7 +149,13 @@ public class GradesManagerImpl implements GradesManager {
     if (grades.isEmpty()) {
       return Mono.just(0L);
     }
-    return gradeRepository.saveAll(grades).switchIfEmpty(Mono.just(0L));
+    return Flux.fromIterable(grades).flatMap(gradeRepository::upsert).count();
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<GradeDB> getAll() {
+    return gradeRepository.getAll();
   }
 
   private Mono<Collection<UUID>> getOwnerIdsClause(UserAuth performer, UUID learnerId) {
@@ -283,8 +289,7 @@ public class GradesManagerImpl implements GradesManager {
             });
   }
 
-  @NotNull
-  private Function<GradeDB, Grade> buildGradesFun(
+  @NotNull private Function<GradeDB, Grade> buildGradesFun(
       Function<GradeDB, Optional<Task>> tasksCache,
       Map<UUID, Collection<TrackerGradeDb>> trackerGrades,
       Map<UUID, User> trackers,

@@ -3,12 +3,13 @@ package ru.hse.lmsteam.backend.repository.impl.grades;
 import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
 
-import java.util.Collection;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -85,35 +86,7 @@ public class GradesRepositoryImpl implements GradeRepository {
   }
 
   @Override
-  public Mono<Long> saveAll(Collection<GradeDB> grades) {
-    if (grades == null) {
-      throw new IllegalArgumentException("grades is null");
-    }
-
-    return db.master
-        .getDatabaseClient()
-        .inConnectionMany(
-            connection -> {
-              var statement =
-                  connection.createStatement(
-                      "INSERT INTO grades (owner_id, task_id, task_type) VALUES ($1, $2, $3)");
-
-              int size = grades.size();
-              int i = 0;
-              for (var grade : grades) {
-                i++;
-                statement
-                    .bind(0, grade.ownerId())
-                    .bind(1, grade.taskId())
-                    .bind(2, grade.taskType().toString());
-
-                if (i < size) {
-                  statement.add();
-                }
-              }
-
-              return Flux.from(statement.execute());
-            })
-        .count();
+  public Flux<GradeDB> getAll() {
+    return db.slave.select(Query.query(Criteria.empty()), GradeDB.class);
   }
 }

@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.hse.lmsteam.backend.domain.submission.Submission;
+import ru.hse.lmsteam.backend.domain.submission.SubmissionDB;
 import ru.hse.lmsteam.backend.service.model.submissions.SubmissionFilterOptions;
 import ru.hse.lmsteam.schema.api.submissions.SubmissionPayload;
 
@@ -22,4 +24,6 @@ public interface SubmissionsManager {
 
   Mono<Submission> upsertSubmission(
       UUID publisherId, UUID taskId, Instant submissionDate, SubmissionPayload payload);
+
+  Flux<SubmissionDB> getALlSubmissions();
 }

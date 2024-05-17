@@ -119,6 +119,12 @@ public class SubmissionsManagerImpl implements SubmissionsManager {
         .flatMap((t) -> upsertSubmission(t.getT1(), t.getT2(), t.getT3(), submissionDate, payload));
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public Flux<SubmissionDB> getALlSubmissions() {
+    return submissionRepository.findAll();
+  }
+
   private Mono<Submission> buildSubmission(SubmissionDB submissionDb) {
     var ownerF =
         userManager

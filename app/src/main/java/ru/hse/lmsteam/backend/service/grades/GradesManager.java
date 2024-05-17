@@ -32,4 +32,6 @@ public interface GradesManager {
   Flux<GradeDB> findByTaskType(TaskType taskType);
 
   Mono<Long> saveAll(Collection<GradeDB> grades);
+
+  Flux<GradeDB> getAll();
 }

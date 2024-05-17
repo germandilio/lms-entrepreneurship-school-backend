@@ -2,6 +2,7 @@ package ru.hse.lmsteam.backend.domain.grades;
 
 import java.util.UUID;
 import lombok.Builder;
+import lombok.With;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
@@ -13,6 +14,6 @@ public record GradeDB(
     UUID ownerId,
     UUID taskId,
     TaskType taskType,
-    @Nullable UUID submissionId,
+    @With @Nullable UUID submissionId,
     @Nullable Integer adminGrade,
     String adminComment) {}

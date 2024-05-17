@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -152,6 +154,11 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
     }
 
     return this.db.master.delete(query(where("task_id").in(taskIds)), SubmissionDB.class);
+  }
+
+  @Override
+  public Flux<SubmissionDB> findAll() {
+    return db.slave.select(Query.query(Criteria.empty()), SubmissionDB.class);
   }
 
   private String buildBatchUpsertQuery(Collection<SubmissionDB> submissions) {

@@ -29,4 +29,6 @@ public interface SubmissionRepository {
   Mono<Long> deleteAllGroupSubmissions(UUID taskId, UUID groupId);
 
   Mono<Long> deleteAllByTaskIds(Collection<UUID> taskIds);
+
+  Flux<SubmissionDB> findAll();
 }
